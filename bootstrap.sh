@@ -1,17 +1,11 @@
 #!/bin/bash
 
-# default image tag
-IMAGETAG="latest"
-# use this as the default docker-compose yaml definition
-COMPOSE_FILE_BASE=test-network/docker/docker-compose-test-net.yaml
-# docker-compose.yaml file if you are using couchdb
-COMPOSE_FILE_COUCH=test-network/docker/docker-compose-couch.yaml
-# certificate authorities compose file
-COMPOSE_FILE_CA=test-network/docker/docker-compose-ca.yaml
-# use this as the docker compose couch file for org3
-COMPOSE_FILE_COUCH_ORG3=test-network/addOrg3/docker/docker-compose-couch-org3.yaml
-# use this as the default docker-compose yaml definition for org3
-COMPOSE_FILE_ORG3=test-network/addOrg3/docker/docker-compose-org3.yaml
+# Fabric version
+VERSION=2.0.0
+# Fabric CA version
+CA_VERSION=1.4.6
+# Version of thirdparty images (couchdb, kafka and zookeeper) released
+THIRDPARTY_IMAGE_VERSION=0.4.18
 
 # Remove hyperledger docker containers
 function clearContainers() {
@@ -35,17 +29,17 @@ function removeImages() {
 }
 
 # Delete all unused docker volumes
-function removeUnusedVolumes() {
-    docker volume ls
-    echo "WARNING! Skip this command if you have your volumes"
-    docker volume prune
+function removeVolumes() {
+  docker volume ls
+  echo "WARNING! Skip this command if you have your volumes"
+  docker volume prune
 }
 
 # Delete all unused docker networks
-function removeUnusedNetwork() {
-    docker network ls
-    echo "WARNING! Skip this command if you have your networks"
-    docker network prune
+function removeNetwork() {
+  docker network ls
+  echo "WARNING! Skip this command if you have your networks"
+  docker network prune
 }
 
 # Tear down running network
@@ -54,26 +48,53 @@ function networkDown() {
   docker-compose -f $COMPOSE_FILE_BASE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_CA down --volumes --remove-orphans
   docker-compose -f $COMPOSE_FILE_COUCH_ORG3 -f $COMPOSE_FILE_ORG3 down --volumes --remove-orphans
   # Don't remove the generated artifacts -- note, the ledgers are always removed
-  if [ "$MODE" != "restart" ]; then
-    # Bring down the network, deleting the volumes
-    #Delete any ledger backups
-    docker run -v $PWD/test-network:/tmp/test-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/test-network/ledgers-backup
-    #Cleanup the chaincode containers
-    clearContainers
-    #Cleanup images
-    removeUnwantedImages
-    # remove orderer block and other channel configuration transactions and certs
-    rm -rf test-network/system-genesis-block/*.block 
-    rm -rf test-network/organizations/peerOrganizations 
-    rm -rf test-network/organizations/ordererOrganizations
-    ## remove fabric ca artifacts
-    rm -rf test-network/organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
-    rm -rf test-network/organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
-    rm -rf test-network/organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-    rm -rf test-network/addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
+  
+  # Bring down the network, deleting the volumes
+  #Delete any ledger backups
+  docker run -v $PWD/test-network:/tmp/test-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/test-network/ledgers-backup
+  
+  #Cleanup the chaincode containers
+  clearContainers
+  #Cleanup images
+  removeImages
+  #Cleanup volumes
+  removeVolumes
+  #Cleanup network
+  removeNetwork
+  
+  # remove orderer block and other channel configuration transactions and certs
+  rm -rf test-network/system-genesis-block/*.block 
+  rm -rf test-network/organizations/peerOrganizations 
+  rm -rf test-network/organizations/ordererOrganizations
+  ## remove fabric ca artifacts
+  rm -rf test-network/organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
+  rm -rf test-network/organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
+  rm -rf test-network/organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
+  rm -rf test-network/addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
 
-    # remove channel and script artifacts
-    rm -rf test-network/channel-artifacts test-network/log.txt
-
-  fi
+  # remove channel and script artifacts
+  rm -rf test-network/channel-artifacts test-network/log.txt
 }
+
+# Install the Hyperledger Fabric platform-specific binaries and config files for 
+# the atest production release into the /bin and /config directories of fabric-samples.
+# More info: https://hyperledger-fabric.readthedocs.io/en/latest/install.html
+function installTools() {
+  curl -sSL https://bit.ly/2ysbOFE | bash -s -- $VERSION $CA_VERSION $THIRDPARTY_IMAGE_VERSION -s 
+}
+
+# default image tag
+IMAGETAG="latest"
+# use this as the default docker-compose yaml definition
+COMPOSE_FILE_BASE=test-network/docker/docker-compose-test-net.yaml
+# docker-compose.yaml file if you are using couchdb
+COMPOSE_FILE_COUCH=test-network/docker/docker-compose-couch.yaml
+# certificate authorities compose file
+COMPOSE_FILE_CA=test-network/docker/docker-compose-ca.yaml
+# use this as the docker compose couch file for org3
+COMPOSE_FILE_COUCH_ORG3=test-network/addOrg3/docker/docker-compose-couch-org3.yaml
+# use this as the default docker-compose yaml definition for org3
+COMPOSE_FILE_ORG3=test-network/addOrg3/docker/docker-compose-org3.yaml
+
+networkDown
+installTools
