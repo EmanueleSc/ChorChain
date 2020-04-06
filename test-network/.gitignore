@@ -12,3 +12,5 @@ organizations/peerOrganizations/*
 system-genesis-block/*
 fabcar.tar.gz
 log.txt
+# MAC files
+.DS_Store
