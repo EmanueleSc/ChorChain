@@ -7,6 +7,34 @@ CA_VERSION=1.4.6
 # Version of thirdparty images (couchdb, kafka and zookeeper) released
 THIRDPARTY_IMAGE_VERSION=0.4.18
 
+# Print the usage message
+function printHelp() {
+  echo "Description: "
+  echo "    Facilitates the installation of the necessary tools to get the hyperledger \"test_network\" running."
+  echo "    It does the following operations:"
+  echo "        1. Remove hyperledger docker containers"
+  echo "        2. Delete hyperledger docker images"
+  echo "        3. Delete all unused docker volumes"
+  echo "        4. Delete all unused docker networks"
+  echo "        5. Tear down the running network \"test_network\""
+  echo "        6. Install the Hyperledger Fabric platform-specific binaries, config files and pull docker images"
+  echo "           - Fabric Version:              2.0.0"
+  echo "           - CA Version:                  1.4.6"
+  echo "           - Thirdparty images Version:   0.4.18"
+  echo "    If you have already installed the tools in step 6, please consider the flag -s"
+  echo
+  echo "Usage:"
+  echo "  bootstrap.sh [Flags]"
+  echo "    Flags:"
+  echo "    -s : bypass tool installation at step 6"
+  echo "    -h : print this message"
+  echo
+  echo "WARNING!"
+  echo "    You may have other docker volumes and networks that may be deleted."
+  echo "    Consider skipping the commands when asked at steps 3 and 4."
+  echo
+}
+
 # Remove hyperledger docker containers
 function clearContainers() {
   CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /hyperledger.*/) {print $1}')
@@ -30,14 +58,20 @@ function removeImages() {
 
 # Delete all unused docker volumes
 function removeVolumes() {
+  echo
+  echo "Your current volumes:"
   docker volume ls
+  echo
   echo "WARNING! Skip this command if you have your volumes"
   docker volume prune
 }
 
 # Delete all unused docker networks
 function removeNetwork() {
+  echo
+  echo "Your current networks:"
   docker network ls
+  echo
   echo "WARNING! Skip this command if you have your networks"
   docker network prune
 }
@@ -77,7 +111,7 @@ function networkDown() {
 }
 
 # Install the Hyperledger Fabric platform-specific binaries and config files for 
-# the atest production release into the /bin and /config directories of fabric-samples.
+# the specific version into the /bin and /config directories of fabric-samples.
 # More info: https://hyperledger-fabric.readthedocs.io/en/latest/install.html
 function installTools() {
   curl -sSL https://bit.ly/2ysbOFE | bash -s -- $VERSION $CA_VERSION $THIRDPARTY_IMAGE_VERSION -s 
@@ -96,5 +130,36 @@ COMPOSE_FILE_COUCH_ORG3=test-network/addOrg3/docker/docker-compose-couch-org3.ya
 # use this as the default docker-compose yaml definition for org3
 COMPOSE_FILE_ORG3=test-network/addOrg3/docker/docker-compose-org3.yaml
 
+BINARIES=true
+
+# parse flags
+while [[ $# -ge 1 ]] ; do
+  key="$1"
+  case $key in
+  -h )
+    printHelp
+    exit 0
+    ;;
+  -s )
+    BINARIES=false
+    shift
+    ;;
+  * )
+    echo
+    echo "Unknown flag: $key"
+    echo
+    printHelp
+    exit 1
+    ;;
+  esac
+  shift
+done
+
 networkDown
-installTools
+
+if [ "$BINARIES" == "true" ]; then
+    echo
+    echo "Pull Hyperledger Fabric binaries and Fabric docker images"
+    echo
+    installTools
+fi
