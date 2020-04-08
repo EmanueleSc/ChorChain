@@ -3,10 +3,20 @@
 // Utility class for ledger state
 const State = require('./../ledger-api/state.js');
 
+const Status = {
+    DISABLED: 'disabled',
+    ENABLED: 'enabled',
+    DONE: 'done'
+}
+
 class Choreography extends State {
 
     constructor(obj) {
-        super(Choreography.getClass(), [obj.issuer, obj.chorNumber]);
+        super(Choreography.getClass(), [obj.issuer, obj.chorID]);
+        this.elements = {}
+        for (const [, elem] of obj.chorElements.entries()) {
+            elements[elem] = Status.DISABLED
+        }
         Object.assign(this, obj);
     }
 
@@ -30,9 +40,12 @@ class Choreography extends State {
 
     /**
      * Factory method to create a choreography object
+     * @param {String} issuer Choreography model issuer
+     * @param {String} chorID Choreography identifier (e.g. UUID)
+     * @param {String[]} chorElements Array of Choreography elements id
      */
-    static createInstance(issuer, chorNumber /*, TODO ... */) {
-        return new Choreography({ issuer, chorNumber /*, TODO ... */ });
+    static createInstance(issuer, chorID, chorElements /*, TODO ... */) {
+        return new Choreography({ issuer, chorID, chorElements /*, TODO ... */ });
     }
 
     static getClass() {
