@@ -12,7 +12,7 @@
 /test-network/system-genesis-block/*
 # /test-network/fabcar.tar.gz
 /test-network/log.txt
-# installed platform-specific binaries
 /bin
 /config
 .DS_Store
+node_modules
