@@ -13,6 +13,7 @@ class Choreography extends State {
 
     constructor(obj) {
         super(Choreography.getClass(), [obj.issuer, obj.chorID]);
+        // Elements is the object that maps keys (choreography element id) with their status (disabled, enabled or done)
         this.elements = {}
         for (const [, elem] of obj.chorElements.entries()) {
             elements[elem] = Status.DISABLED
@@ -20,7 +21,29 @@ class Choreography extends State {
         Object.assign(this, obj);
     }
 
-    // TODO: common properties for a choreography to store in ledger state
+    /**
+     * Set to 'enabled' status a specific Choreography element referenced by his id
+     * @param {String} elementID Choreography element id
+     */
+    enable(elementID) {
+        this.elements[elementID] = Status.ENABLED
+    }
+
+    /**
+     * Set to 'disabled' status a specific Choreography element referenced by his id
+     * @param {String} elementID Choreography element id
+     */
+    disable(elementID) {
+        this.elements[elementID] = Status.DISABLED
+    }
+
+    /**
+     * Set to 'done' status a specific Choreography element referenced by his id
+     * @param {String} elementID Choreography element id
+     */
+    done(elementID) {
+        this.elements[elementID] = Status.DONE
+    }
 
     static fromBuffer(buffer) {
         return Choreography.deserialize(buffer);
