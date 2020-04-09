@@ -15,4 +15,4 @@
 /bin
 /config
 .DS_Store
-node_modules
+/chaincode/node_modules
