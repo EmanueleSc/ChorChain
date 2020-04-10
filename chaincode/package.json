@@ -4,8 +4,11 @@
   "description": "Choreography Contract",
   "main": "index.js",
   "scripts": {
-    "test": "",
-    "start": "fabric-chaincode-node start"
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "nyc mocha test --recursive",
+    "start": "fabric-chaincode-node start",
+    "mocha": "mocha test --recursive"
   },
   "repository": {
     "type": "git",
@@ -22,6 +25,28 @@
     "fabric-shim": "^2.0.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.8.0",
+    "mocha": "^7.1.1",
+    "nyc": "^15.0.1",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0"
+  },
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "test/**"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
   }
 }

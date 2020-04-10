@@ -4,7 +4,7 @@
 const { Contract, Context } = require('fabric-contract-api');
 
 // Chorchain specifc classes
-const Choreography = require('./choreography.js');
+// const Choreography = require('./choreography.js');
 const ChorList = require('./chorlist.js');
 
 /**
@@ -29,6 +29,13 @@ class ChoreographyContract extends Contract {
     constructor() {
         // Unique namespace when multiple contracts per chaincode file
         super('org.chorchain.choreography');
+    }
+
+    /**
+     * Define a custom context for commercial paper
+     */
+    createContext() {
+        return new ChoreographyContext();
     }
 
 }
