@@ -4,8 +4,9 @@
 const { Contract, Context } = require('fabric-contract-api');
 
 // Chorchain specifc classes
-// const Choreography = require('./choreography.js');
+const Choreography = require('./choreography.js');
 const ChorList = require('./chorlist.js');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * A custom context provides easy access to list of all choreography models state
@@ -36,6 +37,19 @@ class ChoreographyContract extends Contract {
      */
     createContext() {
         return new ChoreographyContext();
+    }
+
+    /**
+     * Instantiate to perform any setup of the ledger that might be required.
+     * @param {Context} ctx the transaction context
+     */
+    async instantiate(ctx, issuer) {
+        console.log('Instantiate the contract');
+        const chorElements = ['StartEvent', 'ExclusiveGateway', 'Message', 'EndEvent']; // example
+        // create an instance of the Choreography
+        let choreography = Choreography.createInstance(issuer, uuidv4(), chorElements);
+        // Add the Choreography to the list of all similar Choreography models in the ledger world state
+        await ctx.chorList.addChor(choreography);
     }
 
 }
