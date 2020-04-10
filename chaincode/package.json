@@ -20,5 +20,8 @@
   "dependencies": {
     "fabric-contract-api": "^2.0.0",
     "fabric-shim": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
   }
 }

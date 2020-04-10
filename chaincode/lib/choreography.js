@@ -16,7 +16,7 @@ class Choreography extends State {
         // Elements is the object that maps keys (choreography element id) with their status (disabled, enabled or done)
         this.elements = {}
         for (const [, elem] of obj.chorElements.entries()) {
-            elements[elem] = Status.DISABLED
+            this.elements[elem] = Status.DISABLED
         }
         Object.assign(this, obj);
     }
