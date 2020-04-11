@@ -1,28 +1,24 @@
 'use strict';
 
-const ChorChaincode = require('../lib/choreographycontract');
-const { Stub } = require('fabric-shim');
+// const ChorChaincode = require('../lib/choreographycontract');
+// const { Stub } = require('fabric-shim');
 
 require('chai').should();
-const sinon = require('sinon');
+// const sinon = require('sinon');
 
 describe('Chaincode', () => {
 
-    describe('#Init', () => {
+    /* describe('#Init', () => {
 
         it('should work', async () => {
             const cc = new ChorChaincode();
-            // cc.createContext();
             const stub = sinon.createStubInstance(Stub);
             stub.getFunctionAndParameters.returns({ fcn: 'initFunc', params: [] });
-            const res = await cc.instantiate(stub, 'pippo');
+            const res = await cc.Init(stub);
             res.status.should.equal(Stub.RESPONSE_CODE.OK);
-
-            // const res = await cc.Init(stub);
-            // res.status.should.equal(Stub.RESPONSE_CODE.OK);
         });
 
-    });
+    }); */
 
     /* describe('#Invoke', async () => {
 
