@@ -47,7 +47,7 @@ function clearContainers() {
 
 # Delete hyperledger docker images
 function removeImages() {
-  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /hyperledger.*/) {print $3}')
+  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /hyperledger.*/ || /dev-peer*/) {print $3}')
   # if the length of string is zero (-z) or empty.
   if [ -z "$DOCKER_IMAGE_IDS" ] || [ "$DOCKER_IMAGE_IDS" == " " ]; then
     echo "---- No images available for deletion ----"
@@ -107,7 +107,7 @@ function networkDown() {
   rm -rf test-network/addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
 
   # remove channel and script artifacts
-  rm -rf test-network/channel-artifacts test-network/log.txt
+  rm -rf test-network/channel-artifacts test-network/log.txt test-network/choreographycontract.tar.gz
 }
 
 # Install the Hyperledger Fabric platform-specific binaries and config files for 

@@ -10,7 +10,7 @@
 /test-network/organizations/ordererOrganizations/*
 /test-network/organizations/peerOrganizations/*
 /test-network/system-genesis-block/*
-# /test-network/fabcar.tar.gz
+/test-network/choreographycontract.tar.gz
 /test-network/log.txt
 /bin
 /config

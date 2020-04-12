@@ -43,7 +43,11 @@ class ChoreographyContract extends Contract {
      * Instantiate to perform any setup of the ledger that might be required.
      * @param {Context} ctx the transaction context
      */
-    async instantiate(ctx, issuer) {
+    async initLedger(ctx) {
+        const ret = ctx.stub.getFunctionAndParameters();
+        const args = ret.params;
+        const issuer = args[2];
+
         console.log('Instantiate the contract');
         const chorElements = ['StartEvent', 'ExclusiveGateway', 'Message', 'EndEvent']; // example
         const chorID = uuidv4();
@@ -53,8 +57,8 @@ class ChoreographyContract extends Contract {
         await ctx.chorList.addChor(choreography);
 
         // Retrieve the current Choreography using key fields provided
-        const chorKey = Choreography.makeKey([issuer, chorID])
-        return await ctx.chorList.getChor(chorKey)
+        // const chorKey = Choreography.makeKey([issuer, chorID]);
+        // return await ctx.chorList.getChor(chorKey);
     }
 
 }
