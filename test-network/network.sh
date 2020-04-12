@@ -24,7 +24,7 @@ function printHelp() {
   echo "      - 'up' - bring up fabric orderer and peer nodes. No channel is created"
   echo "      - 'up createChannel' - bring up fabric network with one channel"
   echo "      - 'createChannel' - create and join a channel after the network is created"
-  echo "      - 'deployCC' - deploy the fabcar chaincode on the channel"
+  echo "      - 'deployCC' - deploy the choreography chaincode on the channel"
 # echo "      - 'down' - clear the network with docker-compose down"
 # echo "      - 'restart' - restart the network"
   echo
@@ -433,8 +433,8 @@ COMPOSE_FILE_COUCH_ORG3=addOrg3/docker/docker-compose-couch-org3.yaml
 # use this as the default docker-compose yaml definition for org3
 COMPOSE_FILE_ORG3=addOrg3/docker/docker-compose-org3.yaml
 #
-# use golang as the default language for chaincode
-CC_SRC_LANGUAGE=golang
+# use javascript as the default language for chaincode
+CC_SRC_LANGUAGE=javascript
 # Chaincode version
 VERSION=1
 # default image tag
