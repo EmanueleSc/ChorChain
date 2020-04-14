@@ -217,7 +217,6 @@ queryCommitted() {
   fi
 }
 
-# This function is not invoked because it is commented out
 chaincodeInvokeInit() {
   parsePeerConnectionParameters $@
   res=$?
@@ -228,12 +227,12 @@ chaincodeInvokeInit() {
   # it using the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode invoke -o localhost:7050 -C $CHANNEL_NAME -n choreographycontract $PEER_CONN_PARMS --isInit -c '{"function":"initLedger","Args":["initLedger", "issuer", "OrgTest"]}' >&log.txt
+    peer chaincode invoke -o localhost:7050 -C $CHANNEL_NAME -n choreographycontract $PEER_CONN_PARMS --isInit -c '{"function":"instantiate","Args":[]}' >&log.txt
     res=$?
     set +x
   else
     set -x
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n choreographycontract $PEER_CONN_PARMS --isInit -c '{"function":"initLedger","Args":["initLedger", "issuer", "OrgTest"]}' >&log.txt
+    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n choreographycontract $PEER_CONN_PARMS --isInit -c '{"function":"instantiate","Args":[]}' >&log.txt
     res=$?
     set +x
   fi
@@ -310,7 +309,7 @@ queryCommitted 1
 queryCommitted 2
 
 ## Invoke the chaincode
-# chaincodeInvokeInit 1 2
+chaincodeInvokeInit 1 2
 
 sleep 10
 

@@ -18,3 +18,4 @@
 /chaincode/node_modules
 /chaincode/.nyc_output
 /chaincode/coverage
+/chaincode/identity
