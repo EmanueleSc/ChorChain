@@ -74,18 +74,26 @@ describe('Chaincode', () => {
         it('should work', async () => {
             const resp = await contract.submitTransaction('createChor');
             chor = Choreography.fromBuffer(resp);
-            console.log(chor);
         });
 
     });
 
-    /* describe('Submit queryChor transaction', () => {
+    describe('Submit queryChor transaction', () => {
 
         it('should work', async () => {
             const resp = await contract.submitTransaction('queryChor', chor.issuer, chor.chorID);
             console.log(resp);
         });
 
-    }); */
+    });
+
+    describe('Submit updateChor transaction', () => {
+
+        it('should work', async () => {
+            const resp = await contract.submitTransaction('updateChor', chor.issuer, chor.chorID);
+            console.log(resp);
+        });
+
+    });
 
 });

@@ -63,7 +63,16 @@ class ChoreographyContract extends Contract {
     async queryChor(ctx, issuer, chorID) {
         // Retrieve the Choreography using key fields provided
         const chorKey = Choreography.makeKey([issuer, chorID]);
-        return await ctx.chorList.getChor(chorKey);
+        const chor = await ctx.chorList.getChor(chorKey);
+        return chor;
+    }
+
+    async updateChor(ctx, issuer, chorID) {
+        const chorKey = Choreography.makeKey([issuer, chorID]);
+        const chor = await ctx.chorList.getChor(chorKey);
+        chor.enable('StartEvent');
+        await ctx.chorList.updateChor(chor);
+        return chor;
     }
 
 }
