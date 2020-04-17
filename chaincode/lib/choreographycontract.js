@@ -1,42 +1,30 @@
 'use strict';
 
 // Fabric smart contract classes
-const { Contract, Context } = require('fabric-contract-api');
+const { Contract } = require('fabric-contract-api');
 
-// Chorchain specifc classes
-const Choreography = require('./choreography.js');
-const ChorList = require('./chorlist.js');
-const { v4: uuidv4 } = require('uuid');
-
-/**
- * A custom context provides easy access to list of all choreography models state
- */
-class ChoreographyContext extends Context {
-
-    constructor() {
-        super();
-        // All choreography models state are held in this list
-        this.chorList = new ChorList(this);
-    }
-
+const Status = {
+    DISABLED: 'disabled',
+    ENABLED: 'enabled',
+    DONE: 'done'
 }
 
-/**
- * Define choreography smart contract by extending Fabric Contract class
- *
- */
+class ChoreographyState {
+    constructor() {
+        this.chorID = 'CHOR1';
+        this.chorElements = ['StartEvent', 'ExclusiveGateway', 'Message', 'EndEvent'];
+        this.elements = {};
+        for (const [, elem] of this.chorElements.entries()) {
+            this.elements[elem] = Status.DISABLED
+        }
+    }
+}
+
 class ChoreographyContract extends Contract {
 
     constructor() {
         // Unique namespace when multiple contracts per chaincode file
         super('org.chorchain.choreography');
-    }
-
-    /**
-     * Define a custom context for commercial paper
-     */
-    createContext() {
-        return new ChoreographyContext();
     }
 
     /**
@@ -48,31 +36,39 @@ class ChoreographyContract extends Contract {
     }
 
     async createChor(ctx) {
-        const issuer = 'OrgTest'
-        const chorID = uuidv4();
-        const chorElements = ['StartEvent', 'ExclusiveGateway', 'Message', 'EndEvent'];
+        console.log('\n\n --- CREATE CHOR START ---')
 
-        // create an instance of the Choreography
-        let choreography = Choreography.createInstance(issuer, chorID, chorElements);
-        // Add the Choreography to the list of all similar Choreography models in the ledger world state
-        await ctx.chorList.addChor(choreography);
+        const choreography = new ChoreographyState();
 
-        return choreography;
+        console.log('--- Choreography ---');
+        console.log(choreography);
+
+        await ctx.stub.putState(choreography.chorID, Buffer.from(JSON.stringify(choreography)));
+
+        console.log('--- Create Chor END ---');
+        return choreography.chorID;
     }
 
-    async queryChor(ctx, issuer, chorID) {
-        // Retrieve the Choreography using key fields provided
-        const chorKey = Choreography.makeKey([issuer, chorID]);
-        const chor = await ctx.chorList.getChor(chorKey);
-        return chor;
-    }
+    async queryChor(ctx, chorID) {
+        console.log('\n\n --- QUERY CHOR START ---');
+        console.log('--- Choreography ID ---');
+        console.log(chorID);
 
-    async updateChor(ctx, issuer, chorID) {
-        const chorKey = Choreography.makeKey([issuer, chorID]);
-        const chor = await ctx.chorList.getChor(chorKey);
-        chor.enable('StartEvent');
-        await ctx.chorList.updateChor(chor);
-        return chor;
+        const chor = await ctx.stub.getState(chorID);
+
+        console.log('--- Choreography Buffer ---');
+        console.log(chor);
+
+        if (chor && chor.toString('utf8')) {
+            const json = JSON.parse(chor.toString());
+
+            console.log('\n\n --- Choreography Query Json ---');
+            console.log(json)
+
+            return json;
+        }
+
+        return null;
     }
 
 }

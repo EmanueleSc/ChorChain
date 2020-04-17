@@ -1,7 +1,5 @@
 'use strict';
 
-// const ChorChaincode = require('../lib/choreographycontract');
-const Choreography = require('../lib/choreography');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const { Wallets, Gateway } = require('fabric-network');
@@ -10,7 +8,7 @@ const path = require('path');
 // Global variables
 const fixtures = path.resolve(__dirname, '../../test-network');
 const identityLabel = 'isabella';
-let wallet, gateway, network, contract, chor;
+let wallet, gateway, network, contract, chorID;
 
 require('chai').should();
 
@@ -72,8 +70,10 @@ describe('Chaincode', () => {
     describe('Submit createChor transaction', () => {
 
         it('should work', async () => {
-            const resp = await contract.submitTransaction('createChor');
-            chor = Choreography.fromBuffer(resp);
+            chorID = await contract.submitTransaction('createChor');
+            chorID = chorID.toString();
+            console.log('Choreography ID:');
+            console.log(chorID);
         });
 
     });
@@ -81,17 +81,8 @@ describe('Chaincode', () => {
     describe('Submit queryChor transaction', () => {
 
         it('should work', async () => {
-            const resp = await contract.submitTransaction('queryChor', chor.issuer, chor.chorID);
-            console.log(resp);
-        });
-
-    });
-
-    describe('Submit updateChor transaction', () => {
-
-        it('should work', async () => {
-            const resp = await contract.submitTransaction('updateChor', chor.issuer, chor.chorID);
-            console.log(resp);
+            const resp = await contract.submitTransaction('queryChor', chorID);
+            console.log(resp.toString());
         });
 
     });
