@@ -14,7 +14,7 @@ class ChoreographyState {
         Object.assign(this, obj);
     }
 
-    initElements(chorElements) {
+    initElements() {
         this.elements = {};
         for (const [, elem] of chorElements.entries()) {
             this.elements[elem] = Status.DISABLED;
@@ -74,7 +74,7 @@ class ChoreographyContract extends Contract {
         logger.log('info', 'Instantiate the contract');
 
         const choreography = new ChoreographyState({ chorID });
-        choreography.initElements(chorElements);
+        choreography.initElements();
         await choreography.setEnable(ctx, 'StartEvent');
     }
 
