@@ -8,7 +8,7 @@ const path = require('path');
 // Global variables
 const fixtures = path.resolve(__dirname, '../../test-network');
 const identityLabel = 'isabella';
-let wallet, gateway, network, contract, chorID;
+let wallet, gateway, network, contract;
 
 require('chai').should();
 
@@ -67,21 +67,10 @@ describe('Chaincode', () => {
 
     });
 
-    describe('Submit createChor transaction', () => {
-
-        it('should work', async () => {
-            chorID = await contract.submitTransaction('createChor');
-            chorID = chorID.toString();
-            console.log('Choreography ID:');
-            console.log(chorID);
-        });
-
-    });
-
     describe('Submit queryChor transaction', () => {
 
         it('should work', async () => {
-            const resp = await contract.submitTransaction('queryChor', chorID);
+            const resp = await contract.submitTransaction('queryChor', 'CHOR1');
             console.log(resp.toString());
         });
 

@@ -32,37 +32,29 @@ class ChoreographyContract extends Contract {
      * @param {Context} ctx the transaction context
      */
     async instantiate(ctx) {
-        console.log('Instantiate the contract');
-    }
-
-    async createChor(ctx) {
-        console.log('\n\n --- CREATE CHOR START ---')
+        console.log('===================== Instantiate the contract =====================');
 
         const choreography = new ChoreographyState();
-
-        console.log('--- Choreography ---');
+        console.log('===================== Choreography =====================');
         console.log(choreography);
 
         await ctx.stub.putState(choreography.chorID, Buffer.from(JSON.stringify(choreography)));
-
-        console.log('--- Create Chor END ---');
-        return choreography.chorID;
     }
 
     async queryChor(ctx, chorID) {
-        console.log('\n\n --- QUERY CHOR START ---');
-        console.log('--- Choreography ID ---');
+        console.log('===================== QueryChor start =====================');
+        console.log('===================== Choreography ID =====================');
         console.log(chorID);
 
         const chor = await ctx.stub.getState(chorID);
 
-        console.log('--- Choreography Buffer ---');
+        console.log('===================== Choreography Buffer =====================');
         console.log(chor);
 
         if (chor && chor.toString('utf8')) {
             const json = JSON.parse(chor.toString());
 
-            console.log('\n\n --- Choreography Query Json ---');
+            console.log('===================== Choreography Query Json =====================');
             console.log(json)
 
             return json;
