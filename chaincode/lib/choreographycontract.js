@@ -10,9 +10,8 @@ const chorElements = ['StartEvent', 'ExclusiveGateway', 'Message', 'EndEvent'];
 const Status = { DISABLED: 'disabled', ENABLED: 'enabled', DONE: 'done' };
 
 class ChoreographyState {
-    constructor() {
-        this.choreographyID = chorID;
-        this.initElements(chorElements);
+    constructor(obj) {
+        Object.assign(this, obj);
     }
 
     initElements(chorElements) {
@@ -37,26 +36,22 @@ class ChoreographyState {
         await ctx.stub.putState(chorID, this.serialize(this));
     }
 
-    static async getBufferState(ctx) {
-        const chor = await ctx.stub.getState(chorID);
-        return chor;
-    }
-
-    static async getDeserializedState(ctx) {
-        const chor = await ctx.stub.getState(chorID);
-        let json = null;
+    static async getState(ctx) {
+        const data = await ctx.stub.getState(chorID);
+        let object = null;
 
         logger.log('info', 'Choreography Buffer');
-        logger.log('info', chor);
+        logger.log('info', data);
 
-        if (chor && chor.toString('utf8')) {
-            json = JSON.parse(chor.toString());
+        if(data && data.toString('utf8')) {
+            let json = JSON.parse(data.toString());
+            object = new (ChoreographyState)(json);
         }
 
-        logger.log('info', 'Choreography Query Json');
-        logger.log('info', json);
+        logger.log('info', 'Choreography Object');
+        logger.log('info', object);
 
-        return json;
+        return object;
     }
 
     serialize(object) {
@@ -78,7 +73,8 @@ class ChoreographyContract extends Contract {
     async instantiate(ctx) {
         logger.log('info', 'Instantiate the contract');
 
-        const choreography = new ChoreographyState();
+        const choreography = new ChoreographyState({ chorID });
+        choreography.initElements(chorElements);
         await choreography.setEnable(ctx, 'StartEvent');
     }
 
@@ -86,7 +82,7 @@ class ChoreographyContract extends Contract {
         logger.log('info', 'QueryChor start');
         logger.log('info', 'Choreography ID: ' + chorID);
 
-        const choreography = await ChoreographyState.getDeserializedState(ctx);
+        const choreography = await ChoreographyState.getState(ctx);
         return choreography;
     }
 
