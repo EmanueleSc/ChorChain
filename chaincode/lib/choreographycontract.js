@@ -2,6 +2,7 @@
 
 // Fabric smart contract classes
 const { Contract } = require('fabric-contract-api');
+const { logger } = require('../utils/logger');
 
 const Status = {
     DISABLED: 'disabled',
@@ -32,30 +33,29 @@ class ChoreographyContract extends Contract {
      * @param {Context} ctx the transaction context
      */
     async instantiate(ctx) {
-        console.log('===================== Instantiate the contract =====================');
+        logger.log('info', 'Instantiate the contract');
 
         const choreography = new ChoreographyState();
-        console.log('===================== Choreography =====================');
-        console.log(choreography);
+        logger.log('info', 'Choreography');
+        logger.log('info', choreography);
 
         await ctx.stub.putState(choreography.chorID, Buffer.from(JSON.stringify(choreography)));
     }
 
     async queryChor(ctx, chorID) {
-        console.log('===================== QueryChor start =====================');
-        console.log('===================== Choreography ID =====================');
-        console.log(chorID);
+        logger.log('info', 'QueryChor start');
+        logger.log('info', 'Choreography ID: ' + chorID);
 
         const chor = await ctx.stub.getState(chorID);
 
-        console.log('===================== Choreography Buffer =====================');
-        console.log(chor);
+        logger.log('info', 'Choreography Buffer');
+        logger.log('info', chor);
 
         if (chor && chor.toString('utf8')) {
             const json = JSON.parse(chor.toString());
 
-            console.log('===================== Choreography Query Json =====================');
-            console.log(json)
+            logger.log('info', 'Choreography Query Json');
+            logger.log('info', json);
 
             return json;
         }
