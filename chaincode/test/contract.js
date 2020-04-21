@@ -70,7 +70,7 @@ describe('Chaincode', () => {
     describe('Submit queryChor transaction', () => {
 
         it('should work', async () => {
-            const resp = await contract.submitTransaction('queryChor', 'CHOR1');
+            const resp = await contract.submitTransaction('queryChor');
             console.log(resp.toString());
         });
 
