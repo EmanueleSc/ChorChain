@@ -62,7 +62,7 @@ describe('Chaincode', () => {
 
         it('should work', async () => {
             network = await gateway.getNetwork('mychannel');
-            contract = await network.getContract('choreographycontract', 'org.chorchain.choreography');
+            contract = await network.getContract('choreographycontract', 'org.chorchain.choreography1');
         });
 
     });
