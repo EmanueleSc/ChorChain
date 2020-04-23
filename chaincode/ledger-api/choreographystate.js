@@ -1,6 +1,6 @@
 'use strict'
-const { logger } = require('../utils/logger');
 const Status = { DISABLED: 'disabled', ENABLED: 'enabled', DONE: 'done' };
+const { logger } = require('../utils/logger');
 
 class ChoreographyState {
     constructor(obj) {
@@ -35,20 +35,21 @@ class ChoreographyState {
         await ctx.stub.putState(this.chorID, this.serialize(this));
     }
 
+    async updateState(ctx, obj) {
+        Object.assign(this, obj);
+        await ctx.stub.putState(this.chorID, this.serialize(this));
+    }
+
     static async getState(ctx, chorID) {
         const data = await ctx.stub.getState(chorID);
         let object = null;
 
-        logger.log('info', 'Choreography Buffer');
-        logger.log('info', data);
+        logger.log('info', 'Choreography Buffer: ' + data);
 
         if(data && data.toString('utf8')) {
             let json = JSON.parse(data.toString());
             object = new (ChoreographyState)(json);
         }
-
-        logger.log('info', 'Choreography Object');
-        logger.log('info', object);
 
         return object;
     }
@@ -58,4 +59,7 @@ class ChoreographyState {
     }
 }
 
-module.exports = ChoreographyState;
+module.exports = {
+    ChoreographyState,
+    Status
+}

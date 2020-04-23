@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const yaml = require('js-yaml');
-const { Wallets, Gateway } = require('fabric-network');
+const { Wallets, Gateway, DefaultEventHandlerStrategies } = require('fabric-network');
 const path = require('path');
 
 // Global variables
@@ -50,7 +50,9 @@ describe('Chaincode', () => {
                 wallet: wallet,
                 discovery: { enabled: true, asLocalhost: true },
                 eventHandlerOptions: {
-                    strategy: null // Cause transaction invocations to return immediately after successfully sending the endorsed transaction to the orderer
+                    // if strategy set to null, it will not wait for any commit events to be received from peers
+                    // https://hyperledger.github.io/fabric-sdk-node/release-1.4/module-fabric-network.html#.DefaultEventHandlerStrategies
+                    strategy: DefaultEventHandlerStrategies.NETWORK_SCOPE_ALLFORTX
                 }
             };
             await gateway.connect(connectionProfile, connectionOptions);
@@ -62,15 +64,33 @@ describe('Chaincode', () => {
 
         it('should work', async () => {
             network = await gateway.getNetwork('mychannel');
-            contract = await network.getContract('choreographycontract', 'org.chorchain.choreography1');
+            contract = await network.getContract('choreographycontract', 'org.chorchain.choreography_1');
         });
 
     });
 
-    describe('Submit queryChor transaction', () => {
+    describe('Submit StartEvent_00yy9i8 transaction', () => {
 
         it('should work', async () => {
-            const resp = await contract.submitTransaction('queryChor');
+            const resp = await contract.submitTransaction('StartEvent_00yy9i8');
+            console.log(resp.toString());
+        });
+
+    });
+
+    describe('Submit Message_1pam53q transaction', () => {
+
+        it('should work', async () => {
+            const resp = await contract.submitTransaction('Message_1pam53q', 'pollo_fritto_con_patate');
+            console.log(resp.toString());
+        });
+
+    });
+
+    describe('Submit ExclusiveGateway_0zotmga transaction', () => {
+
+        it('should work', async () => {
+            const resp = await contract.submitTransaction('ExclusiveGateway_0zotmga');
             console.log(resp.toString());
         });
 

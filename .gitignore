@@ -19,3 +19,5 @@
 /chaincode/.nyc_output
 /chaincode/coverage
 /chaincode/identity
+/application/node_modules
+/application/src/public
