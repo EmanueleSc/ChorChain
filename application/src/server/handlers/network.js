@@ -1,9 +1,10 @@
 import express from "express";
 const router = express.Router();
 
-const { Wallets } = require('fabric-network');
+const { Wallets, Gateway, DefaultEventHandlerStrategies } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
 const fixtures = path.resolve(__dirname, '../../../../test-network');
 
 router.get('/create/org1/identity', async (req, res) => {
@@ -30,6 +31,34 @@ router.get('/create/org1/identity', async (req, res) => {
 
         await wallet.put(identityLabel, identity);
         res.json({ response: `Identity for the client user "${identityLabel}" created!` });
+
+    } catch (err) {
+        res.json({ error: err.message || err.toString() });
+    }
+});
+
+router.get('/create/org1/gateway', async (req, res) => {
+    try {
+        const identityLabel = 'isabella';
+        const walletPath = path.resolve(__dirname, `../../../identity/user/${identityLabel}/wallet`);
+        const wallet = await Wallets.newFileSystemWallet(walletPath);
+
+        // const gateway = new Gateway();
+        const connOrg1Path = path.join(fixtures, process.env.ORG1_CONN_PROFILE);
+        let connectionProfile = yaml.safeLoad(fs.readFileSync(connOrg1Path, 'utf8'));
+        let connectionOptions = {
+            identity: identityLabel,
+            wallet: wallet,
+            discovery: { enabled: true, asLocalhost: true },
+            eventHandlerOptions: {
+                // if strategy set to null, it will not wait for any commit events to be received from peers
+                // https://hyperledger.github.io/fabric-sdk-node/release-1.4/module-fabric-network.html#.DefaultEventHandlerStrategies
+                strategy: DefaultEventHandlerStrategies.MSPID_SCOPE_ALLFORTX
+            }
+        };
+        // await gateway.connect(connectionProfile, connectionOptions);
+        console.log({ connectionProfile, connectionOptions })
+        // res.json({ response: {} });
 
     } catch (err) {
         res.json({ error: err.message || err.toString() });

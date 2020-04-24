@@ -7,6 +7,11 @@ export const createOrg1Identity = () =>
     method: 'GET',
 });
 
+export const createOrg1Gateway = () =>
+  sendRequest(`${BASE_PATH}/create/org1/gateway`, {
+    method: 'GET',
+});
+
 /* export const addBook = ({ name, price, githubRepo }) =>
   sendRequest(`${BASE_PATH}/books/add`, {
     body: JSON.stringify({ name, price, githubRepo }),

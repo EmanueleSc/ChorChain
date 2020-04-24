@@ -6,7 +6,8 @@
   "scripts": {
     "webpack": "webpack -wd",
     "build": "webpack --mode production",
-    "dev": "nodemon --exec babel-node src/server.js"
+    "dev": "nodemon --exec babel-node src/server.js",
+    "dev-inspect": "nodemon --exec babel-node --inspect src/server.js"
   },
   "author": "Emanuele Scala",
   "license": "ISC",
@@ -18,6 +19,7 @@
     "fabric-network": "^2.0.0-snapshot.353",
     "fs": "0.0.1-security",
     "isomorphic-unfetch": "^3.0.0",
+    "js-yaml": "^3.13.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
