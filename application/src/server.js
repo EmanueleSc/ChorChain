@@ -1,5 +1,6 @@
 import express from "express";
 import compression from "compression";
+import bodyParser from 'body-parser';
 import path from "path";
 import index from "./routes/index";
 
@@ -11,6 +12,9 @@ import apiNetwork from "./server/handlers/network";
 const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '../') + '.env' });
 
+// GLOBALS
+global.ConnectionProfiles = {}; // consider to use e.g. redis
+
 // Server var
 const app = express();
 
@@ -20,6 +24,7 @@ app.set("view engine", "ejs");
 
 // Middleware
 app.use(compression());
+app.use(bodyParser());
 console.log(__dirname);
 app.use(express.static(__dirname + "/public"));
 

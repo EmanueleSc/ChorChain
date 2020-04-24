@@ -10,7 +10,7 @@ export default async function sendRequest(path, options = {}) {
 
   const response = await fetch(
     `${ROOT_URL}${path}`,
-    Object.assign({ method: 'POST', credentials: 'include' }, options, { headers }),
+    Object.assign({ method: 'POST', credentials: 'same-origin' }, options, { headers }),
   );
 
   const data = await response.json();

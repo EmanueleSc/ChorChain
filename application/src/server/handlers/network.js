@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const fixtures = path.resolve(__dirname, '../../../../test-network');
+const { v4: uuidv4 } = require('uuid');
 
 router.get('/create/org1/identity', async (req, res) => {
     try {
@@ -37,13 +38,12 @@ router.get('/create/org1/identity', async (req, res) => {
     }
 });
 
-router.get('/create/org1/gateway', async (req, res) => {
+router.get('/create/org1/connection', async (req, res) => {
     try {
         const identityLabel = 'isabella';
         const walletPath = path.resolve(__dirname, `../../../identity/user/${identityLabel}/wallet`);
         const wallet = await Wallets.newFileSystemWallet(walletPath);
 
-        // const gateway = new Gateway();
         const connOrg1Path = path.join(fixtures, process.env.ORG1_CONN_PROFILE);
         let connectionProfile = yaml.safeLoad(fs.readFileSync(connOrg1Path, 'utf8'));
         let connectionOptions = {
@@ -56,9 +56,32 @@ router.get('/create/org1/gateway', async (req, res) => {
                 strategy: DefaultEventHandlerStrategies.MSPID_SCOPE_ALLFORTX
             }
         };
-        // await gateway.connect(connectionProfile, connectionOptions);
-        console.log({ connectionProfile, connectionOptions })
-        // res.json({ response: {} });
+
+        const connectionID = uuidv4();
+        // save connection profile and option in global object 
+        global.ConnectionProfiles[connectionID] = { connectionProfile, connectionOptions };
+
+        res.json({ response: connectionID }); // return the ID of the connection
+
+    } catch (err) {
+        res.json({ error: err.message || err.toString() });
+    }
+});
+
+router.post('/submit/transaction', async (req, res) => {
+    try {
+        const { connectionID, channel, contractNamespace, contractName, transactionName } = req.body;
+        const gateway = new Gateway();
+        const conn = global.ConnectionProfiles[connectionID];
+        await gateway.connect(conn.connectionProfile, conn.connectionOptions);
+
+        const network = await gateway.getNetwork(channel);
+        const contract = await network.getContract(contractNamespace, contractName);
+
+        const resp = await contract.submitTransaction(transactionName);
+        gateway.disconnect();
+
+        res.json({ response: resp });
 
     } catch (err) {
         res.json({ error: err.message || err.toString() });
