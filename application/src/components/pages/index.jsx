@@ -1,5 +1,5 @@
 import React from "react";
-import { helloWorld } from "../../server/api/helloworld"
+import { createOrg1Identity } from "../../server/api/network"
 
 class Index extends React.Component {
     constructor() {
@@ -10,7 +10,7 @@ class Index extends React.Component {
     onFormSubmit = (event) => {
         event.preventDefault();
 
-        return helloWorld().then((res) => {
+        return createOrg1Identity().then((res) => {
             console.log(res.response)
             this.setState({ response: res.response });
         })
@@ -22,7 +22,7 @@ class Index extends React.Component {
                 <h1>ChorChain</h1>
                 <form onSubmit={this.onFormSubmit}>
                     <div>
-                        <button type={"submit"}>Call hellorworld API</button>
+                        <button type={"submit"}>Create Org1 identity</button>
                     </div>
                 </form>
                 <span><h5>Response: {this.state.response}</h5></span>

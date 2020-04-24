@@ -21,3 +21,4 @@
 /chaincode/identity
 /application/node_modules
 /application/src/public
+/application/identity

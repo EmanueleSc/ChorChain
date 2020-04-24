@@ -2,7 +2,14 @@ import express from "express";
 import compression from "compression";
 import path from "path";
 import index from "./routes/index";
-import apiHelloWorld from "./server/handlers/helloworld"
+
+// APIs
+import apiHelloWorld from "./server/handlers/helloworld";
+import apiNetwork from "./server/handlers/network";
+
+// .env file
+const dotenv = require('dotenv');
+dotenv.config({ path: path.join(__dirname, '../') + '.env' });
 
 // Server var
 const app = express();
@@ -19,6 +26,7 @@ app.use(express.static(__dirname + "/public"));
 //Routes
 app.use("/", index);
 app.use("/api/helloworld", apiHelloWorld);
+app.use("/api/network", apiNetwork);
 
 const port = process.env.PORT || 3000;
 
