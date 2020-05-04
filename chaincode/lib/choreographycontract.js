@@ -53,7 +53,7 @@ class ChoreographyContract extends Contract {
 
             return choreography;
         } else {
-            throw new Error('StartEvent_00yy9i8 is not ENABLED. Current state = ' + choreography);
+            throw new Error('StartEvent_00yy9i8 is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
 
@@ -74,7 +74,7 @@ class ChoreographyContract extends Contract {
 
             return choreography;
         } else {
-            throw new Error('Message_1pam53q is not ENABLED. Current state = ' + choreography);
+            throw new Error('Message_1pam53q is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
 
@@ -93,7 +93,7 @@ class ChoreographyContract extends Contract {
 
             return choreography;
         } else {
-            throw new Error('ExclusiveGateway_0zotmga is not ENABLED. Current state = ' + choreography);
+            throw new Error('ExclusiveGateway_0zotmga is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
 

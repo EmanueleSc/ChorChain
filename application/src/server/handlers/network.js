@@ -70,17 +70,21 @@ router.get('/create/org1/connection', async (req, res) => {
 
 router.post('/submit/transaction', async (req, res) => {
     try {
-        const { connectionID, channel, contractNamespace, contractName, transactionName } = req.body;
+        const { connectionID, channel, contractNamespace, contractName, transactionName, transactionParams } = req.body;
         const gateway = new Gateway();
         const conn = global.ConnectionProfiles[connectionID];
         await gateway.connect(conn.connectionProfile, conn.connectionOptions);
 
         const network = await gateway.getNetwork(channel);
         const contract = await network.getContract(contractNamespace, contractName);
+        let resp = null
 
-        const resp = await contract.submitTransaction(transactionName);
+        if(!transactionParams || transactionParams === '')
+            resp = await contract.submitTransaction(transactionName);
+        else
+            resp = await contract.submitTransaction(transactionName, transactionParams);
+        
         gateway.disconnect();
-
         res.json({ response: resp });
 
     } catch (err) {
