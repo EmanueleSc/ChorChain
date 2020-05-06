@@ -29,7 +29,8 @@ class ChoreographyContract extends Contract {
 
         const choreography = new ChoreographyState({ chorID });
         choreography.initElements(chorElements);
-        await choreography.setEnable(ctx, 'StartEvent_00yy9i8');
+        choreography.setEnable('StartEvent_00yy9i8');
+        await choreography.updateState(ctx);
 
         logger.log('info', 'Choreography init state:');
         logger.log('info', choreography);
@@ -45,8 +46,9 @@ class ChoreographyContract extends Contract {
         const choreography = await ChoreographyState.getState(ctx, chorID);
 
         if(choreography.elements.StartEvent_00yy9i8 === Status.ENABLED) {
-            await choreography.setDone(ctx, 'StartEvent_00yy9i8');
-            await choreography.setEnable(ctx, 'Message_1pam53q');
+            choreography.setDone('StartEvent_00yy9i8');
+            choreography.setEnable('Message_1pam53q');
+            await choreography.updateState(ctx);
 
             logger.log('info', 'Choreography:');
             logger.log('info', choreography);
@@ -64,9 +66,9 @@ class ChoreographyContract extends Contract {
         const choreography = await ChoreographyState.getState(ctx, chorID);
 
         if(choreography.elements.Message_1pam53q === Status.ENABLED) {
-            await choreography.setDone(ctx, 'Message_1pam53q');
+            choreography.setDone('Message_1pam53q');
+            choreography.setEnable('ExclusiveGateway_0zotmga');
             await choreography.updateState(ctx, { product });
-            await choreography.setEnable(ctx, 'ExclusiveGateway_0zotmga');
             // this.ExclusiveGateway_0zotmga(ctx);
 
             logger.log('info', 'Choreography:');
@@ -85,8 +87,9 @@ class ChoreographyContract extends Contract {
         const choreography = await ChoreographyState.getState(ctx, chorID);
 
         if(choreography.elements.ExclusiveGateway_0zotmga === Status.ENABLED) {
-            await choreography.setDone(ctx, 'ExclusiveGateway_0zotmga');
+            choreography.setDone('ExclusiveGateway_0zotmga');
             // TODO: enable next element
+            await choreography.updateState(ctx);
 
             logger.log('info', 'Choreography:');
             logger.log('info', choreography);

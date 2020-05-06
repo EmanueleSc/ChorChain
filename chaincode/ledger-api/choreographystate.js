@@ -20,19 +20,16 @@ class ChoreographyState {
         }
     }
 
-    async setEnable(ctx, taskID) {
+    setEnable(taskID) {
         this.elements[taskID] = Status.ENABLED;
-        await ctx.stub.putState(this.chorID, this.serialize(this));
     }
 
-    async setDisable(ctx, taskID) {
+    setDisable(taskID) {
         this.elements[taskID] = Status.DISABLED;
-        await ctx.stub.putState(this.chorID, this.serialize(this));
     }
 
-    async setDone(ctx, taskID) {
+    setDone(taskID) {
         this.elements[taskID] = Status.DONE;
-        await ctx.stub.putState(this.chorID, this.serialize(this));
     }
 
     async updateState(ctx, obj) {
