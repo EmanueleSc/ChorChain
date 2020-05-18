@@ -135,29 +135,29 @@ echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
 createChannelTx
 
 ## Create anchorpeertx
-echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
-createAncorPeerTx
+# echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
+# createAncorPeerTx
 
-FABRIC_CFG_PATH=$PWD/../config/
+# FABRIC_CFG_PATH=$PWD/../config/
 
 ## Create channel
-echo "Creating channel "$CHANNEL_NAME
-createChannel
+# echo "Creating channel "$CHANNEL_NAME
+# createChannel
 
 ## Join all the peers to the channel
-echo "Join Org1 peers to the channel..."
-joinChannel 1
-echo "Join Org2 peers to the channel..."
-joinChannel 2
+# echo "Join Org1 peers to the channel..."
+# joinChannel 1
+# echo "Join Org2 peers to the channel..."
+# joinChannel 2
 
 ## Set the anchor peers for each org in the channel
-echo "Updating anchor peers for org1..."
-updateAnchorPeers 1
-echo "Updating anchor peers for org2..."
-updateAnchorPeers 2
+# echo "Updating anchor peers for org1..."
+# updateAnchorPeers 1
+# echo "Updating anchor peers for org2..."
+# updateAnchorPeers 2
 
-echo
-echo "========= Channel successfully joined =========== "
-echo
+# echo
+# echo "========= Channel successfully joined =========== "
+# echo
 
 exit 0
