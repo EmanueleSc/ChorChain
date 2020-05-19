@@ -18,7 +18,7 @@ class ChannelU {
         const connOrg1Path = CryptoPeerUser.getConnectionProfilePath(org, ccpFileName)
 
         // Create identity
-        const identityLabel = 'admin';
+        const identityLabel = `Admin@${org}`;
         const walletPath = WalletU.getWalletPath(identityLabel)
         const cryptoUser = new CryptoPeerUser(org, `Admin@${org}`, `Admin@${org}-cert.pem`, 'priv_sk')
         await WalletU.createIdentity(identityLabel, orgMspID, cryptoUser.certificate, cryptoUser.privateKey)
@@ -62,8 +62,9 @@ class ChannelU {
      * @param {Client} client | the Client object returned by createClient method
      * @param {String} channelName | name of the created channel (eg. mychannel)
      * @param {String} org | organization domain (eg. org1.example.com)
+     * @param {String} peerAddress | grpcs peer local address (eg. grpcs://localhost:7051) 
      */
-    static async joinChannel(client, channelName, org) {
+    static async joinChannel(client, channelName, org, peerAddress) {
         const channel = client.newChannel(channelName)
         const orderer = ChannelU.getOrderer(client)
         channel.addOrderer(orderer)
@@ -77,18 +78,18 @@ class ChannelU {
         // Join peer0 Org1 to mychannel
         const peerOrgID = `peer0.${org}`
         const peerOrgTlsCert = CryptoPeerUser.getPeerOrgTlsCert(org, peerOrgID, `tlsca.${org}-cert.pem`)
-        const peerOrg = client.newPeer('grpcs://localhost:7051', {
+        const peerOrg = client.newPeer(peerAddress, {
             pem: peerOrgTlsCert,
             'ssl-target-name-override': peerOrgID
         })
         channel.addPeer(peerOrg)
 
-        resp = await channel.joinChannel({
+        const resp = await channel.joinChannel({
             targets : [peerOrg],
             block : genesis_block,
             txId : 	client.newTransactionID()
         })
-        console.log(`\n ------ JOIN CHANNEL: ${peerOrgID} RESP -------`); console.log(resp); console.log('\n')
+        console.log(`\n ------ JOIN CHANNEL RESP: ${peerOrgID} -------`); console.log(resp); console.log('\n')
     }
 
     static getOrderer(client) {

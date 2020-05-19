@@ -1,11 +1,28 @@
-const fs = require('fs')
-const path = require('path')
-const WalletU = require('../utils/walletu')
-const CryptoPeerUser = require('../utils/cryptopeeruser')
-const FabClient = require('fabric-client')
+// const fs = require('fs')
+// const path = require('path')
+// const WalletU = require('../utils/walletu')
+// const CryptoPeerUser = require('../utils/cryptopeeruser')
+// const FabClient = require('fabric-client')
+const ChannelU = require('../utils/channelu')
 
-
+// Using ChannelU
 const main = async () => {
+    try {
+        const client = await ChannelU.createClient('org1.example.com', 'Org1MSP', 'connection-org1.yaml')
+        await ChannelU.createChannel(client, 'mychannel')
+        await ChannelU.joinChannel(client, 'mychannel', 'org1.example.com', 'grpcs://localhost:7051')
+
+        const client2 = await ChannelU.createClient('org2.example.com', 'Org2MSP', 'connection-org2.yaml')
+        await ChannelU.joinChannel(client2, 'mychannel', 'org2.example.com', 'grpcs://localhost:9051')
+        
+    } catch (error) {
+        console.log('\n ----- ERROR -----')
+        console.log(error)
+    }
+}
+
+// Not using ChannelU
+/* const main = async () => {
     try {
         const channelName = 'mychannel'
         const connOrg1Path = CryptoPeerUser.getConnectionProfilePath('org1.example.com', 'connection-org1.yaml')
@@ -109,6 +126,6 @@ const main = async () => {
         console.log(error)
     }
 
-}
+} */
 
 main()
