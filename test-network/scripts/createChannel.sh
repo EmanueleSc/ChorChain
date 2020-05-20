@@ -2,10 +2,12 @@
 
 
 CHANNEL_NAME="$1"
-DELAY="$2"
-MAX_RETRY="$3"
-VERBOSE="$4"
+PROFILE_TX="$2" ## The profile specified in configtx.yaml
+DELAY="$3"
+MAX_RETRY="$4"
+VERBOSE="$5"
 : ${CHANNEL_NAME:="mychannel"}
+: ${PROFILE_TX:="TwoOrgsChannel"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 : ${VERBOSE:="false"}
@@ -20,7 +22,7 @@ fi
 createChannelTx() {
 
 	set -x
-	configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
+	configtxgen -profile ${PROFILE_TX} -outputCreateChannelTx ./channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
 	res=$?
 	set +x
 	if [ $res -ne 0 ]; then
@@ -37,7 +39,7 @@ createAncorPeerTx() {
 
 	echo "#######    Generating anchor peer update for ${orgmsp}  ##########"
 	set -x
-	configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/${orgmsp}anchors.tx -channelID $CHANNEL_NAME -asOrg ${orgmsp}
+	configtxgen -profile ${PROFILE_TX} -outputAnchorPeersUpdate ./channel-artifacts/${orgmsp}anchors.tx -channelID $CHANNEL_NAME -asOrg ${orgmsp}
 	res=$?
 	set +x
 	if [ $res -ne 0 ]; then
@@ -135,29 +137,29 @@ echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
 createChannelTx
 
 ## Create anchorpeertx
-# echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
-# createAncorPeerTx
+echo "### Generating channel configuration transaction '${CHANNEL_NAME}.tx' ###"
+createAncorPeerTx
 
-# FABRIC_CFG_PATH=$PWD/../config/
+FABRIC_CFG_PATH=$PWD/../config/
 
 ## Create channel
-# echo "Creating channel "$CHANNEL_NAME
-# createChannel
+echo "Creating channel "$CHANNEL_NAME
+createChannel
 
 ## Join all the peers to the channel
-# echo "Join Org1 peers to the channel..."
-# joinChannel 1
-# echo "Join Org2 peers to the channel..."
-# joinChannel 2
+echo "Join Org1 peers to the channel..."
+joinChannel 1
+echo "Join Org2 peers to the channel..."
+joinChannel 2
 
 ## Set the anchor peers for each org in the channel
-# echo "Updating anchor peers for org1..."
-# updateAnchorPeers 1
-# echo "Updating anchor peers for org2..."
-# updateAnchorPeers 2
+echo "Updating anchor peers for org1..."
+updateAnchorPeers 1
+echo "Updating anchor peers for org2..."
+updateAnchorPeers 2
 
-# echo
-# echo "========= Channel successfully joined =========== "
-# echo
+echo
+echo "========= Channel successfully joined =========== "
+echo
 
 exit 0

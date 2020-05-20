@@ -2,10 +2,21 @@ const fs = require('fs')
 const path = require('path')
 const WalletU = require('../utils/walletu')
 const CryptoPeerUser = require('../utils/cryptopeeruser')
+const command = require('../utils/command')
 const FabClient = require('fabric-client')
 
 class ChannelU {
     constructor() {}
+
+    /**
+     * @param {String} channelName | name of the created channel (eg. mychannel)
+     * @param {String} configTxProfile | the profile specified in configtx.yaml (eg. TwoOrgsChannel)
+     */
+    static async generateChannelTransaction(channelName, configTxProfile) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/channelTx.sh')
+        const resp = await command.shExec(shFilePath, [channelName, configTxProfile])
+        console.log('\n------- CREATE CHANNEL TX -------'); console.log(resp); console.log('\n')
+    }
 
     /**
      * 
@@ -75,7 +86,7 @@ class ChannelU {
             orderer: orderer 
         })
 
-        // Join peer0 Org1 to mychannel
+        // Join peer0 to mychannel
         const peerOrgID = `peer0.${org}`
         const peerOrgTlsCert = CryptoPeerUser.getPeerOrgTlsCert(org, peerOrgID, `tlsca.${org}-cert.pem`)
         const peerOrg = client.newPeer(peerAddress, {
