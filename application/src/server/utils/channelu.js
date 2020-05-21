@@ -113,6 +113,18 @@ class ChannelU {
         return orderer
     }
 
+    /**
+     * @param {String} channelName | name of the channel (eg. mychannel)
+     * @param {Number} version | the version of the contract (eg. 1)
+     * @param {Number} firstOrgNum | the first org number (eg. if Org1 then this value should be 1)
+     * @param {Number} secondOrgNum | the second org number (e.g. if Org3 then this value should be 3)
+     */
+    static async deployContract(channelName, version, firstOrgNum, secondOrgNum) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/deployC.sh')
+        const resp = await command.shExec(shFilePath, [channelName, version, firstOrgNum, secondOrgNum])
+        console.log('\n------- DEPLOY CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
+    }
+
 }
 
 module.exports = ChannelU
