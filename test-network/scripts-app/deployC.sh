@@ -6,14 +6,12 @@ FIRST_ORG_NUM="$3" # the first org number (e.g. if Org1 then this value should b
 SECOND_ORG_NUM="$4" # the second org number (e.g. if Org3 then this value should be 3)
 DELAY="$5"
 MAX_RETRY="$6"
-VERBOSE="$7"
 : ${CHANNEL_NAME:="mychannel"}
 : ${VERSION:="1"}
 : ${FIRST_ORG_NUM:="1"}
 : ${SECOND_ORG_NUM:="2"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
-: ${VERBOSE:="false"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 CC_NAME="choreographycontract"
