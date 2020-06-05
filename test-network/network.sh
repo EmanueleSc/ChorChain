@@ -29,7 +29,7 @@ function printHelp() {
 # echo "      - 'restart' - restart the network"
   echo
   echo "    Flags:"
-  echo "    -ca <use CAs> -  create Certificate Authorities to generate the crypto material"
+# echo "    -ca <use CAs> -  create Certificate Authorities to generate the crypto material"
   echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
   echo "    -r <max retry> - CLI times out after certain number of attempts (defaults to 5)"
@@ -41,8 +41,8 @@ function printHelp() {
   echo "  network.sh -h (print this message)"
   echo
   echo " Possible Mode and flags"
-  echo "  network.sh up -ca -c -r -d -s -i -verbose"
-  echo "  network.sh up createChannel -ca -c -r -d -s -i -verbose"
+  echo "  network.sh up -c -r -d -s -i -verbose" # -ca removed
+  echo "  network.sh up createChannel -c -r -d -s -i -verbose" # -ca removed
   echo "  network.sh createChannel -c -r -d -verbose"
   echo "  network.sh deployCC -l -v -r -d -verbose"
   echo
@@ -50,7 +50,7 @@ function printHelp() {
   echo "	network.sh up"
   echo
   echo " Examples:"
-  echo "  network.sh up createChannel -ca -c mychannel -s couchdb -i 2.0.0"
+  echo "  network.sh up createChannel -c mychannel -s couchdb -i 2.0.0" # -ca removed
   echo "  network.sh createChannel -c channelName"
   echo "  network.sh deployCC -l javascript"
 }
@@ -198,6 +198,19 @@ function createOrgs() {
     fi
 
     echo "##########################################################"
+    echo "############ Create Org3 Identities ######################"
+    echo "##########################################################"
+
+    set -x
+    cryptogen generate --config=./organizations/cryptogen/crypto-config-org3.yaml --output="organizations"
+    res=$?
+    set +x
+    if [ $res -ne 0 ]; then
+      echo "Failed to generate certificates..."
+      exit 1
+    fi
+
+    echo "##########################################################"
     echo "############ Create Orderer Org Identities ###############"
     echo "##########################################################"
 
@@ -213,55 +226,55 @@ function createOrgs() {
   fi
 
   # Create crypto material using Fabric CAs
-  if [ "$CRYPTO" == "Certificate Authorities" ]; then
+#  if [ "$CRYPTO" == "Certificate Authorities" ]; then
 
-    fabric-ca-client version > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-      echo "Fabric CA client not found locally, downloading..."
-      cd ..
-      curl -s -L "https://github.com/hyperledger/fabric-ca/releases/download/v1.4.4/hyperledger-fabric-ca-${OS_ARCH}-1.4.4.tar.gz" | tar xz || rc=$?
-    if [ -n "$rc" ]; then
-        echo "==> There was an error downloading the binary file."
-        echo "fabric-ca-client binary is not available to download"
-    else
-        echo "==> Done."
-      cd test-network
-    fi
-    fi
+#    fabric-ca-client version > /dev/null 2>&1
+#    if [ $? -ne 0 ]; then
+#      echo "Fabric CA client not found locally, downloading..."
+#      cd ..
+#      curl -s -L "https://github.com/hyperledger/fabric-ca/releases/download/v1.4.4/hyperledger-fabric-ca-${OS_ARCH}-1.4.4.tar.gz" | tar xz || rc=$?
+#    if [ -n "$rc" ]; then
+#        echo "==> There was an error downloading the binary file."
+#        echo "fabric-ca-client binary is not available to download"
+#    else
+#        echo "==> Done."
+#      cd test-network
+#    fi
+#    fi
 
-    echo
-    echo "##########################################################"
-    echo "##### Generate certificates using Fabric CA's ############"
-    echo "##########################################################"
+#    echo
+#    echo "##########################################################"
+#    echo "##### Generate certificates using Fabric CA's ############"
+#    echo "##########################################################"
 
-    IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE_CA up -d 2>&1
+#    IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE_CA up -d 2>&1
 
-    . organizations/fabric-ca/registerEnroll.sh
+#    . organizations/fabric-ca/registerEnroll.sh
 
-    sleep 10
+#    sleep 10
 
-    echo "##########################################################"
-    echo "############ Create Org1 Identities ######################"
-    echo "##########################################################"
+#    echo "##########################################################"
+#    echo "############ Create Org1 Identities ######################"
+#    echo "##########################################################"
 
-    createOrg1
+#    createOrg1
 
-    echo "##########################################################"
-    echo "############ Create Org2 Identities ######################"
-    echo "##########################################################"
+#    echo "##########################################################"
+#    echo "############ Create Org2 Identities ######################"
+#    echo "##########################################################"
 
-    createOrg2
+#    createOrg2
 
-    echo "##########################################################"
-    echo "############ Create Orderer Org Identities ###############"
-    echo "##########################################################"
+#    echo "##########################################################"
+#    echo "############ Create Orderer Org Identities ###############"
+#    echo "##########################################################"
 
-    createOrderer
+#    createOrderer
 
-  fi
+#  fi
 
   echo
-  echo "Generate CCP files for Org1 and Org2"
+  echo "Generate CCP files for Org1, Org2 and Org3"
   ./organizations/ccp-generate.sh
 }
 
@@ -271,9 +284,9 @@ function createOrgs() {
 
 # The configtxgen tool is used to create the genesis block. Configtxgen consumes a
 # "configtx.yaml" file that contains the definitions for the sample network. The
-# genesis block is defiend using the "TwoOrgsOrdererGenesis" profile at the bottom
+# genesis block is defiend using the "ThreeOrgsOrdererGenesis" profile at the bottom
 # of the file. This profile defines a sample consortium, "SampleConsortium",
-# consisting of our two Peer Orgs. This consortium defines which organizations are
+# consisting of our three Peer Orgs. This consortium defines which organizations are
 # recognized as members of the network. The peer and ordering organizations are defined
 # in the "Profiles" section at the top of the file. As part of each organization
 # profile, the file points to a the location of the MSP directory for each member.
@@ -305,7 +318,8 @@ function createConsortium() {
   # Note: For some unknown reason (at least for now) the block file can't be
   # named orderer.genesis.block or the orderer will fail to launch!
   set -x
-  configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+# configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+  configtxgen -profile ThreeOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
   res=$?
   set +x
   if [ $res -ne 0 ]; then
@@ -475,9 +489,9 @@ while [[ $# -ge 1 ]] ; do
     CHANNEL_NAME="$2"
     shift
     ;;
-  -ca )
-    CRYPTO="Certificate Authorities"
-    ;;
+#  -ca )
+#    CRYPTO="Certificate Authorities"
+#    ;;
   -r )
     MAX_RETRY="$2"
     shift
