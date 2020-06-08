@@ -125,6 +125,16 @@ class ChannelU {
         console.log('\n------- DEPLOY CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
     }
 
+    /**
+     * @param {String} channelName | name of the channel (eg. mychannel)
+     * @param {Number} version | the version of the contract (eg. 1)
+     */
+    static async deploy3OrgsContract(channelName, version) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/deploy3OrgsC.sh')
+        const resp = await command.shExec(shFilePath, [channelName, version])
+        console.log('\n------- DEPLOY 3 ORGS CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
+    }
+
 }
 
 module.exports = ChannelU

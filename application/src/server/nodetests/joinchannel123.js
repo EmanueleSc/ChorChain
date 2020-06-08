@@ -17,6 +17,9 @@ const main = async () => {
         const client3 = await ChannelU.createClient('org3.example.com', 'Org3MSP', 'connection-org3.yaml')
         await ChannelU.joinChannel(client3, channelName, 'org3.example.com', 'grpcs://localhost:11051')
         
+        console.log('Deploying the 3Orgs Contract')
+        await ChannelU.deploy3OrgsContract(channelName, 1)
+
     } catch (error) {
         console.log('\n ----- ERROR -----')
         console.log(error)

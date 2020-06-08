@@ -2,21 +2,18 @@
 
 CHANNEL_NAME="$1"
 VERSION="$2"
-FIRST_ORG_NUM="$3" # the first org number (e.g. if Org1 then this value should be 1)
-SECOND_ORG_NUM="$4" # the second org number (e.g. if Org3 then this value should be 3)
-DELAY="$5"
-MAX_RETRY="$6"
+DELAY="$3"
+MAX_RETRY="$4"
 : ${CHANNEL_NAME:="mychannel"}
 : ${VERSION:="1"}
-: ${FIRST_ORG_NUM:="1"}
-: ${SECOND_ORG_NUM:="2"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-CC_NAME="choreographycontract"
+CC_NAME="choreographyprivatedatacontract"
 CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 CC_SRC_PATH=$SCRIPT_PATH/../../chaincode/
+COLLECTION_CONFIG=${SCRIPT_PATH}/../collections_config.json
 
 export PATH=${SCRIPT_PATH}/../../bin:${SCRIPT_PATH}:$PATH
 export FABRIC_CFG_PATH=$SCRIPT_PATH/../../config/
@@ -74,46 +71,12 @@ approveForMyOrg() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
+  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --collections-config $COLLECTION_CONFIG --signature-policy "OR('Org1MSP.member','Org2MSP.member','Org3MSP.member')" --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
   set +x
   cat log.txt
   verifyResult $res "Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' failed"
   echo "===================== Chaincode definition approved on peer0.org${ORG} on channel '$CHANNEL_NAME' ===================== "
   echo
-}
-
-# checkCommitReadiness VERSION PEER ORG
-checkCommitReadiness() {
-  ORG=$1
-  shift 1
-  setGlobals $ORG
-  echo "===================== Checking the commit readiness of the chaincode definition on peer0.org${ORG} on channel '$CHANNEL_NAME'... ===================== "
-	local rc=1
-	local COUNTER=1
-	# continue to poll
-    # we either get a successful response, or reach MAX RETRY
-	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
-    sleep $DELAY
-    echo "Attempting to check the commit readiness of the chaincode definition on peer0.org${ORG}, Retry after $DELAY seconds."
-    set -x
-    peer lifecycle chaincode checkcommitreadiness --channelID $CHANNEL_NAME --name ${CC_NAME} --version ${VERSION} --sequence ${VERSION} --output json --init-required >&log.txt
-    res=$?
-    set +x
-    let rc=0
-    for var in "$@"
-    do
-      grep "$var" log.txt &>/dev/null || let rc=1
-    done
-		COUNTER=$(expr $COUNTER + 1)
-	done
-  cat log.txt
-  if test $rc -eq 0; then
-    echo "===================== Checking the commit readiness of the chaincode definition successful on peer0.org${ORG} on channel '$CHANNEL_NAME' ===================== "
-  else
-    echo "!!!!!!!!!!!!!!! After $MAX_RETRY attempts, Check commit readiness result on peer0.org${ORG} is INVALID !!!!!!!!!!!!!!!!"
-    echo
-    exit 1
-  fi
 }
 
 # commitChaincodeDefinition VERSION PEER ORG (PEER ORG)...
@@ -126,7 +89,7 @@ commitChaincodeDefinition() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   set -x
-  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} --init-required >&log.txt
+  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --collections-config $COLLECTION_CONFIG --signature-policy "OR('Org1MSP.member','Org2MSP.member','Org3MSP.member')" --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name ${CC_NAME} $PEER_CONN_PARMS --version ${VERSION} --sequence ${VERSION} --init-required >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -187,42 +150,67 @@ chaincodeInvokeInit() {
 }
 
 ## At first we package the chaincode
-packageChaincode $FIRST_ORG_NUM
+packageChaincode 1
 
 ## Install chaincode
-echo "Installing chaincode on peer0.org${FIRST_ORG_NUM}..."
-installChaincode $FIRST_ORG_NUM
-echo "Install chaincode on peer0.org${SECOND_ORG_NUM}..."
-installChaincode $SECOND_ORG_NUM
+echo "Installing chaincode on peer0.org1..."
+installChaincode 1
+echo "Install chaincode on peer0.org2..."
+installChaincode 2
+echo "Install chaincode on peer0.org3..."
+installChaincode 3
 
 ## query whether the chaincode is installed
-queryInstalled $FIRST_ORG_NUM
+queryInstalled 1
 
-## approve the definition for the first org
-approveForMyOrg $FIRST_ORG_NUM
+cat <<- EOF > ${COLLECTION_CONFIG}
 
-## check whether the chaincode definition is ready to be committed
-## expect org1 to have approved and org2 not to
-#checkCommitReadiness 1 "\"Org1MSP\": true" "\"Org2MSP\": false"
-#checkCommitReadiness 2 "\"Org1MSP\": true" "\"Org2MSP\": false"
+[
+  {
+       "name": "collectionOrg1MSPOrg2MSP",
+       "policy": "OR('Org1MSP.member', 'Org2MSP.member')",
+       "requiredPeerCount": 0,
+       "maxPeerCount": 3,
+       "blockToLive":1000000,
+       "memberOnlyRead": true
+  },
+  {
+       "name": "collectionOrg1MSPOrg3MSP",
+       "policy": "OR('Org1MSP.member', 'Org3MSP.member')",
+       "requiredPeerCount": 0,
+       "maxPeerCount": 3,
+       "blockToLive":1000000,
+       "memberOnlyRead": true
+  },
+  {
+       "name": "collectionOrg2MSPOrg3MSP",
+       "policy": "OR('Org2MSP.member', 'Org3MSP.member')",
+       "requiredPeerCount": 0,
+       "maxPeerCount": 3,
+       "blockToLive":1000000,
+       "memberOnlyRead": true
+  }
+]
 
-## now approve also for the second org
-approveForMyOrg $SECOND_ORG_NUM
+EOF
 
-## check whether the chaincode definition is ready to be committed
-## expect them both to have approved
-checkCommitReadiness $FIRST_ORG_NUM "\"Org${FIRST_ORG_NUM}MSP\": true" "\"Org${SECOND_ORG_NUM}MSP\": true"
-checkCommitReadiness $SECOND_ORG_NUM "\"Org${FIRST_ORG_NUM}MSP\": true" "\"Org${SECOND_ORG_NUM}MSP\": true"
+## approve the definition for org1
+approveForMyOrg 1
+## approve the definition for org2
+approveForMyOrg 2
+## approve the definition for org3
+approveForMyOrg 3
 
-## now that we know for sure both orgs have approved, commit the definition
-commitChaincodeDefinition $FIRST_ORG_NUM $SECOND_ORG_NUM
+## commit the definition
+commitChaincodeDefinition 1 2 3
 
 ## query on both orgs to see that the definition committed successfully
-queryCommitted $FIRST_ORG_NUM
-queryCommitted $SECOND_ORG_NUM
+queryCommitted 1
+queryCommitted 2
+queryCommitted 3
 
 ## Invoke the chaincode
-chaincodeInvokeInit $FIRST_ORG_NUM $SECOND_ORG_NUM
+chaincodeInvokeInit 1 2 3
 
 sleep 10
 
