@@ -83,7 +83,7 @@ class ChoreographyPrivateDataContract extends Contract {
     }
 
 
-    async Message_11j40xz(ctx, bikeType) {
+    async Message_11j40xz(ctx) {
         logger.log('info', '==== Message_11j40xz CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -96,7 +96,7 @@ class ChoreographyPrivateDataContract extends Contract {
             const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.CustomerBike_center, chorID);
             choreography.setDone('Message_11j40xz');
             await choreography.updateState(ctx);
-            await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.CustomerBike_center, { bikeType });
+            await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.CustomerBike_center);
 
             logger.log('info', 'Choreography:');
             logger.log('info', choreography);

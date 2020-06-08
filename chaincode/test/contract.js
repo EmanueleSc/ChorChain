@@ -63,13 +63,24 @@ describe('Chaincode', () => {
     describe('Access the Network channel mychannel and get the Choreography Contract', () => {
 
         it('should work', async () => {
-            network = await gateway.getNetwork('mychannel');
-            contract = await network.getContract('choreographycontract', 'org.chorchain.choreography_1');
+            // network = await gateway.getNetwork('mychannel');
+            // contract = await network.getContract('choreographycontract', 'org.chorchain.choreography_1');
+            network = await gateway.getNetwork('channel123');
+            contract = await network.getContract('choreographyprivatedatacontract', 'org.chorchain.choreographyprivatedata_1');
         });
 
     });
 
-    describe('Submit StartEvent_00yy9i8 transaction', () => {
+    describe('Submit Event_0tttznh transaction', () => {
+
+        it('should work', async () => {
+            const resp = await contract.submitTransaction('Event_0tttznh');
+            console.log(resp.toString());
+        });
+
+    });
+
+    /* describe('Submit StartEvent_00yy9i8 transaction', () => {
 
         it('should work', async () => {
             const resp = await contract.submitTransaction('StartEvent_00yy9i8');
@@ -94,6 +105,6 @@ describe('Chaincode', () => {
             console.log(resp.toString());
         });
 
-    });
+    }); */
 
 });
