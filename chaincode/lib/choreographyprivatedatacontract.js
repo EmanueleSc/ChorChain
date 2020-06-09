@@ -107,6 +107,13 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
+    async queryPrivateData(ctx) {
+        logger.log('info', '==== Query private data CALLED');
+        logger.log('info', 'MSP ID: ' + ctx.stub.getCreator().mspid);
+        const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.CustomerBike_center, chorID);
+        return choreographyPrivate;
+    }
+
 }
 
 module.exports = ChoreographyPrivateDataContract;

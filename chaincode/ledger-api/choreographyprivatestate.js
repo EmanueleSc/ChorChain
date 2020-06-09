@@ -9,13 +9,15 @@ class ChoreographyPrivateState {
     async updatePrivateState(ctx, collection) {
         const transientMap = ctx.stub.getTransient();
 
-        logger.log('info', 'Transient Map: ' + transientMap);
+        const obj =  this.mapToObj(transientMap);
+        logger.log('info', 'Transient Map Data: ');
+        logger.log('info', obj);
+        logger.log('info', obj.data);
+        logger.log('info', obj.data.toString('utf8'));
 
-        const data = this.transientMapToBuffer(transientMap);
-        const json =  JSON.parse(data.toString());
+        const json = JSON.parse(obj.data.toString('utf8'));
         Object.assign(this, json);
-
-        logger.log('info', 'Data Object: ' + this);
+        logger.log('info', 'Data Object: ' + JSON.stringify(this));
 
         await ctx.stub.putPrivateData(collection, this.chorID, this.serialize(this));
     }
@@ -29,6 +31,8 @@ class ChoreographyPrivateState {
         if(data && data.toString('utf8')) {
             let json = JSON.parse(data.toString());
             object = new (ChoreographyPrivateState)(json);
+        } else {
+            object = new (ChoreographyPrivateState)({ chorID });
         }
 
         return object;
@@ -38,9 +42,11 @@ class ChoreographyPrivateState {
         return Buffer.from(JSON.stringify(object));
     }
 
-    transientMapToBuffer(transientMap) {
-        // convert into buffer
-        return new Buffer(transientMap.map.conversation.value.toArrayBuffer());
+    mapToObj(m) {
+        return Array.from(m).reduce((obj, [key, value]) => {
+            obj[key] = value;
+            return obj;
+        }, {});
     }
 }
 
