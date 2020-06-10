@@ -12,11 +12,8 @@ class ChoreographyPrivateState {
         const obj =  this.mapToObj(transientMap);
         logger.log('info', 'Transient Map Data: ');
         logger.log('info', obj);
-        logger.log('info', obj.data);
-        logger.log('info', obj.data.toString('utf8'));
 
-        const json = JSON.parse(obj.data.toString('utf8'));
-        Object.assign(this, json);
+        Object.assign(this, obj);
         logger.log('info', 'Data Object: ' + JSON.stringify(this));
 
         await ctx.stub.putPrivateData(collection, this.chorID, this.serialize(this));
@@ -44,7 +41,7 @@ class ChoreographyPrivateState {
 
     mapToObj(m) {
         return Array.from(m).reduce((obj, [key, value]) => {
-            obj[key] = value;
+            obj[key] = value.toString('utf8');
             return obj;
         }, {});
     }

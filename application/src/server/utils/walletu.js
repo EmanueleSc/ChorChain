@@ -9,6 +9,7 @@ class WalletU {
      * @param {String} mspId | (eg. Org1MSP)
      * @param {String} certificate | user crypto certificate
      * @param {String} privateKey | user crypto private key
+     * @returns {Wallet} return file system wallet
      */
     static async createIdentity(identity, mspId, certificate, privateKey) {
         try {
@@ -26,6 +27,7 @@ class WalletU {
             }
 
             await wallet.put(identity, identityWallet)
+            return wallet
         } catch (err) {
             throw new Error({ error: err.message || err.toString() });
         }

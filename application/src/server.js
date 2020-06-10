@@ -7,6 +7,8 @@ import index from "./routes/index";
 // APIs
 import apiHelloWorld from "./server/handlers/helloworld";
 import apiNetwork from "./server/handlers/network";
+import apiIdentity from "./server/handlers/identity";
+import apiTransaction from "./server/handlers/transaction"
 
 // .env file
 const dotenv = require('dotenv');
@@ -32,6 +34,8 @@ app.use(express.static(__dirname + "/public"));
 app.use("/", index);
 app.use("/api/helloworld", apiHelloWorld);
 app.use("/api/network", apiNetwork);
+app.use("/api/identity", apiIdentity);
+app.use("/api/transaction", apiTransaction);
 
 const port = process.env.PORT || 3000;
 

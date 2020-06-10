@@ -1,5 +1,6 @@
 import React from "react";
-import { createOrg1Identity, createOrg1ConnectionID, submitTransaction } from "../../server/api/network";
+import { createUserIdentity } from "../../server/api/identity";
+import { submitTransaction, submitPrivateTransaction } from "../../server/api/transaction";
 import TextField from '@material-ui/core/TextField';
 
 class Index extends React.Component {
@@ -10,14 +11,9 @@ class Index extends React.Component {
 
     onSubmitIdentity = (event) => {
         event.preventDefault();
-        return createOrg1Identity().then((res) => {
-            this.setState({ response: res.response });
-        })
-    }
-
-    onSubmitConnection = (event) => {
-        event.preventDefault();
-        return createOrg1ConnectionID().then(res => {
+        const orgNum = this.state.orgNum;
+        const dataPayload = { orgNum };
+        return createUserIdentity(dataPayload).then((res) => {
             this.setState({ response: res.response });
         })
     }
@@ -30,14 +26,23 @@ class Index extends React.Component {
         const contractName = this.state.contractName;
         const transactionName = this.state.transactionName;
         const dataPayload = { connectionID, channel, contractNamespace, contractName, transactionName };
-        // transactionParams può essere o singolo valore o array
-        if (this.state.transactionParams) dataPayload.transactionParams = this.state.transactionParams;
+        const isPrivate = this.state.isPrivate;
 
-        return submitTransaction(dataPayload).then(res => {
-            if(res.error) res = { error: res.error }
-            else res = { response: res.response, error: undefined }
-            this.setState(res);
-        })
+        if(!isPrivate || isPrivate === '' || isPrivate === 'n') {
+            // transactionParams può essere o singolo valore o array
+            if (this.state.transactionParams) dataPayload.transactionParams = this.state.transactionParams;
+            return submitTransaction(dataPayload).then(res => {
+                if(res.error) res = { error: res.error }
+                else res = { response: res.response, error: undefined }
+                this.setState(res);
+            })
+        } else if(isPrivate === 'y') {
+            return submitPrivateTransaction(dataPayload).then(res => {
+                if(res.error) res = { error: res.error }
+                else res = { response: res.response, error: undefined }
+                this.setState(res);
+            })
+        }
     } 
 
     render() {
@@ -45,26 +50,34 @@ class Index extends React.Component {
             <div>
                 <h1>ChorChain</h1>
                 <div>
-                    <button onClick={this.onSubmitIdentity}>Create Org1 identity</button>
-                    <button onClick={this.onSubmitConnection}>Create Org1 connection ID</button>
+                    <form onSubmit={this.onSubmitIdentity}>
+                        <br />   
+                        <TextField label="Org number" onChange={(event) => { this.setState({ orgNum: event.target.value }); }} />
+                        <br />
+                        <button type={"submit"}>Create Org User identity</button>
+                    </form>
+
                     <form onSubmit={this.onSubmitTransaction}>
                         <br />   
                         <TextField label="Connection ID" onChange={(event) => { this.setState({ connectionID: event.target.value }); }} />
                         <br />
-                        <p>mychannel</p>
+                        <p>channel123</p>
                         <TextField label="Channel name" onChange={(event) => { this.setState({ channel: event.target.value }); }} />
                         <br />
-                        <p>choreographycontract</p>
+                        <p>choreographyprivatedatacontract</p>
                         <TextField label="Contract namespace" onChange={(event) => { this.setState({ contractNamespace: event.target.value }); }} />
                         <br />
-                        <p>org.chorchain.choreography_1</p>
+                        <p>org.chorchain.choreographyprivatedata_1</p>
                         <TextField label="Contract name" onChange={(event) => { this.setState({ contractName: event.target.value }); }} />
                         <br />
-                        <p>StartEvent_00yy9i8</p>
+                        <p>Event_0tttznh</p>
                         <TextField label="Transaction name" onChange={(event) => { this.setState({ transactionName: event.target.value }); }} />
                         <br />
                         <br />
                         <TextField label="Transaction params" onChange={(event) => { this.setState({ transactionParams: event.target.value }); }} />
+                        <br />
+                        <br />
+                        <TextField label="Is private transaction ? (y/n)" onChange={(event) => { this.setState({ isPrivate: event.target.value }); }} />
                         <br />
                         <button type={"submit"}>Submit transaction</button>
                     </form>
