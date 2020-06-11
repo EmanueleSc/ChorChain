@@ -13,6 +13,7 @@
 /test-network/choreographycontract.tar.gz
 /test-network/choreographyprivatedatacontract.tar.gz
 /test-network/log.txt
+/application/src/server/nodetests/log.txt
 /bin
 /config
 .DS_Store
