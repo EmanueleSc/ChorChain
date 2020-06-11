@@ -19,6 +19,17 @@ class ChannelU {
     }
 
     /**
+     * @param {String} channelName | name of the created channel (eg. mychannel)
+     * @param {String} configTxProfile | the profile specified in configtx.yaml (eg. TwoOrgsChannel)
+     * @param {String} orgMspID | organization msp ID (eg. Org1MSP)     
+     */
+    static async generateAnchorPeerTransaction(channelName, configTxProfile, orgMspID) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/anchorPeerTx.sh')
+        const resp = await command.shExec(shFilePath, [channelName, configTxProfile, orgMspID])
+        console.log('\n------- CREATE ANCHOR PEER TX -------'); console.log(resp); console.log('\n')
+    }
+
+    /**
      * 
      * @param {String} org | organization domain (eg. org1.example.com)
      * @param {String} orgMspID | organization msp ID (eg. Org1MSP)
@@ -101,6 +112,15 @@ class ChannelU {
             txId : 	client.newTransactionID()
         })
         console.log(`\n ------ JOIN CHANNEL RESP: ${peerOrgID} -------`); console.log(resp); console.log('\n')
+    }
+
+    /**
+     * @param {String} channelName | name of the created channel (eg. mychannel)    
+     */
+    static async update3OrgsAnchorPeers(channelName) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/update3OrgsAnchorPeer.sh')
+        const resp = await command.shExec(shFilePath, [channelName])
+        console.log('\n------- UPDATE 3 ORGS ANCHOR PEERS -------'); console.log(resp); console.log('\n')
     }
 
     static getOrderer(client) {

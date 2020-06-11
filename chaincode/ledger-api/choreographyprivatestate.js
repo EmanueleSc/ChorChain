@@ -20,6 +20,9 @@ class ChoreographyPrivateState {
     }
 
     static async getPrivateState(ctx, collection, chorID) {
+        logger.log('info', 'Collection ' + collection);
+        logger.log('info', 'ChorID ' + chorID);
+
         const data = await ctx.stub.getPrivateData(collection, chorID);
         let object = null;
 
