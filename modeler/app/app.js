@@ -1,4 +1,5 @@
 import ChoreoModeler from 'chor-js/lib/Modeler';
+import { createUserIdentity } from './lib/rest';
 
 import xml from './diagrams/BikeRental.bpmn';
 
@@ -21,6 +22,21 @@ function renderModel(newXml) {
     console.error('something went wrong: ', error);
   });
 }
+
+function bindResp(output) {
+  document.getElementById('output').innerHTML = output;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const btnCustomer = document.getElementById("btnOrg1");
+  btnCustomer.addEventListener('click', async (e) => {
+    const resp = await createUserIdentity({ orgNum: 1 });
+    bindResp(resp.response);
+  });
+
+});
+
 
 // expose bpmnjs to window for debugging purposes
 window.bpmnjs = modeler;

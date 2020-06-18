@@ -26,3 +26,4 @@
 /application/identity
 /modeler/dist
 /modeler/.cache
+/modeler/node_modules

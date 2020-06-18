@@ -15,18 +15,23 @@
       height: 100%;
     }
     #canvas, #canvas > div {
-      height: 70%;
+      height: 100%;
       border: 1px solid rgba(34,36,38,.15);
       -webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
       box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
       border-radius: .28571429rem;
     }
     .content {
+      height: 60%;
       padding-left: 15px;
       padding-right: 15px;
     }
     .djs-palette {
       display: none;
+    }
+    .button {
+      position: relative;
+      left: 15px;
     }
   </style>
 
@@ -39,10 +44,17 @@
     <a class="item">Translator</a>
   </div>
 
+  <button id="btnOrg1" class="ui button">Customer</button>
+  <button id="btnOrg2" class="ui button">Bike Center</button>
+  <button id="btnOrg3" class="ui button">Insurer</button>
+
   <div class="content">
     <div id="canvas"></div>
   </div>
-  
+
+  <button id="btnStart" class="ui button">Start</button> <!-- loading -->
+
+  <p id="output">Response: </p>
 
   <script src="./app.js"></script>
   <script
