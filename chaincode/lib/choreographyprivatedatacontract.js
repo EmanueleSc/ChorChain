@@ -132,7 +132,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    /*async Message_0tn8489(ctx) {
+    async Message_0tn8489(ctx) {
         logger.log('info', '==== Message_0tn8489 CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -272,7 +272,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    async Message_0p0m4qc(ctx) {
+    /*async Message_0p0m4qc(ctx) {
         logger.log('info', '==== Message_0p0m4qc CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 

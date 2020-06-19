@@ -8,6 +8,16 @@ let connectionIDOrg1 = ''
 let connectionIDOrg2 = ''
 let connectionIDOrg3 = ''
 let connectionID = ''
+let dataPayload = {
+  //connectionID: connectionID, 
+  channel: 'channel123', 
+  contractNamespace: 'choreographyprivatedatacontract', 
+  contractName: 'org.chorchain.choreographyprivatedata_1', 
+  transactionName: 'Event_0tttznh', // Choreography StartEvent
+  //transactionName: 'Message_11j40xz', // Choreography Message
+  // transientData TODO
+}
+let elements = {}
 
 // create and configure a chor-js instance
 const modeler = new ChoreoModeler({
@@ -29,6 +39,18 @@ function renderModel(newXml) {
 }
 
 function bindResp(output) {
+  if(typeof output === 'object') {
+    if(output.type && output.type === 'Buffer') {
+      output = Buffer.from(output.data);
+      output = output.toString('utf8');
+
+      const json = JSON.parse(output);
+      if('choreography' in json) elements = json.choreography.elements;
+      else elements = json.elements;
+      console.log('RESP: ');
+      console.log(elements);
+    }
+  }
   document.getElementById('output').innerHTML = output;
 }
 
@@ -76,17 +98,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnStart = document.getElementById("btnStart");
   btnStart.addEventListener('click', async (e) => {
     if(connectionID !== '') {
-      const dataPayload = {
-        connectionID: connectionID, 
-        channel: 'channel123', 
-        contractNamespace: 'choreographyprivatedatacontract', 
-        contractName: 'org.chorchain.choreographyprivatedata_1', 
-        transactionName: 'Event_0tttznh', // Choreography StartEvent
-        // transientData TODO
+  
+      if(Object.keys(elements).length !== 0) {
+        let tx
+        for (let [key, value] of Object.entries(elements)) {
+          if(value === 'enabled') {
+            tx = key;
+            break;
+          }    
+        }
+        dataPayload.transactionName = tx;
       }
+
+      dataPayload.connectionID = connectionID;
+      console.log('DATA PAYLOAD: ');
+      console.log(JSON.stringify(dataPayload));
+
       const resp = await submitPrivateTransaction(dataPayload);
       if(resp.error) bindResp(resp.error);
       else bindResp(resp.response);
+
     } else {
       alert('Click on one organization');
     }
