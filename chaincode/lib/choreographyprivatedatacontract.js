@@ -132,7 +132,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    async Message_0tn8489(ctx) {
+    /*async Message_0tn8489(ctx) {
         logger.log('info', '==== Message_0tn8489 CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -667,7 +667,7 @@ class ChoreographyPrivateDataContract extends Contract {
         logger.log('info', 'MSP ID: ' + ctx.stub.getCreator().mspid);
         const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.CustomerBike_center, chorID);
         return choreographyPrivate;
-    }
+    } */
 
 }
 

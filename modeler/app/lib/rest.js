@@ -22,7 +22,8 @@ export const submitPrivateTransaction = ({
     channel, 
     contractNamespace, 
     contractName, 
-    transactionName 
+    transactionName,
+    transientData
 }) => sendRequest(`/api/transaction/submit/private`, { 
-    body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName }) 
+    body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName, transientData }) 
 });
