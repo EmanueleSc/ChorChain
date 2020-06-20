@@ -1,23 +1,24 @@
 import ChoreoModeler from 'chor-js/lib/Modeler';
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
+import { submitTransaction } from './lib/rest';
 
 import xml from './diagrams/BikeRental.bpmn';
 
-let connectionIDOrg1 = ''
-let connectionIDOrg2 = ''
-let connectionIDOrg3 = ''
-let connectionID = ''
-let dataPayload = {
-  //connectionID: connectionID, 
+let connectionIDOrg1 = '';
+let connectionIDOrg2 = '';
+let connectionIDOrg3 = '';
+let connectionID = '';
+let startEvent = 'Event_0tttznh';
+let dataPayload = { 
   channel: 'channel123', 
   contractNamespace: 'choreographyprivatedatacontract', 
   contractName: 'org.chorchain.choreographyprivatedata_1', 
-  transactionName: 'Event_0tttznh', // Choreography StartEvent
-  //transactionName: 'Message_11j40xz', // Choreography Message
-  // transientData TODO
+  transactionName: startEvent
+  // connectionID
+  // transientData
 }
-let elements = {}
+let elements = {};
 
 // create and configure a chor-js instance
 const modeler = new ChoreoModeler({
@@ -38,8 +39,59 @@ function renderModel(newXml) {
   });
 }
 
+function queryChorState() {
+  if(connectionID !== '') {
+    dataPayload.connectionID = connectionID;
+    dataPayload.transactionName = 'queryChorState';
+    submitTransaction(dataPayload).then(resp => {
+      return bindResp(resp);
+    }).catch(error => {
+      console.error('something went wrong: ', error);
+    });
+  } else {
+    alert('Click on one organization');
+  }
+}
+
+function colorElem(e) {
+  var overlays = modeler.get('overlays');
+  var elementRegistry = modeler.get('elementRegistry');
+  var shape = elementRegistry.get(e);
+
+  var $overlayHtml =
+    $('<div class="highlight-overlay">')
+      .css({
+        width: shape.width,
+        height: shape.height
+      });
+
+  overlays.add(shape, {
+    position: {
+      top: 0,
+      left: 0
+    },
+    html: $overlayHtml
+  });	 
+}
+
+function findEnabledElemID() {
+  let id = null
+  if(Object.keys(elements).length !== 0) {
+    for (let [key, value] of Object.entries(elements)) {
+      if(value === 'enabled') {
+        id = key;
+        break;
+      }    
+    }
+  }
+  return id
+}
+
 function bindResp(output) {
+  console.log(output);
   if(typeof output === 'object') {
+    if('response' in output) output = output.response;
+
     if(output.type && output.type === 'Buffer') {
       output = Buffer.from(output.data);
       output = output.toString('utf8');
@@ -47,8 +99,16 @@ function bindResp(output) {
       const json = JSON.parse(output);
       if('choreography' in json) elements = json.choreography.elements;
       else elements = json.elements;
-      console.log('RESP: ');
+      
+      console.log('RESP JSON: ');
+      console.log(JSON.stringify(json));
+      console.log('ELEMENtS: ');
       console.log(elements);
+
+      const elem = findEnabledElemID();
+      if(elem !== null) {
+        colorElem(elem);
+      }
     }
   }
   document.getElementById('output').innerHTML = output;
@@ -65,8 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       bindResp(connectionIDOrg1);
     }
-
+    
     connectionID = connectionIDOrg1;
+    await queryChorState();
   });
 
   const btnBikeCenter = document.getElementById("btnOrg2");
@@ -80,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     connectionID = connectionIDOrg2;
+    await queryChorState();
   });
 
   const btnInsurer = document.getElementById("btnOrg3");
@@ -93,22 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     connectionID = connectionIDOrg3;
+    await queryChorState();
   });
 
   const btnStart = document.getElementById("btnStart");
   btnStart.addEventListener('click', async (e) => {
     if(connectionID !== '') {
-  
-      if(Object.keys(elements).length !== 0) {
-        let tx
-        for (let [key, value] of Object.entries(elements)) {
-          if(value === 'enabled') {
-            tx = key;
-            break;
-          }    
-        }
-        dataPayload.transactionName = tx;
-      }
+      
+      const tx = findEnabledElemID();
+      if(tx !== null) dataPayload.transactionName = tx;
 
       dataPayload.connectionID = connectionID;
       console.log('DATA PAYLOAD: ');
