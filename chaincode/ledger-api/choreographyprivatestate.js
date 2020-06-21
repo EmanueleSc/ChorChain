@@ -44,7 +44,13 @@ class ChoreographyPrivateState {
 
     mapToObj(m) {
         return Array.from(m).reduce((obj, [key, value]) => {
-            obj[key] = value.toString('utf8');
+            const v = value.toString('utf8');
+            if(isNaN(v)) {
+                if(v == "true" || v == "false") obj[key] = JSON.parse(v);
+                else obj[key] = v;
+            } else {
+                obj[key] = JSON.parse(v);
+            }
             return obj;
         }, {});
     }
