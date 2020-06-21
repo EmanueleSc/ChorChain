@@ -26,7 +26,7 @@ const main = async () => {
         //await ChannelU.update3OrgsAnchorPeers(channelName) // DA FARE SOLO 1 VOLTA (dopo bootstrap della network)
 
         console.log('Deploying the 3Orgs Contract')
-        await ChannelU.deploy3OrgsContract(channelName, 1)
+        await ChannelU.deploy3OrgsContract(channelName, 3)
 
     } catch (error) {
         console.log('\n ----- ERROR -----')

@@ -19,6 +19,8 @@ let dataPayload = {
   // transientData
 }
 let elements = {};
+let paramsArr = [];
+let paramStr = '';
 
 // create and configure a chor-js instance
 const modeler = new ChoreoModeler({
@@ -88,7 +90,7 @@ function findEnabledElemID() {
 }
 
 function bindResp(output) {
-  console.log(output);
+
   if(typeof output === 'object') {
     if('response' in output) output = output.response;
 
@@ -101,17 +103,30 @@ function bindResp(output) {
       else elements = json.elements;
       
       console.log('RESP JSON: ');
-      console.log(JSON.stringify(json));
+      console.log(json);
       console.log('ELEMENtS: ');
       console.log(elements);
 
       const elem = findEnabledElemID();
       if(elem !== null) {
         colorElem(elem);
+        paramsArr = getParams(elem);
       }
     }
   }
   document.getElementById('output').innerHTML = output;
+  document.getElementById('params').innerHTML = paramStr;
+}
+
+function getParams(elemID) {
+  const elementRegistry = modeler.get('elementRegistry');
+  const elem = elementRegistry.get(elemID);
+  paramStr = elem.businessObject.name;
+  if(paramStr) {
+    const arr = paramStr.split('(').pop().split(')')[0].split(', ').map(e => e.split(' ')[1]);
+    return arr;
+  }
+  return [];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -164,14 +179,39 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const tx = findEnabledElemID();
       if(tx !== null) dataPayload.transactionName = tx;
-
       dataPayload.connectionID = connectionID;
+      paramsArr = getParams(tx);
+
+      if(paramsArr.length !== 0) {
+        let values = document.getElementById("paramsInput").value;
+        if(values === '') {
+          alert('Inputs are empty!');
+          return;
+        }
+
+        values = values.split(',');
+        if(paramsArr.length !== values.length) {
+          alert('Fill all params');
+          return;
+        }
+        let data = {};
+        paramsArr.forEach((p, i) => {
+          data[p] = values[i];
+        });
+        dataPayload.transientData = data;
+      }
+
       console.log('DATA PAYLOAD: ');
-      console.log(JSON.stringify(dataPayload));
+      console.log(dataPayload);
 
       const resp = await submitPrivateTransaction(dataPayload);
       if(resp.error) bindResp(resp.error);
-      else bindResp(resp.response);
+      else {
+        bindResp(resp.response);
+        dataPayload.transientData = undefined;
+        dataPayload.transactionName = undefined;
+        dataPayload.connectionID = undefined;
+      }
 
     } else {
       alert('Click on one organization');
