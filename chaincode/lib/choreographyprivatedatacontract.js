@@ -272,7 +272,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    /*async Message_0p0m4qc(ctx) {
+    async Message_0p0m4qc(ctx) {
         logger.log('info', '==== Message_0p0m4qc CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -385,7 +385,7 @@ class ChoreographyPrivateDataContract extends Contract {
     }
 
     // Event-based gateway
-    async Gateway_06oryac(ctx, choreography) {
+    /*async Gateway_06oryac(ctx, choreography) {
         logger.log('info', '==== Gateway_06oryac CALLED');
 
         if(choreography.elements.Gateway_06oryac === Status.ENABLED) {
