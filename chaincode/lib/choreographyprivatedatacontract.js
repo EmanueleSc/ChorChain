@@ -424,7 +424,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    /*async Message_1d0fq3r(ctx) {
+    async Message_1d0fq3r(ctx) {
         logger.log('info', '==== Message_1d0fq3r CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -505,7 +505,7 @@ class ChoreographyPrivateDataContract extends Contract {
             throw new Error('Gateway_0wkn4k8 is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
-*/
+
     async Message_09zwe1j(ctx) {
         logger.log('info', '==== Message_09zwe1j CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
@@ -568,9 +568,8 @@ class ChoreographyPrivateDataContract extends Contract {
             throw new Error('Message_00x4erc is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
-
-    // Parallel gateway
-    async Gateway_0u101rc(ctx, choreography) {
+    
+    async Gateway_0u101rc(ctx, choreography) { // Parallel gateway
         logger.log('info', '==== Gateway_0u101rc CALLED');
 
         if(choreography.elements.Gateway_0u101rc === Status.ENABLED) {
