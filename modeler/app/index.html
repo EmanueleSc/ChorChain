@@ -44,6 +44,16 @@
 			pointer-events: none;
 			/* no pointer events, allows clicking through onto the element */
 		}
+
+    #inputContainer {
+      border: 1px solid rgba(34,36,38,.15);
+      -webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+      box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
+      border-radius: .28571429rem;
+      position: relative;
+      left: 15px;
+      width: 40%;
+    }
   </style>
 
   <title>ChorChain</title>
@@ -66,10 +76,15 @@
   <button id="btnStart" class="ui button">Start</button> <!-- loading -->
 
   <p id="output">Response: </p>
-  <p id="params">Params: </p>
-  <div class="ui input focus">
-    <input id="paramsInput" type="text" placeholder="value,value ...">
+  
+  <div id="inputContainer">
+    <!--<p id="params">Params: </p>
+    <div class="ui input focus">
+      <input id="paramsInput" type="text" placeholder="value,value ...">
+    </div>
+    -->
   </div>
+  
 
   <script src="./app.js"></script>
   <script

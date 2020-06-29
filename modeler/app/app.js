@@ -1,4 +1,3 @@
-//import ChoreoModeler from 'chor-js/lib/Modeler';
 import { ChorModeler } from './lib/modeler'; // my lib
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
@@ -20,28 +19,10 @@ let dataPayload = {
   // transientData
 }
 let elements = {};
-let paramsArr = [];
-// let paramStr = '';
+// let paramsArr = [];
 
 // create and configure a chor-js instance
-/*const modeler = new ChoreoModeler({
-  container: '#canvas',
-  keyboard: {
-    bindTo: document
-  }
-});*/
 const modeler = new ChorModeler();
-
-// display the given model (XML representation)
-/*function renderModel(newXml) {
-  modeler.importXML(newXml, {
-    // choreoID: '_choreo1'
-  }).then(() => {
-    modeler.get('canvas').zoom('fit-viewport');
-  }).catch(error => {
-    console.error('something went wrong: ', error);
-  });
-}*/
 
 function queryChorState() {
   if(connectionID !== '') {
@@ -57,42 +38,22 @@ function queryChorState() {
   }
 }
 
-/*function colorElem(e) {
-  var overlays = modeler.get('overlays');
-  var elementRegistry = modeler.get('elementRegistry');
-  var shape = elementRegistry.get(e);
+function templateParams(index) {
+  return `<p id="params${index}"></p>` + 
+         '<div class="ui input focus">' +
+            `<input id="paramsInput${index}" type="text" placeholder="value,value ...">` +
+         '</div>';
+}
 
-  var $overlayHtml =
-    $('<div class="highlight-overlay">')
-      .css({
-        width: shape.width,
-        height: shape.height
-      });
-
-  overlays.add(shape, {
-    position: {
-      top: 0,
-      left: 0
-    },
-    html: $overlayHtml
-  });	 
-}*/
-
-/*function findEnabledElemID() {
-  let id = null
-  if(Object.keys(elements).length !== 0) {
-    for (let [key, value] of Object.entries(elements)) {
-      if(value === 'enabled') {
-        id = key;
-        break;
-      }    
-    }
+function removeChilds(nodeID) {
+  const node = document.getElementById(nodeID);
+  while (node.firstChild) {
+    node.removeChild(node.lastChild);
   }
-  return id
-}*/
+}
 
 function bindResp(output) {
-  let messageAnnotation = '';
+  // let messageAnnotation = '';
 
   if(typeof output === 'object') {
     if('response' in output) output = output.response;
@@ -108,30 +69,34 @@ function bindResp(output) {
       console.log('RESP JSON: '); console.log(json);
       console.log('ELEMENTS: '); console.log(elements);
 
-      const elem = modeler.findFirstEnabledElementID(elements);
-      if(elem !== null) {
-        modeler.colorElem(elem);
-        // paramsArr = getParams(elem);
-        paramsArr = modeler.getAnnotationParams(elem);
-        messageAnnotation = modeler.getAnnotation(elem);
-      }
+      const elems = modeler.findEnabledElementsID(elements);
+      if(elems.length !== 0) {
+        removeChilds('inputContainer');
+
+        for(let i = 0; i < elems.length; i++) {
+          const elemID = elems[i];
+          modeler.colorElem(elemID);
+          const messageAnnotation = modeler.getAnnotation(elemID);
+          if(messageAnnotation) {
+            document.getElementById('inputContainer').innerHTML += templateParams(elemID);
+            document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID);
+          }
+            
+        }
+
+      } /*else {
+        const elem = modeler.findFirstEnabledElementID(elements);
+        if(elem !== null) {
+          modeler.colorElem(elem);
+          // paramsArr = modeler.getAnnotationParams(elem);
+          messageAnnotation = modeler.getAnnotation(elem);
+        }
+      }*/
     }
   }
   document.getElementById('output').innerHTML = output;
-  // document.getElementById('params').innerHTML = paramStr;
-  document.getElementById('params').innerHTML = messageAnnotation;
+  // document.getElementById('params').innerHTML = messageAnnotation;
 }
-
-/*function getParams(elemID) {
-  const elementRegistry = modeler.get('elementRegistry');
-  const elem = elementRegistry.get(elemID);
-  paramStr = elem.businessObject.name;
-  if(paramStr) {
-    const arr = paramStr.split('(').pop().split(')')[0].split(', ').map(e => e.split(' ')[1]);
-    return arr;
-  }
-  return [];
-}*/
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -180,16 +145,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnStart = document.getElementById("btnStart");
   btnStart.addEventListener('click', async (e) => {
     if(connectionID !== '') {
-      
-      // const tx = findEnabledElemID();
-      const tx = modeler.findFirstEnabledElementID(elements);
+      let paramsArr = [];
+      let tx = null;
+      const elems = modeler.findEnabledElementsID(elements);
+
+      if(elems.length !== 0) {
+        for(let i = 0; i < elems.length; i++) {
+          const elemID = elems[i];
+          const messageAnnotation = modeler.getAnnotation(elemID);
+          // check if the element has an annotation string
+          if(messageAnnotation) {
+            let values = document.getElementById(`paramsInput${elemID}`).value;
+            if(values && values !== '') {
+              tx = elemID;
+              break;
+            }
+          }
+        }
+      }
+
+      if(tx === null) tx = modeler.findFirstEnabledElementID(elements);
+      // const tx = modeler.findFirstEnabledElementID(elements);
       if(tx !== null) dataPayload.transactionName = tx;
       dataPayload.connectionID = connectionID;
-      // paramsArr = getParams(tx);
       paramsArr = modeler.getAnnotationParams(tx);
 
       if(paramsArr.length !== 0) {
-        let values = document.getElementById("paramsInput").value;
+        let values = document.getElementById(`paramsInput${tx}`).value;
         if(values === '') {
           alert('Inputs are empty!');
           return;
@@ -225,9 +207,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-
-// expose bpmnjs to window for debugging purposes
-// window.bpmnjs = modeler;
-
-// renderModel(xml);
+// render the model
 modeler.renderModel(xml).catch(error => console.log(error))

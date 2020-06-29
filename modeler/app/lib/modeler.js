@@ -48,7 +48,7 @@ class ChorModeler {
     }
 
     findEnabledElementsID(elements) {
-        let arrID = null
+        let arrID = []
         if(Object.keys(elements).length !== 0) {
           for (let [key, value] of Object.entries(elements)) {
             if(value === 'enabled') {
