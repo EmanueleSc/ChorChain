@@ -1,4 +1,5 @@
-import ChoreoModeler from 'chor-js/lib/Modeler';
+//import ChoreoModeler from 'chor-js/lib/Modeler';
+import { ChorModeler } from './lib/modeler'; // my lib
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
 import { submitTransaction } from './lib/rest';
@@ -20,18 +21,19 @@ let dataPayload = {
 }
 let elements = {};
 let paramsArr = [];
-let paramStr = '';
+// let paramStr = '';
 
 // create and configure a chor-js instance
-const modeler = new ChoreoModeler({
+/*const modeler = new ChoreoModeler({
   container: '#canvas',
   keyboard: {
     bindTo: document
   }
-});
+});*/
+const modeler = new ChorModeler();
 
 // display the given model (XML representation)
-function renderModel(newXml) {
+/*function renderModel(newXml) {
   modeler.importXML(newXml, {
     // choreoID: '_choreo1'
   }).then(() => {
@@ -39,7 +41,7 @@ function renderModel(newXml) {
   }).catch(error => {
     console.error('something went wrong: ', error);
   });
-}
+}*/
 
 function queryChorState() {
   if(connectionID !== '') {
@@ -55,7 +57,7 @@ function queryChorState() {
   }
 }
 
-function colorElem(e) {
+/*function colorElem(e) {
   var overlays = modeler.get('overlays');
   var elementRegistry = modeler.get('elementRegistry');
   var shape = elementRegistry.get(e);
@@ -74,9 +76,9 @@ function colorElem(e) {
     },
     html: $overlayHtml
   });	 
-}
+}*/
 
-function findEnabledElemID() {
+/*function findEnabledElemID() {
   let id = null
   if(Object.keys(elements).length !== 0) {
     for (let [key, value] of Object.entries(elements)) {
@@ -87,9 +89,10 @@ function findEnabledElemID() {
     }
   }
   return id
-}
+}*/
 
 function bindResp(output) {
+  let messageAnnotation = '';
 
   if(typeof output === 'object') {
     if('response' in output) output = output.response;
@@ -102,23 +105,24 @@ function bindResp(output) {
       if('choreography' in json) elements = json.choreography.elements;
       else elements = json.elements;
       
-      console.log('RESP JSON: ');
-      console.log(json);
-      console.log('ELEMENtS: ');
-      console.log(elements);
+      console.log('RESP JSON: '); console.log(json);
+      console.log('ELEMENTS: '); console.log(elements);
 
-      const elem = findEnabledElemID();
+      const elem = modeler.findFirstEnabledElementID(elements);
       if(elem !== null) {
-        colorElem(elem);
-        paramsArr = getParams(elem);
+        modeler.colorElem(elem);
+        // paramsArr = getParams(elem);
+        paramsArr = modeler.getAnnotationParams(elem);
+        messageAnnotation = modeler.getAnnotation(elem);
       }
     }
   }
   document.getElementById('output').innerHTML = output;
-  document.getElementById('params').innerHTML = paramStr;
+  // document.getElementById('params').innerHTML = paramStr;
+  document.getElementById('params').innerHTML = messageAnnotation;
 }
 
-function getParams(elemID) {
+/*function getParams(elemID) {
   const elementRegistry = modeler.get('elementRegistry');
   const elem = elementRegistry.get(elemID);
   paramStr = elem.businessObject.name;
@@ -127,7 +131,7 @@ function getParams(elemID) {
     return arr;
   }
   return [];
-}
+}*/
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -177,10 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
   btnStart.addEventListener('click', async (e) => {
     if(connectionID !== '') {
       
-      const tx = findEnabledElemID();
+      // const tx = findEnabledElemID();
+      const tx = modeler.findFirstEnabledElementID(elements);
       if(tx !== null) dataPayload.transactionName = tx;
       dataPayload.connectionID = connectionID;
-      paramsArr = getParams(tx);
+      // paramsArr = getParams(tx);
+      paramsArr = modeler.getAnnotationParams(tx);
 
       if(paramsArr.length !== 0) {
         let values = document.getElementById("paramsInput").value;
@@ -201,8 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dataPayload.transientData = data;
       }
 
-      console.log('DATA PAYLOAD: ');
-      console.log(dataPayload);
+      console.log('DATA PAYLOAD: '); console.log(dataPayload);
 
       const resp = await submitPrivateTransaction(dataPayload);
       if(resp.error) bindResp(resp.error);
@@ -222,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // expose bpmnjs to window for debugging purposes
-window.bpmnjs = modeler;
+// window.bpmnjs = modeler;
 
-renderModel(xml);
+// renderModel(xml);
+modeler.renderModel(xml).catch(error => console.log(error))

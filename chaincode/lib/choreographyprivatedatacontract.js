@@ -385,7 +385,7 @@ class ChoreographyPrivateDataContract extends Contract {
     }
 
     // Event-based gateway
-    /*async Gateway_06oryac(ctx, choreography) {
+    async Gateway_06oryac(ctx, choreography) {
         logger.log('info', '==== Gateway_06oryac CALLED');
 
         if(choreography.elements.Gateway_06oryac === Status.ENABLED) {
@@ -424,7 +424,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    async Message_1d0fq3r(ctx) {
+    /*async Message_1d0fq3r(ctx) {
         logger.log('info', '==== Message_1d0fq3r CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
@@ -505,7 +505,7 @@ class ChoreographyPrivateDataContract extends Contract {
             throw new Error('Gateway_0wkn4k8 is not ENABLED. Current state = ' + JSON.stringify(choreography));
         }
     }
-
+*/
     async Message_09zwe1j(ctx) {
         logger.log('info', '==== Message_09zwe1j CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
@@ -544,7 +544,7 @@ class ChoreographyPrivateDataContract extends Contract {
         }
     }
 
-    async Message_00x4erc(ctx, choreography) {
+    /*async Message_00x4erc(ctx, choreography) {
         logger.log('info', '==== Message_00x4erc CALLED');
         logger.log('info', 'Choreography ID: ' + chorID);
 
