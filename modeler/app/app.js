@@ -2,6 +2,7 @@ import { ChorModeler } from './lib/modeler'; // my lib
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
 import { submitTransaction } from './lib/rest';
+import JSONFormatter from 'json-formatter-js';
 
 import xml from './diagrams/BikeRental.bpmn';
 
@@ -19,7 +20,6 @@ let dataPayload = {
   // transientData
 }
 let elements = {};
-// let paramsArr = [];
 
 // create and configure a chor-js instance
 const modeler = new ChorModeler();
@@ -40,7 +40,7 @@ function queryChorState() {
 
 function templateParams(index) {
   return `<p id="params${index}"></p>` + 
-         '<div class="ui input focus">' +
+         '<div style="display:flex;" class="div-input ui input focus">' +
             `<input id="paramsInput${index}" type="text" placeholder="value,value ...">` +
          '</div>';
 }
@@ -53,8 +53,6 @@ function removeChilds(nodeID) {
 }
 
 function bindResp(output) {
-  // let messageAnnotation = '';
-
   if(typeof output === 'object') {
     if('response' in output) output = output.response;
 
@@ -84,18 +82,14 @@ function bindResp(output) {
             
         }
 
-      } /*else {
-        const elem = modeler.findFirstEnabledElementID(elements);
-        if(elem !== null) {
-          modeler.colorElem(elem);
-          // paramsArr = modeler.getAnnotationParams(elem);
-          messageAnnotation = modeler.getAnnotation(elem);
-        }
-      }*/
+      }
     }
+    removeChilds('output');
+    const formatter = new JSONFormatter(JSON.parse(output));
+    document.getElementById('output').appendChild(formatter.render());
+  } else {
+    document.getElementById('output').innerHTML = output;
   }
-  document.getElementById('output').innerHTML = output;
-  // document.getElementById('params').innerHTML = messageAnnotation;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if(tx === null) tx = modeler.findFirstEnabledElementID(elements);
-      // const tx = modeler.findFirstEnabledElementID(elements);
       if(tx !== null) dataPayload.transactionName = tx;
       dataPayload.connectionID = connectionID;
       paramsArr = modeler.getAnnotationParams(tx);
