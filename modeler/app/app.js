@@ -1,4 +1,5 @@
 import { ChorModeler } from './lib/modeler'; // my lib
+import { ChorTranslator } from './lib/translator'; // TEST
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
 import { submitTransaction } from './lib/rest';
@@ -23,6 +24,7 @@ let elements = {};
 
 // create and configure a chor-js instance
 const modeler = new ChorModeler();
+const translator = new ChorTranslator(xml);
 
 function queryChorState() {
   if(connectionID !== '') {
