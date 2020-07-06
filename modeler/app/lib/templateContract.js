@@ -40,7 +40,8 @@ const typeElem = {
     EXCLUSIVEGATEWAY: 'bpmn:ExclusiveGateway',
     PARALLELGATEWAY: 'bpmn:ParallelGateway',
     EVENTBASEDGATEWAY: 'bpmn:EventBasedGateway',
-    ENDEVENT: 'bpmn:EndEvent'
+    ENDEVENT: 'bpmn:EndEvent',
+    CHOREOGRAPHYTASK: 'bpmn:ChoreographyTask'
 }
 
 
@@ -73,7 +74,88 @@ const _startEventTamplate = (obj) => {
     `
 }
 
-const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj) => {
+const _getInitialParticipantMessageID = (outgoingTargetRef) => {
+    const initialParticipantID = outgoingTargetRef.initiatingParticipantRef.id
+    const messages = outgoingTargetRef.messageFlowRef
+    let messageID = ''
+    for(let i = 0; i < messages.length; i ++) {
+        if(messages[i].sourceRef.id === initialParticipantID) {
+            messageID = messages[i].messageRef.id
+        }
+    }
+    return messageID
+}
+
+const _exclusiveGatewayTamplate = (obj) => {
+    if(!obj) return ''
+
+    let body = ''
+    if(obj.outgoing.length === 1) {
+        const outgoing = obj.outgoing[0].targetRef
+
+        if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+            const messageID = _getInitialParticipantMessageID(outgoing)
+            body += `
+                choreography.setEnable('${messageID}')
+                await choreography.updateState(ctx)
+            `
+        } else {
+            // it's a gateway
+            body += `
+                choreography.setEnable('${outgoing.id}')
+                await this.${outgoing.id}(ctx, choreography, choreographyPrivate)
+            `
+        }
+
+    } else if(obj.outgoing.length === 2) {
+        for(let i = 0; i < obj.outgoing.length; i++) {
+            const condition = obj.outgoing[i].name
+            const outgoing = obj.outgoing[i].targetRef            
+
+            if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+                const messageID = _getInitialParticipantMessageID(outgoing)
+                body += `
+                if(choreographyPrivate.${condition}) {
+                    choreography.setEnable('${messageID}')
+                    await choreography.updateState(ctx)
+                }
+                `
+            } else {
+                // it's a gateway
+                body += `
+                if(choreographyPrivate.${condition}) {
+                    choreography.setEnable('${outgoing.id}')
+                    await this.${outgoing.id}(ctx, choreography, choreographyPrivate)
+                }
+                `
+            }
+        }
+
+    }
+
+    return `
+        async ${obj.id}(ctx, choreography, choreographyPrivate) {
+
+            if(choreography.elements.${obj.id} === Status.ENABLED) {
+                choreography.setDone('${obj.id}')
+                ${body}
+            } else {
+                throw new Error('Element ${obj.id} is not ENABLED')
+            }
+        }
+    `
+}
+
+const _computeExclusiveGateways = (arr) => {
+    if(arr.length === 0) return ''
+    let str = ''
+    for(let i = 0; i < arr.length; i++) {
+        str += _exclusiveGatewayTamplate(arr[i])  + '\n'
+    }
+    return str
+}
+
+const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs) => {
     return `
         'use strict'
         const { Contract } = require('fabric-contract-api')
@@ -103,6 +185,8 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
             }
 
             ${_startEventTamplate(startEventObj)}
+
+            ${_computeExclusiveGateways(exclusiveGatewayObjs)}
 
         }
 
