@@ -146,16 +146,42 @@ const _exclusiveGatewayTamplate = (obj) => {
     `
 }
 
-const _computeExclusiveGateways = (arr) => {
+const _eventBasedGatewayTamplate = (obj) => {
+    if(!obj) return ''
+
+    let body = ''
+    for(let i = 0; i < obj.outgoing.length; i++) {
+        const outgoing = obj.outgoing[i].targetRef
+        if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+            const messageID = _getInitialParticipantMessageID(outgoing)
+            body += `choreography.setEnable('${messageID}')` + '\n'
+        }
+    }
+
+    return `
+        async ${obj.id}(ctx, choreography) {
+
+            if(choreography.elements.${obj.id} === Status.ENABLED) {
+                choreography.setDone('${obj.id}')
+                ${body}
+                await choreography.updateState(ctx)
+            } else {
+                throw new Error('Element ${obj.id} is not ENABLED')
+            }
+        }
+    `
+}
+
+const _computeMultipleElements = (arr, template) => {
     if(arr.length === 0) return ''
     let str = ''
     for(let i = 0; i < arr.length; i++) {
-        str += _exclusiveGatewayTamplate(arr[i])  + '\n'
+        str += template(arr[i])  + '\n'
     }
     return str
 }
 
-const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs) => {
+const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs) => {
     return `
         'use strict'
         const { Contract } = require('fabric-contract-api')
@@ -186,7 +212,9 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
 
             ${_startEventTamplate(startEventObj)}
 
-            ${_computeExclusiveGateways(exclusiveGatewayObjs)}
+            ${_computeMultipleElements(exclusiveGatewayObjs, _exclusiveGatewayTamplate)}
+
+            ${_computeMultipleElements(eventBasedGatewayObjs, _eventBasedGatewayTamplate)}
 
         }
 
