@@ -24,7 +24,7 @@ let elements = {};
 
 // create and configure a chor-js instance
 const modeler = new ChorModeler();
-const translator = new ChorTranslator(xml);
+const translator = new ChorTranslator(xml); // TEST
 
 function queryChorState() {
   if(connectionID !== '') {

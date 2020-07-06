@@ -1,5 +1,5 @@
 import BpmnModdle from 'bpmn-moddle';
-import { header } from './templateContract'
+import { smartcontract } from './templateContract'
 
 class ChorTranslator {
     constructor(xml) {
@@ -9,6 +9,9 @@ class ChorTranslator {
             console.log(obj)
             
             let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
+            const startEvent = chorElements[0]
+            const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
+
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message")) 
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
@@ -16,7 +19,11 @@ class ChorTranslator {
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
 
             const participants = this.getParticipatsNames(obj)
-            console.log(header('chor1', 'chorcontract', chorElements, participants))
+            const contract = smartcontract(
+                'chor1', 'chorcontract', chorElements, participants, startEvent,
+                startEventObj
+            )
+            console.log(contract)
         })
     }
 

@@ -34,25 +34,83 @@ const _computeCollections = (roles) => {
     return str
 }
 
-const header = (chorID, contractName, chorElements, roles) => {
+const typeElem = {
+    STARTEVENT: 'bpmn:StartEvent',
+    MESSAGE: 'bpmn:Message',
+    EXCLUSIVEGATEWAY: 'bpmn:ExclusiveGateway',
+    PARALLELGATEWAY: 'bpmn:ParallelGateway',
+    EVENTBASEDGATEWAY: 'bpmn:EventBasedGateway',
+    ENDEVENT: 'bpmn:EndEvent'
+}
+
+
+const _startEventTamplate = (obj) => {
+    if(!obj) return ''
+
+    // compute next invoke call
+    const outgoing = obj.outgoing[0].targetRef
+
+    let nextInvoke = ''
+    if(outgoing.$type === typeElem.MESSAGE)
+        nextInvoke = 'await choreography.updateState(ctx)'
+    else
+        nextInvoke = `await this.${outgoing.id}(ctx, choreography)`
+
     return `
-        'use strict'
-        const { Contract } = require('fabric-contract-api')
-        const { logger } = require('../utils/logger')
-        const { ChoreographyState, Status } = require('../ledger-api/choreographystate')
-        const { ChoreographyPrivateState } = require('../ledger-api/choreographyprivatestate')
-        const chorID = ${chorID}
-        const contractName = ${contractName}
-        const chorElements = [
-            ${_computeStringElements(chorElements)}
-        ];
-        const roles = { ${_computeRoles(roles)} }
-        const collectionsPrivate = {
-            ${_computeCollections(roles)}
+        async ${obj.id}(ctx) {
+            const choreography = await ChoreographyState.getState(ctx, chorID)
+
+            if(choreography.elements.${obj.id} === Status.ENABLED) {
+                choreography.setDone('${obj.id}')
+                choreography.setEnable('${outgoing.id}')
+                ${nextInvoke}
+
+                return choreography
+            } else {
+                throw new Error('Element ${obj.id} not ENABLED')
+            }
         }
     `
 }
 
+const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj) => {
+    return `
+        'use strict'
+        const { Contract } = require('fabric-contract-api')
+        const { ChoreographyState, Status } = require('../ledger-api/choreographystate')
+        const { ChoreographyPrivateState } = require('../ledger-api/choreographyprivatestate')
+        const chorID = '${chorID}'
+        const contractName = '${contractName}'
+        const chorElements = [
+            ${_computeStringElements(chorElements)}
+        ]
+        const roles = { ${_computeRoles(roles)} }
+        const collectionsPrivate = {
+            ${_computeCollections(roles)}
+        }
+
+        class ChoreographyPrivateDataContract extends Contract {
+            constructor() {
+                super(contractName)
+            }
+
+            async instantiate(ctx) {
+                const choreography = new ChoreographyState({ chorID })
+                choreography.initElements(chorElements)
+                choreography.setEnable('${startEvent}')
+                await choreography.updateState(ctx)
+                return choreography
+            }
+
+            ${_startEventTamplate(startEventObj)}
+
+        }
+
+        module.exports = ChoreographyPrivateDataContract
+
+    `
+}
+
 module.exports = {
-    header
+    smartcontract
 }
