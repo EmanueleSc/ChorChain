@@ -27,7 +27,7 @@ class ChorTranslator {
 
             const participants = this.getParticipatsNames(obj)
             const contract = smartcontract(
-                'chor1', 'chorcontract', chorElements, participants, startEvent,
+                'CHOR1', 'org.chorchain.choreographyprivatedata_1', chorElements, participants, startEvent,
                 startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
             )
             console.log(contract)

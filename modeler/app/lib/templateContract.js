@@ -397,6 +397,51 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
 
             ${_computeMultipleElements(choreographyTaskObjs, _messageTamplate, roles)}
 
+            async queryChorState(ctx) {
+                let privateState, privateCollection 
+                let resp = {}
+        
+                // public state
+                const choreography = await ChoreographyState.getState(ctx, chorID)
+                resp.choreography = choreography
+                resp.choreographyPrivate = {}
+        
+                const mspid = ctx.stub.getCreator().mspid
+                const k1 = Object.keys(roles).find(key => roles[key] === 'Org1MSP') // Customer
+                const k2 = Object.keys(roles).find(key => roles[key] === 'Org2MSP') // Bike_center
+                const k3 = Object.keys(roles).find(key => roles[key] === 'Org3MSP') // Insurer
+        
+                if(mspid === 'Org1MSP') {
+                    privateCollection = k1 + k2
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+        
+                    privateCollection = k1 + k3
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+                }
+                else if(mspid === 'Org2MSP') {
+                    privateCollection = k1 + k2
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+        
+                    privateCollection = k2 + k3
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+                }
+                else if(mspid === 'Org3MSP') {
+                    privateCollection = k1 + k3
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+        
+                    privateCollection = k2 + k3
+                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
+                    resp.choreographyPrivate[privateCollection] = privateState
+                }
+        
+                return resp
+            }
+
         }
 
         module.exports = ChoreographyPrivateDataContract
