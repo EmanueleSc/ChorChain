@@ -225,7 +225,7 @@ const _messageTamplate = (obj, roles) => {
         const messageID = obj.messageFlowRef[0].messageRef.id
         const outgoing = obj.outgoing[0].targetRef
         const incoming = obj.incoming[0].sourceRef
-        let messageDisabled = _getDisabledMessageID(incoming, messageID)
+        const messageDisabled = _getDisabledMessageID(incoming, messageID)
 
         if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
             const outgoingMessageID = _getInitialParticipantMessageID(outgoing)
@@ -262,7 +262,8 @@ const _messageTamplate = (obj, roles) => {
         `
 
     } else if(obj.messageFlowRef.length === 2) { // two-way task
-        let body = '/** TODO **/'
+        let body1 = ''
+        let body2 = ''
         const initialMessageID = _getInitialParticipantMessageID(obj)
         const initialParticipant = submitter
         let lastMessageID, lastParticipant
@@ -284,7 +285,31 @@ const _messageTamplate = (obj, roles) => {
             }
 
         }
-        
+
+        // initial message body: check if the previous element is an EventBasedGateway 
+        // and search the message to disable
+        const incoming = obj.incoming[0].sourceRef
+        const messageDisabled = _getDisabledMessageID(incoming, initialMessageID)
+        if(messageDisabled) body1 += `choreography.setDisable('${messageDisabled}')` + '\n'
+
+        // last message body
+        const outgoing = obj.outgoing[0].targetRef
+        if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+            const outgoingMessageID = _getInitialParticipantMessageID(outgoing)
+            
+            body2 += `
+                choreography.setEnable('${outgoingMessageID}')
+                await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.${collection})
+                await choreography.updateState(ctx)
+            `
+        } else {
+            // it's a gateway
+            body2 += `
+                choreography.setEnable('${outgoing.id}')
+                await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.${collection})
+                await this.${outgoing.id}(ctx, choreography, choreographyPrivate)
+            `
+        }
 
         return `
             async ${initialMessageID}(ctx) {
@@ -294,8 +319,10 @@ const _messageTamplate = (obj, roles) => {
                 if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${initialMessageID}')
-                    
-                    ${body}
+                    ${body1}
+                    choreography.setEnable('${lastMessageID}')
+                    await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.${collection})
+                    await choreography.updateState(ctx)
 
                     return { choreography, choreographyPrivate }
                 } else {
@@ -311,7 +338,7 @@ const _messageTamplate = (obj, roles) => {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${lastMessageID}')
                     
-                    ${body}
+                    ${body2}
 
                     return { choreography, choreographyPrivate }
                 } else {
