@@ -19,13 +19,16 @@ class ChorTranslator {
             const eventBasedGatewayObjs = this.getElementsByType(obj, "bpmn:EventBasedGateway")
 
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message"))
+            const choreographyTaskObjs = this.getElementsByType(obj, "bpmn:ChoreographyTask")
+            console.log(choreographyTaskObjs)
+
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
 
             const participants = this.getParticipatsNames(obj)
             const contract = smartcontract(
                 'chor1', 'chorcontract', chorElements, participants, startEvent,
-                startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs
+                startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
             )
             console.log(contract)
         })

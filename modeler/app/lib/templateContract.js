@@ -34,6 +34,15 @@ const _computeCollections = (roles) => {
     return str
 }
 
+const _computeRelations = (roles) => {
+    const relations = []
+
+    for(let i = 0; i < roles.length-1; i++) {
+        relations.push(...cartesian(roles.slice(i, i+1), roles.slice(i+1, roles.length)))
+    }
+    return relations.map(e => e[0]+e[1])
+}
+
 const typeElem = {
     STARTEVENT: 'bpmn:StartEvent',
     MESSAGE: 'bpmn:Message',
@@ -172,16 +181,103 @@ const _eventBasedGatewayTamplate = (obj) => {
     `
 }
 
-const _computeMultipleElements = (arr, template) => {
+const _getDisabledMessageID = (incomingSourceRef, enabledMessageID) => {
+    let messageDisabled = ''
+    if(incomingSourceRef.$type === typeElem.EVENTBASEDGATEWAY) {
+        for(let i = 0; i < incomingSourceRef.outgoing.length; i++) {
+            const target = incomingSourceRef.outgoing[i].targetRef
+            const targetMessageID = _getInitialParticipantMessageID(target)
+            if(targetMessageID !== enabledMessageID) messageDisabled = targetMessageID
+        }
+    }
+    return messageDisabled
+}
+
+const _getParticipantNames = (obj) => {
+    const names = []
+    if(obj.$type === typeElem.CHOREOGRAPHYTASK) {
+        for(let i = 0; i < obj.participantRef.length; i++) {
+            names.push(obj.participantRef[i].name.replace(" ", "_"))
+        }
+    }
+    return names
+}
+
+const _getCollection = (relationsArr, rolesArr) => {
+    let collection = ''
+    for(let i = 0; i < relationsArr.length; i++) {
+        if(relationsArr[i].includes(rolesArr[0]) && relationsArr[i].includes(rolesArr[1]))
+        collection = relationsArr[i]
+    }
+    return collection
+}
+
+const _messageTamplate = (obj, roles) => {
+    if(!obj) return ''
+    const relations = _computeRelations(roles)
+    const names = _getParticipantNames(obj)
+    const collection = _getCollection(relations, names)
+    const submitter = obj.initiatingParticipantRef.name.replace(" ", "_")
+
+    // one-way task
+    if(obj.messageFlowRef.length === 1) {
+        let body = ''
+        const messageID = obj.messageFlowRef[0].messageRef.id
+        const outgoing = obj.outgoing[0].targetRef
+        const incoming = obj.incoming[0].sourceRef
+        let messageDisabled = _getDisabledMessageID(incoming, messageID)
+
+        if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+            const outgoingMessageID = _getInitialParticipantMessageID(outgoing)
+            
+            body += `choreography.setEnable('${outgoingMessageID}')` + '\n'
+            if(messageDisabled) body += `choreography.setDisable('${messageDisabled}')` + '\n'
+            body += `await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.${collection})` + '\n'
+            body += `await choreography.updateState(ctx)` + '\n'
+
+        } else {
+            // it's a gateway
+            body += `choreography.setEnable('${outgoing.id}')` + '\n'
+            if(messageDisabled) body += `choreography.setDisable('${messageDisabled}')` + '\n'
+            body += `await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.${collection})` + '\n'
+            body += `await this.${outgoing.id}(ctx, choreography, choreographyPrivate)` + '\n'
+        }
+
+        return `
+            async ${messageID}(ctx) {
+                /* one-way task */
+                const choreography = await ChoreographyState.getState(ctx, chorID)
+
+                if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid) {
+                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
+                    choreography.setDone('${messageID}')
+                    
+                    ${body}
+
+                    return { choreography, choreographyPrivate }
+                } else {
+                    throw new Error('Element ${messageID} is not ENABLED or submitter not allowed, only the ${submitter} can send this transaction')
+                }
+            }
+        `
+
+    } else if(obj.messageFlowRef.length === 2) { // two-way task
+
+    }
+}
+
+
+const _computeMultipleElements = (arr, template, args) => {
     if(arr.length === 0) return ''
     let str = ''
     for(let i = 0; i < arr.length; i++) {
-        str += template(arr[i])  + '\n'
+        if(args) str += template(arr[i], args)  + '\n'
+        else str += template(arr[i])  + '\n'
     }
     return str
 }
 
-const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs) => {
+const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs) => {
     return `
         'use strict'
         const { Contract } = require('fabric-contract-api')
@@ -215,6 +311,8 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
             ${_computeMultipleElements(exclusiveGatewayObjs, _exclusiveGatewayTamplate)}
 
             ${_computeMultipleElements(eventBasedGatewayObjs, _eventBasedGatewayTamplate)}
+
+            ${_computeMultipleElements(choreographyTaskObjs, _messageTamplate, roles)}
 
         }
 
