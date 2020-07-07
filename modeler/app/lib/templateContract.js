@@ -262,7 +262,63 @@ const _messageTamplate = (obj, roles) => {
         `
 
     } else if(obj.messageFlowRef.length === 2) { // two-way task
+        let body = '/** TODO **/'
+        const initialMessageID = _getInitialParticipantMessageID(obj)
+        const initialParticipant = submitter
+        let lastMessageID, lastParticipant
 
+        // get last message id
+        for(let i = 0; i < obj.messageFlowRef.length; i++) {
+            if(obj.messageFlowRef[i].messageRef.id !== initialMessageID) {
+                lastMessageID = obj.messageFlowRef[i].messageRef.id
+                break
+            }
+        }
+
+        // get last participant name
+        for(let i = 0; i < obj.participantRef.length; i++) {
+            const name = obj.participantRef[i].name.replace(" ", "_")
+            if(name !== initialParticipant) {
+                lastParticipant = name
+                break
+            }
+
+        }
+        
+
+        return `
+            async ${initialMessageID}(ctx) {
+                /* two-way task - initial participant */
+                const choreography = await ChoreographyState.getState(ctx, chorID)
+
+                if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid) {
+                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
+                    choreography.setDone('${initialMessageID}')
+                    
+                    ${body}
+
+                    return { choreography, choreographyPrivate }
+                } else {
+                    throw new Error('Element ${initialMessageID} is not ENABLED or submitter not allowed, only the ${initialParticipant} can send this transaction')
+                }
+            }
+
+            async ${lastMessageID}(ctx) {
+                /* two-way task - last participant */
+                const choreography = await ChoreographyState.getState(ctx, chorID)
+
+                if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid) {
+                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
+                    choreography.setDone('${lastMessageID}')
+                    
+                    ${body}
+
+                    return { choreography, choreographyPrivate }
+                } else {
+                    throw new Error('Element ${lastMessageID} is not ENABLED or submitter not allowed, only the ${lastParticipant} can send this transaction')
+                }
+            }
+        `
     }
 }
 
