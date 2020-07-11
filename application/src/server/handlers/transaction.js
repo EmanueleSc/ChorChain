@@ -44,28 +44,16 @@ router.post('/submit/private', async (req, res) => {
             size: Buffer.from('85'),
             price: Buffer.from('99')
         } */
-        console.log('\n<====================== API: /submit/private CALLED')
-        console.log(transientData)
-        console.log(typeof transientData)
 
         if(transientData && transientData !== '') {
             if(typeof transientData !== 'object') {
                 transientData = JSON.stringify(transientData)
-                console.log('--- STRINGIFY ---')
-                console.log(transientData)
-
                 transientData = JSON.parse(transientData)
-                console.log('--- PARSE ---')
-                console.log(transientData)
             }
 
             for (let [key, value] of Object.entries(transientData)) {
-                const str = String(value);
-
-                console.log('VALUE')
-                console.log(str)
-
-                transientData[key] = Buffer.from(str);
+                const str = String(value)
+                transientData[key] = Buffer.from(str)
             }
     
             resp = await contract.createTransaction(transactionName)

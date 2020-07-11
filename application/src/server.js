@@ -10,6 +10,7 @@ import apiHelloWorld from "./server/handlers/helloworld";
 import apiNetwork from "./server/handlers/network";
 import apiIdentity from "./server/handlers/identity";
 import apiTransaction from "./server/handlers/transaction"
+import apiDeploy from "./server/handlers/deploy"
 
 // .env file
 const dotenv = require('dotenv');
@@ -58,6 +59,7 @@ app.use("/api/helloworld", apiHelloWorld);
 app.use("/api/network", apiNetwork);
 app.use("/api/identity", apiIdentity);
 app.use("/api/transaction", apiTransaction);
+app.use("/api/deploy", apiDeploy);
 
 const port = process.env.PORT || 3000;
 
