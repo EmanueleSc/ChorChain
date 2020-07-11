@@ -27,3 +27,16 @@ export const submitPrivateTransaction = ({
 }) => sendRequest(`/api/transaction/submit/private`, { 
     body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName, transientData }) 
 });
+
+export const deployContract = ({ 
+    idBpmnFile, 
+    bpmnFileName, 
+    startEvent, 
+    roles, 
+    configTxProfile, 
+    idChor 
+}) => sendRequest(`/api/contract/deploy`, { 
+    body: JSON.stringify({ idBpmnFile, bpmnFileName, startEvent, roles, configTxProfile, idChor }) 
+});
+
+export const uploadBpmnFile = ( data ) => sendRequest(`/api/file/upload`, { body: data }, true);

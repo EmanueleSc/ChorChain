@@ -10,7 +10,7 @@ const highlightLog = (message) => {
 
 }
 
-router.post('/deploy/contract', async (req, res) => {
+router.post('/deploy', async (req, res) => {
     try {
         const { idBpmnFile, bpmnFileName, startEvent, roles, configTxProfile, idChor } = req.body
         const contractName = `org.hyreochain.choreographyprivatedata_${idChor}`

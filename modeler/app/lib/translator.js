@@ -1,15 +1,21 @@
 import BpmnModdle from 'bpmn-moddle';
 import { smartcontract } from './templateContract'
+const { v4: uuidv4 } = require('uuid');
 
 class ChorTranslator {
     constructor(xml) {
         const moddle = new BpmnModdle()
+        this.chorID = uuidv4()
+        this.roles = {}
+        this.configTxProfile = 'ThreeOrgsChannel' // default
+        this.startEvent = ''
+        const contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
 
         moddle.fromXML(xml).then(obj => {
             console.log(obj)
             
             let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
-            const startEvent = chorElements[0]
+            this.startEvent = chorElements[0]
             const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
 
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
@@ -26,8 +32,11 @@ class ChorTranslator {
             chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
 
             const participants = this.getParticipatsNames(obj)
+            this.roles = this.computeRolesObj(participants)
+            if(participants.length === 2) this.configTxProfile = 'TwoOrgsChannel'
+
             const contract = smartcontract(
-                'CHOR1', 'org.chorchain.choreographyprivatedata_1', chorElements, participants, startEvent,
+                this.chorID, contractName, chorElements, participants, this.startEvent,
                 startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
             )
             console.log(contract)
@@ -57,6 +66,13 @@ class ChorTranslator {
         return participants.map(p => p.name.replace(" ", "_"))
     }
 
+    computeRolesObj = (roles) => {
+        let obj = {}
+        for(let i = 0; i < roles.length; i++) {
+            obj[roles[i]] = "Org" + (i+1) + "MSP"
+        }
+        return obj
+    }
 
 }
 

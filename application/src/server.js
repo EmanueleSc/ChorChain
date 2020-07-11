@@ -11,6 +11,7 @@ import apiNetwork from "./server/handlers/network";
 import apiIdentity from "./server/handlers/identity";
 import apiTransaction from "./server/handlers/transaction"
 import apiDeploy from "./server/handlers/deploy"
+import apiUpload from "./server/handlers/upload"
 
 // .env file
 const dotenv = require('dotenv');
@@ -53,13 +54,18 @@ app.use(function(req, res, next) {
     next();
 });
 
+//File upload middleware
+const fileUpload = require('express-fileupload');
+app.use(fileUpload());
+
 //Routes
 app.use("/", index);
 app.use("/api/helloworld", apiHelloWorld);
 app.use("/api/network", apiNetwork);
 app.use("/api/identity", apiIdentity);
 app.use("/api/transaction", apiTransaction);
-app.use("/api/deploy", apiDeploy);
+app.use("/api/contract", apiDeploy);
+app.use("/api/file", apiUpload);
 
 const port = process.env.PORT || 3000;
 
