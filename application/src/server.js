@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import compression from "compression";
 import bodyParser from 'body-parser';
 import path from "path";
@@ -16,6 +17,22 @@ dotenv.config({ path: path.join(__dirname, '../') + '.env' });
 
 // GLOBALS
 global.ConnectionProfiles = {}; // consider to use e.g. redis
+
+// Connect to MongoDB
+const dbURI = process.env.MONGODB_URL;
+mongoose.connect(dbURI, { useNewUrlParser: true });
+// When successfully connected
+mongoose.connection.on('connected', () => {
+    console.log('info: Mongoose default connection open to: ' + dbURI);
+});
+// If the connection throws an error
+mongoose.connection.on('error', (err) => {
+    console.log('error: Mongoose default connection error: ' + err);
+});
+// When the connection is disconnected
+mongoose.connection.on('disconnected', () => {
+    console.log('info: Mongoose default connection disconnected');
+});
 
 // Server var
 const app = express();

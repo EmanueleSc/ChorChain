@@ -26,44 +26,9 @@
       padding-left: 15px;
       padding-right: 15px;
     }
-    .djs-palette {
-      display: none;
-    }
     .button {
       position: relative;
       left: 15px;
-    }
-    .highlight:not(.djs-connection) .djs-visual>:nth-child(1) {
-			fill: green !important;
-		}
-
-		.highlight-overlay {
-			background-color: green;
-			/* color elements as green */
-			opacity: 0.4;
-			pointer-events: none;
-			/* no pointer events, allows clicking through onto the element */
-		}
-
-    #inputContainer {
-      position: relative;
-      left: 15px;
-      width: 40%;
-    }
-
-    .box {
-      display: flex;
-      padding-bottom: 30px;
-    }
-    .div-right{
-      border: 1px solid rgba(34,36,38,.15);
-      -webkit-box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-      box-shadow: 0 1px 2px 0 rgba(34,36,38,.15);
-      border-radius: .28571429rem;
-      position: relative;
-      width: 60%;
-      margin-left: 25px;
-      margin-right: 15px;
     }
     
   </style>
@@ -73,31 +38,19 @@
 <body>
   
   <div class="ui three item menu">
-    <a class="item active">Execution Page</a>
-    <a href="translator.html" class="item">Translator</a>
+    <a href="index.html" class="item">Execution Page</a>
+    <a class="item active">Translator</a>
   </div>
-
-  <button id="btnOrg1" class="ui button">Customer</button>
-  <button id="btnOrg2" class="ui button">Bike Center</button>
-  <button id="btnOrg3" class="ui button">Insurer</button>
 
   <div class="content">
     <div id="canvas"></div>
   </div>
 
-  <button id="btnStart" class="ui button">Start</button> <!-- loading -->
-
-  
-  <div class="box">
-    <div id="inputContainer"></div>
-    <div id="output" class="div-right">
-      <!--<p id="output"></p>-->
-    </div>
-  </div>
+  <button id="btnDeploy" class="ui button">Deploy</button> <!-- loading -->
   
   
 
-  <script src="./app.js"></script>
+  <script src="./deploy.js"></script>
   <script
     src="https://code.jquery.com/jquery-3.1.1.min.js"
     integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="

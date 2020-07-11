@@ -28,6 +28,15 @@ class ChorModeler {
         })
     }
 
+    saveModel() {
+        return new Promise((resolve, reject) => {
+            return this.modeler.saveXML({ format: true }, (err, xml) => {
+                if(err) return reject(err)
+                return resolve(xml)
+            })
+        })
+    }
+
     colorElem(elemID) {
         let overlays = this.modeler.get('overlays')
         let elementRegistry = this.modeler.get('elementRegistry')
