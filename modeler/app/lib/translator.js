@@ -9,38 +9,56 @@ class ChorTranslator {
         this.roles = {}
         this.configTxProfile = 'ThreeOrgsChannel' // default
         this.startEvent = ''
+        this.modelName = ''
+        this.contract = ''
         const contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
 
-        moddle.fromXML(xml).then(obj => {
-            console.log(obj)
-            
-            let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
-            this.startEvent = chorElements[0]
-            const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
-
-            chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
-            const exclusiveGatewayObjs = this.getElementsByType(obj, "bpmn:ExclusiveGateway")
-
-            chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EventBasedGateway"))
-            const eventBasedGatewayObjs = this.getElementsByType(obj, "bpmn:EventBasedGateway")
-
-            chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message"))
-            const choreographyTaskObjs = this.getElementsByType(obj, "bpmn:ChoreographyTask")
-            console.log(choreographyTaskObjs)
-
-            chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
-            chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
-
-            const participants = this.getParticipatsNames(obj)
-            this.roles = this.computeRolesObj(participants)
-            if(participants.length === 2) this.configTxProfile = 'TwoOrgsChannel'
-
-            const contract = smartcontract(
-                this.chorID, contractName, chorElements, participants, this.startEvent,
-                startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
-            )
-            console.log(contract)
+        return new Promise((resolve, reject) => {
+            try {
+                return moddle.fromXML(xml).then(obj => {
+                    this.modelName = this.getModelName(obj)
+                    
+                    let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
+                    this.startEvent = chorElements[0]
+                    const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
+        
+                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
+                    const exclusiveGatewayObjs = this.getElementsByType(obj, "bpmn:ExclusiveGateway")
+        
+                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EventBasedGateway"))
+                    const eventBasedGatewayObjs = this.getElementsByType(obj, "bpmn:EventBasedGateway")
+        
+                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message"))
+                    const choreographyTaskObjs = this.getElementsByType(obj, "bpmn:ChoreographyTask")
+        
+                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
+                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
+        
+                    const participants = this.getParticipatsNames(obj)
+                    this.roles = this.computeRolesObj(participants)
+                    if(participants.length === 2) this.configTxProfile = 'TwoOrgsChannel'
+        
+                    this.contract = smartcontract(
+                        this.chorID, contractName, chorElements, participants, this.startEvent,
+                        startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
+                    )
+                    
+                    return resolve(this)
+                })
+                
+            } catch (error) {
+                return reject(error)
+            }
         })
+    }
+
+    getModelName(obj) {
+        const rootElems = obj.rootElement.rootElements
+        let name = ''
+        for(let i = 0; i < rootElems.length; i++) {
+            if(rootElems[i].id === 'Choreography') name = rootElems[i].name
+        }
+        return name
     }
 
     getElementsByType(modelObj, type) {

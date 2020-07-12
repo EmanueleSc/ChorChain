@@ -12,21 +12,33 @@ const path = require('path');
 // create and configure a chor-js instance
 const modeler = new ChorModeler();
 
-// API data: bpmnFileName
-// OK: idChor, roles, configTxProfile, startEvent, idBpmnFile
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnDeploy = document.getElementById("btnDeploy");
     btnDeploy.addEventListener('click', async (e) => {
         try {
             const chorxml = await modeler.saveModel();
-            const translator = new ChorTranslator(chorxml);
+            const translator = await new ChorTranslator(chorxml);
             const idBpmnFile = translator.chorID + '.bpmn';
 
-            const file = new File([chorxml], idBpmnFile, {type: "text/plain;charset=utf-8"});
-            const data = new FormData()
-            data.append('bpmn', file)
-            await uploadBpmnFile(data);
+            //const bpmnfile = new File([chorxml], idBpmnFile, {type: "text/plain;charset=utf-8"});
+            //const formData = new FormData()
+            //formData.append('bpmn', bpmnfile)
+            //await uploadBpmnFile(formData);
+
+
+            // deploy data
+            const data = {
+                idBpmnFile: idBpmnFile, 
+                bpmnFileName: translator.modelName, 
+                startEvent: translator.startEvent, 
+                roles: translator.roles, 
+                configTxProfile: translator.configTxProfile, 
+                idChor: translator.chorID
+            }
+            console.log(data)
+            console.log(translator.contract)
+
 
         } catch (error) {
             console.log(error);
