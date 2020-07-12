@@ -4,8 +4,9 @@ import { deployContract } from './lib/rest';
 import { uploadBpmnFile } from './lib/rest';
 import xml from './diagrams/newDiagram.bpmn';
 // const FileSaver = require('file-saver');
+const Prism = require('prismjs');
 
-const path = require('path');
+// const path = require('path');
 // const bpmnPath = path.resolve(__dirname, `diagrams`);
 // const chaincodeFile = path.resolve(__dirname, `../../chaincode/lib/choreographyprivatedatacontract.js`);
 
@@ -14,6 +15,14 @@ const modeler = new ChorModeler();
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    const btnCode = document.getElementById("btnCode");
+    btnCode.addEventListener('click', async (e) => {
+        const chorxml = await modeler.saveModel();
+        const translator = await new ChorTranslator(chorxml);
+        const html = Prism.highlight(translator.contract, Prism.languages.javascript, 'javascript');
+        document.getElementById('codeViewer').innerHTML = html
+    });
+
     const btnDeploy = document.getElementById("btnDeploy");
     btnDeploy.addEventListener('click', async (e) => {
         try {
@@ -37,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 idChor: translator.chorID
             }
             console.log(data)
-            console.log(translator.contract)
+            //console.log(translator.contract)
 
 
         } catch (error) {

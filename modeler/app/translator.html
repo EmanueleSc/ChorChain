@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles/editor.css"/>
   <link rel="stylesheet" href="styles/app.less"/> <!--Order is important, editor first -->
   <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+  <link href="styles/prism.css" rel="stylesheet" />
 
   <style type="text/css">
     html, body {
@@ -30,6 +31,9 @@
       position: relative;
       left: 15px;
     }
+    #preCode {
+        max-height: 600px;
+    }
     
   </style>
 
@@ -46,11 +50,14 @@
     <div id="canvas"></div>
   </div>
 
+  <button id="btnCode" class="ui button">Code Inspect</button>
   <button id="btnDeploy" class="ui button">Deploy</button> <!-- loading -->
+  <pre id="preCode" ><code id="codeViewer" class="language-js">console.log('Hello from Hyreo :) !!')</code></pre>
   
   
 
   <script src="./deploy.js"></script>
+  <script src="lib/prism/prism.js"></script>
   <script
     src="https://code.jquery.com/jquery-3.1.1.min.js"
     integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
