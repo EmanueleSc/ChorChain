@@ -62,15 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Upload the model first!');
                 return;
             }
-
             console.log(data)
-            
-            //let deployElem = document.querySelector('.deploy');
-            //deployElem.classList.add('loading');
-            //const deployResp = await deployContract(data);
-            //deployElem.classList.remove('loading');
 
-            //console.log(deployResp);
+            let deployElem = document.querySelector('.deploy');
+            deployElem.classList.add('loading');
+            const deployResp = await deployContract(data);
+            deployElem.classList.remove('loading');
+
+            // console.log(deployResp);
+            alert('Deploy contract completed!')
 
         } catch (error) {
             console.log(error);

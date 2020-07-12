@@ -4,9 +4,9 @@ const ChorInstance = require("../../db/chorinstance")
 const ChannelU = require("../utils/channelu")
 
 const highlightLog = (message) => {
-    console.log(`#####################################################`)
-    console.log(`#################### ${message} #####################`)
-    console.log(`#####################################################`)
+    console.log(`##############################################################################`)
+    console.log(`### ${message} ###`)
+    console.log(`##############################################################################`)
 
 }
 
@@ -16,19 +16,6 @@ router.post('/deploy', async (req, res) => {
         const contractName = `org.hyreochain.choreographyprivatedata_${idChor}`
         const channel = `channel${idChor}`
         const contractVersion = 1
-
-        highlightLog(`Creating Choreography Instance on MongoDB - chor ID: ${idChor}`)
-        const chor = await ChorInstance.create({
-            idBpmnFile,
-            bpmnFileName,
-            startEvent,
-            roles,
-            configTxProfile,
-            idChor,
-            contractName,
-            channel,
-            contractVersion
-        })
 
         highlightLog(`Generating Channel Transaction for: ${channel}`)
         await ChannelU.generateChannelTransaction(channel, configTxProfile)
@@ -52,10 +39,23 @@ router.post('/deploy', async (req, res) => {
         await ChannelU.joinChannel(client3, channel, 'org3.example.com', 'grpcs://localhost:11051')
 
         highlightLog(`Update Anchor Peers definition for: ${channel}`)
-        await ChannelU.update3OrgsAnchorPeers(channel)
+        await ChannelU.update3OrgsAnchorPeers(channel).catch(e => undefined) // skip this error
 
         highlightLog(`Deploying Contract: ${contractName}`)
         await ChannelU.deploy3OrgsContract(channel, contractVersion)
+
+        highlightLog(`Creating Choreography Instance on MongoDB - chor ID: ${idChor}`)
+        const chor = await ChorInstance.create({
+            idBpmnFile,
+            bpmnFileName,
+            startEvent,
+            roles,
+            configTxProfile,
+            idChor,
+            contractName,
+            channel,
+            contractVersion
+        })
 
         res.json({ response: chor })
     } catch (err) {

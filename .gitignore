@@ -24,6 +24,8 @@
 /application/node_modules
 /application/src/public
 /application/identity
+/application/src/server/bpmnFiles/*
+/application/log.txt
 /modeler/dist
 /modeler/.cache
 /modeler/node_modules
