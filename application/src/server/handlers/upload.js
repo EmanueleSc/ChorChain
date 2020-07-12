@@ -26,7 +26,7 @@ router.post('/upload', async (req, res) => {
                 return res.status(500).send(err)
             }
             
-            res.send('File uploaded!')
+            res.json({ response: 'File uploaded!' })
         })
     } catch (err) {
         res.json({ error: err.message || err.toString() })

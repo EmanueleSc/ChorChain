@@ -61,10 +61,19 @@ const _startEventTamplate = (obj) => {
     const outgoing = obj.outgoing[0].targetRef
 
     let nextInvoke = ''
-    if(outgoing.$type === typeElem.MESSAGE)
-        nextInvoke = 'await choreography.updateState(ctx)'
-    else
-        nextInvoke = `await this.${outgoing.id}(ctx, choreography)`
+    if(outgoing.$type === typeElem.CHOREOGRAPHYTASK) {
+        const msgID = _getInitialParticipantMessageID(outgoing)
+        nextInvoke += `
+            choreography.setEnable('${msgID}')
+            await choreography.updateState(ctx)
+        `
+    } else {
+        // it's a gateway
+        nextInvoke += `
+            choreography.setEnable('${outgoing.id}')
+            await this.${outgoing.id}(ctx, choreography, choreographyPrivate)
+        `
+    }
 
     return `
         async ${obj.id}(ctx) {
@@ -72,7 +81,6 @@ const _startEventTamplate = (obj) => {
 
             if(choreography.elements.${obj.id} === Status.ENABLED) {
                 choreography.setDone('${obj.id}')
-                choreography.setEnable('${outgoing.id}')
                 ${nextInvoke}
 
                 return choreography
@@ -407,9 +415,9 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
                 resp.choreographyPrivate = {}
         
                 const mspid = ctx.stub.getCreator().mspid
-                const k1 = Object.keys(roles).find(key => roles[key] === 'Org1MSP') // Customer
-                const k2 = Object.keys(roles).find(key => roles[key] === 'Org2MSP') // Bike_center
-                const k3 = Object.keys(roles).find(key => roles[key] === 'Org3MSP') // Insurer
+                const k1 = Object.keys(roles).find(key => roles[key] === 'Org1MSP')
+                const k2 = Object.keys(roles).find(key => roles[key] === 'Org2MSP')
+                const k3 = Object.keys(roles).find(key => roles[key] === 'Org3MSP')
         
                 if(mspid === 'Org1MSP') {
                     privateCollection = k1 + k2
