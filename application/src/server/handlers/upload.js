@@ -1,5 +1,6 @@
 import express from "express"
 const router = express.Router()
+const fs = require('fs');
 const path = require('path')
 
 
@@ -8,11 +9,16 @@ router.post('/upload', async (req, res) => {
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).send('No files were uploaded.')
         }
+
+        if(req.files.contract) {
+            const code = req.files.contract.data.toString('utf8')
+            const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
+            fs.writeFileSync(chaincodeFile, code)
+        }
         
-        // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
         const file = req.files.bpmn
         const fileName = req.files.bpmn.name
-        const uploadPath = path.resolve(__dirname, `../bpmnFiles/${fileName}`);
+        const uploadPath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
         
 
         file.mv(uploadPath, (err) => {

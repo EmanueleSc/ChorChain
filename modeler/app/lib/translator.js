@@ -11,7 +11,7 @@ class ChorTranslator {
         this.startEvent = ''
         this.modelName = ''
         this.contract = ''
-        const contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
+        this.contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
 
         return new Promise((resolve, reject) => {
             try {
@@ -39,7 +39,7 @@ class ChorTranslator {
                     if(participants.length === 2) this.configTxProfile = 'TwoOrgsChannel'
         
                     this.contract = smartcontract(
-                        this.chorID, contractName, chorElements, participants, this.startEvent,
+                        this.chorID, this.contractName, chorElements, participants, this.startEvent,
                         startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
                     )
                     
