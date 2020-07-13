@@ -40,3 +40,11 @@ export const deployContract = ({
 });
 
 export const uploadBpmnFile = ( data ) => sendRequest(`/api/file/upload`, { body: data }, true);
+
+export const fetchChorInstances = ({ hello }) => sendRequest(`/api/chorinstance/fetch`, { 
+    body:  JSON.stringify({ hello })
+});
+
+export const fetchChorInstanceFile = ({ idBpmnFile }) => sendRequest(`/api/chorinstance/fetch/file`, { 
+    body:  JSON.stringify({ idBpmnFile })
+}, false);

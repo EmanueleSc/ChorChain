@@ -3,10 +3,10 @@
         const { Contract } = require('fabric-contract-api')
         const { ChoreographyState, Status } = require('../ledger-api/choreographystate')
         const { ChoreographyPrivateState } = require('../ledger-api/choreographyprivatestate')
-        const chorID = '9fe1294e-8169-453d-b29a-97231beafdf9'
-        const contractName = 'org.hyreochain.choreographyprivatedata_9fe1294e-8169-453d-b29a-97231beafdf9'
+        const chorID = 'ffe1f4df-9b25-4c2d-9577-60400705e55b'
+        const contractName = 'org.hyreochain.choreographyprivatedata_ffe1f4df-9b25-4c2d-9577-60400705e55b'
         const chorElements = [
-            'Event_0lm8p7m','Message_1ikf3sd','Message_1e86ejs','Message_01dlbl5','Event_1icqmh1',
+            'Event_04dc3oj','Message_0ynorau','Message_1h5bieh','Event_1haujxq',
         ]
         const roles = { Role1: 'Org1MSP', Role2: 'Org2MSP', Role3: 'Org3MSP',  }
         const collectionsPrivate = {
@@ -21,25 +21,25 @@
             async instantiate(ctx) {
                 const choreography = new ChoreographyState({ chorID })
                 choreography.initElements(chorElements)
-                choreography.setEnable('Event_0lm8p7m')
+                choreography.setEnable('Event_04dc3oj')
                 await choreography.updateState(ctx)
                 return choreography
             }
 
             
-        async Event_0lm8p7m(ctx) {
+        async Event_04dc3oj(ctx) {
             const choreography = await ChoreographyState.getState(ctx, chorID)
 
-            if(choreography.elements.Event_0lm8p7m === Status.ENABLED) {
-                choreography.setDone('Event_0lm8p7m')
+            if(choreography.elements.Event_04dc3oj === Status.ENABLED) {
+                choreography.setDone('Event_04dc3oj')
                 
-            choreography.setEnable('Message_01dlbl5')
+            choreography.setEnable('Message_1h5bieh')
             await choreography.updateState(ctx)
         
 
                 return choreography
             } else {
-                throw new Error('Element Event_0lm8p7m not ENABLED')
+                throw new Error('Element Event_04dc3oj not ENABLED')
             }
         }
     
@@ -49,62 +49,42 @@
             
 
             
-            async Message_01dlbl5(ctx) {
+            async Message_1h5bieh(ctx) {
                 /* one-way task */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.Message_01dlbl5 === Status.ENABLED && roles.Role1 === ctx.stub.getCreator().mspid) {
+                if(choreography.elements.Message_1h5bieh === Status.ENABLED && roles.Role1 === ctx.stub.getCreator().mspid) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.Role1Role2, chorID)
-                    choreography.setDone('Message_01dlbl5')
+                    choreography.setDone('Message_1h5bieh')
                     
-                    choreography.setEnable('Message_1e86ejs')
+                    choreography.setEnable('Message_0ynorau')
 await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.Role1Role2)
 await choreography.updateState(ctx)
 
 
                     return { choreography, choreographyPrivate }
                 } else {
-                    throw new Error('Element Message_01dlbl5 is not ENABLED or submitter not allowed, only the Role1 can send this transaction')
+                    throw new Error('Element Message_1h5bieh is not ENABLED or submitter not allowed, only the Role1 can send this transaction')
                 }
             }
         
 
-            async Message_1e86ejs(ctx) {
+            async Message_0ynorau(ctx) {
                 /* one-way task */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.Message_1e86ejs === Status.ENABLED && roles.Role2 === ctx.stub.getCreator().mspid) {
-                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.Role1Role2, chorID)
-                    choreography.setDone('Message_1e86ejs')
+                if(choreography.elements.Message_0ynorau === Status.ENABLED && roles.Role3 === ctx.stub.getCreator().mspid) {
+                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.Role1Role3, chorID)
+                    choreography.setDone('Message_0ynorau')
                     
-                    choreography.setEnable('Message_1ikf3sd')
-await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.Role1Role2)
-await choreography.updateState(ctx)
+                    choreography.setEnable('Event_1haujxq')
+await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.Role1Role3)
+await this.Event_1haujxq(ctx, choreography, choreographyPrivate)
 
 
                     return { choreography, choreographyPrivate }
                 } else {
-                    throw new Error('Element Message_1e86ejs is not ENABLED or submitter not allowed, only the Role2 can send this transaction')
-                }
-            }
-        
-
-            async Message_1ikf3sd(ctx) {
-                /* one-way task */
-                const choreography = await ChoreographyState.getState(ctx, chorID)
-
-                if(choreography.elements.Message_1ikf3sd === Status.ENABLED && roles.Role3 === ctx.stub.getCreator().mspid) {
-                    const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.Role2Role3, chorID)
-                    choreography.setDone('Message_1ikf3sd')
-                    
-                    choreography.setEnable('Event_1icqmh1')
-await choreographyPrivate.updatePrivateState(ctx, collectionsPrivate.Role2Role3)
-await this.Event_1icqmh1(ctx, choreography, choreographyPrivate)
-
-
-                    return { choreography, choreographyPrivate }
-                } else {
-                    throw new Error('Element Message_1ikf3sd is not ENABLED or submitter not allowed, only the Role3 can send this transaction')
+                    throw new Error('Element Message_0ynorau is not ENABLED or submitter not allowed, only the Role3 can send this transaction')
                 }
             }
         

@@ -69,10 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const deployResp = await deployContract(data);
             deployElem.classList.remove('loading');
 
-            // console.log(deployResp);
+            console.log(deployResp);
             alert('Deploy contract completed!')
 
         } catch (error) {
+            deployElem.classList.remove('loading');
             console.log(error);
         }
     });

@@ -65,6 +65,13 @@
       margin-left: 25px;
       margin-right: 15px;
     }
+
+    .grid {
+      height: 100%;
+    }
+    .four {
+      max-width: 20%;
+    }
     
   </style>
 
@@ -77,21 +84,30 @@
     <a href="translator.html" class="item">Translator</a>
   </div>
 
-  <button id="btnOrg1" class="ui button">Customer</button>
-  <button id="btnOrg2" class="ui button">Bike Center</button>
-  <button id="btnOrg3" class="ui button">Insurer</button>
+  <div class="ui grid">
+    <div class="four wide column">
+      <div id="rightmenu" class="ui vertical fluid tabular menu">
+      </div>
+    </div>
+    <div class="twelve wide stretched column">
+      <div class="ui segment">
+          <button id="btnOrg1" class="ui button"></button> <!--Customer-->
+          <button id="btnOrg2" class="ui button"></button> <!--Bike Center-->
+          <button id="btnOrg3" class="ui button"></button><!--Insurer-->
 
-  <div class="content">
-    <div id="canvas"></div>
-  </div>
+          <div class="content">
+            <div id="canvas"></div>
+          </div>
 
-  <button id="btnStart" class="ui button">Start</button> <!-- loading -->
+          <button id="btnStart" class="ui button">Start</button> <!-- loading -->
 
-  
-  <div class="box">
-    <div id="inputContainer"></div>
-    <div id="output" class="div-right">
-      <!--<p id="output"></p>-->
+          
+          <div class="box">
+            <div id="inputContainer"></div>
+            <div id="output" class="div-right">
+            </div>
+          </div>
+      </div>
     </div>
   </div>
   

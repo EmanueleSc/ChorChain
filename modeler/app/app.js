@@ -1,8 +1,9 @@
 import { ChorModeler } from './lib/modeler'; // my lib
-// import { ChorTranslator } from './lib/translator'; // TEST
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
 import { submitTransaction } from './lib/rest';
+import { fetchChorInstances } from './lib/rest';
+import { fetchChorInstanceFile } from './lib/rest';
 import JSONFormatter from 'json-formatter-js';
 
 import xml from './diagrams/BikeRental.bpmn';
@@ -11,20 +12,55 @@ let connectionIDOrg1 = '';
 let connectionIDOrg2 = '';
 let connectionIDOrg3 = '';
 let connectionID = '';
-let startEvent = 'Event_0tttznh';
+
 let dataPayload = { 
-  channel: 'channel123', 
-  contractNamespace: 'choreographyprivatedatacontract', 
-  contractName: 'org.chorchain.choreographyprivatedata_1', 
-  transactionName: startEvent
+  // channel: 'channel123', 
+  // contractNamespace: 'choreographyprivatedatacontract', 
+  // contractName: 'org.chorchain.choreographyprivatedata_1', 
+  // transactionName: 'Event_0tttznh', // startEvent
   // connectionID
   // transientData
 }
+
 let elements = {};
+let chorInstances = [];
 
 // create and configure a chor-js instance
 const modeler = new ChorModeler();
-// const translator = new ChorTranslator(xml); // TEST
+
+function updateUI() {
+  // update menu left
+  let items = `<a id="${chorInstances[0]._id}" class="item active">${chorInstances[0].bpmnFileName}</a>`; // first item
+  for(let i = 1; i < chorInstances.length; i++) {
+    items += `
+      <a id="${chorInstances[i]._id}" class="item active">${chorInstances[i].bpmnFileName}</a>
+    `;
+  }
+  document.getElementById('rightmenu').innerHTML = items;
+}
+
+function updateButtonsName(chorInstanceID) {
+  let roles
+  for(let i = 0; i < chorInstances.length; i++) {
+    if(chorInstances[i]._id === chorInstanceID) roles = chorInstances[i].roles
+  }
+  let i = 1
+  for (const [key, value] of Object.entries(roles)) {
+    document.getElementById(`btnOrg${i}`).innerText = key
+    i++;
+  }
+}
+
+function fetchChors() {
+  return new Promise((resolve, reject) => {
+      return fetchChorInstances({ hello: 'hello' }).then(res => {
+        return resolve(res.response);
+      })
+      .catch(err => {
+        return reject(err);
+      })
+  });
+}
 
 function queryChorState() {
   if(connectionID !== '') {
@@ -202,5 +238,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// render the model
-modeler.renderModel(xml).catch(error => console.log(error))
+fetchChors().then(async (res) => {
+  console.log(res);
+  chorInstances = res;
+  const resp = await fetchChorInstanceFile({ idBpmnFile: chorInstances[0].idBpmnFile }); // get first file
+  await modeler.renderModel(resp.response);
+  updateUI();
+  updateButtonsName(chorInstances[0]._id);
+
+  dataPayload = {
+    channel: chorInstances[0].channel,
+    contractName: chorInstances[0].contractName,
+    contractNamespace: 'choreographyprivatedatacontract', 
+    transactionName: chorInstances[0].startEvent
+  };
+}).catch(error => console.log(error))
+
+
+// modeler.renderModel(xml).catch(error => console.log(error))

@@ -12,6 +12,7 @@ import apiIdentity from "./server/handlers/identity";
 import apiTransaction from "./server/handlers/transaction"
 import apiDeploy from "./server/handlers/deploy"
 import apiUpload from "./server/handlers/upload"
+import apiFetch from "./server/handlers/fetch"
 
 // .env file
 const dotenv = require('dotenv');
@@ -48,6 +49,7 @@ app.use(compression());
 app.use(bodyParser());
 console.log(__dirname);
 app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/server/bpmnFiles"));
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", process.env.MODELER_URL); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -66,6 +68,7 @@ app.use("/api/identity", apiIdentity);
 app.use("/api/transaction", apiTransaction);
 app.use("/api/contract", apiDeploy);
 app.use("/api/file", apiUpload);
+app.use("/api/chorinstance", apiFetch);
 
 const port = process.env.PORT || 3000;
 
