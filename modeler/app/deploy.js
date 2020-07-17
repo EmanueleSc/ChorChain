@@ -12,6 +12,17 @@ const modeler = new ChorModeler();
 let data = {};
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let contents = e.target.result;
+            modeler.renderModel(contents);
+        };
+        reader.readAsText(file);
+    }, false);
+
     const btnCode = document.getElementById("btnCode");
     btnCode.addEventListener('click', async (e) => {
         const chorxml = await modeler.saveModel();
