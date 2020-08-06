@@ -1,9 +1,9 @@
+
 'use strict';
+const contracts = [];
 
-// const ChoreographyContract = require('./lib/choreographycontract.js');
-// module.exports.ChoreographyContract = ChoreographyContract;
-// module.exports.contracts = [ChoreographyContract];
-
-const ChoreographyPrivateDataContract = require('./lib/choreographyprivatedatacontract.js');
-module.exports.ChoreographyPrivateDataContract = ChoreographyPrivateDataContract;
-module.exports.contracts = [ChoreographyPrivateDataContract];
+const ChoreographyPrivateDataContract1 = require('./lib/choreographyprivatedatacontract1.js');
+contracts.push(ChoreographyPrivateDataContract1);
+const ChoreographyPrivateDataContract2 = require('./lib/choreographyprivatedatacontract2.js');
+contracts.push(ChoreographyPrivateDataContract2);
+module.exports.contracts = contracts;

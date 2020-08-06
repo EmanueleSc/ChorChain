@@ -11,9 +11,35 @@ router.post('/upload', async (req, res) => {
         }
 
         if(req.files.contract) {
+            // check if cc_counter.json exists (contract counter file)
+            const cc_counterFile = path.resolve(__dirname, `../../../../chaincode/utils/cc_counter.json`)
+            let data
+            if (fs.existsSync(cc_counterFile)) { // file exists
+                data = JSON.parse(fs.readFileSync(cc_counterFile, {encoding:'utf8', flag:'r'}))
+                data.counter = data.counter + 1
+                fs.writeFileSync(cc_counterFile, JSON.stringify(data))
+
+            } else {  //file not exists
+                data = { counter: 1 }
+                fs.writeFileSync(cc_counterFile, JSON.stringify(data))
+            }
+
+            // write smart contract file inside chaincode
             const code = req.files.contract.data.toString('utf8')
-            const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
+            const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract${data.counter}.js`)
             fs.writeFileSync(chaincodeFile, code)
+
+            // write index.js file inside chaincode
+            let header = `\n'use strict';\nconst contracts = [];`
+            let body = ''
+            let end = 'module.exports.contracts = contracts;'
+            const cc_index = path.resolve(__dirname, `../../../../chaincode/index.js`)
+
+            for(let i = 0; i < data.counter; i++) {
+                body += `\nconst ChoreographyPrivateDataContract${i+1} = require('./lib/choreographyprivatedatacontract${i+1}.js');\ncontracts.push(ChoreographyPrivateDataContract${i+1});`
+            }
+            body = header + '\n' + body + '\n' + end
+            fs.writeFileSync(cc_index, body)
         }
         
         const file = req.files.bpmn

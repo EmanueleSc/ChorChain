@@ -71,7 +71,7 @@ const _startEventTamplate = (obj) => {
         // it's a gateway
         nextInvoke += `
             choreography.setEnable('${outgoing.id}')
-            await this.${outgoing.id}(ctx, choreography, choreographyPrivate)
+            await this.${outgoing.id}(ctx, choreography)
         `
     }
 

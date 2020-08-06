@@ -21,6 +21,8 @@
 /chaincode/.nyc_output
 /chaincode/coverage
 /chaincode/identity
+/chaincode/lib/*
+/chaincode/utils/cc_counter.json
 /application/node_modules
 /application/src/public
 /application/identity

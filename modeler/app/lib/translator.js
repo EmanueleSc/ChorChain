@@ -56,7 +56,7 @@ class ChorTranslator {
         const rootElems = obj.rootElement.rootElements
         let name = ''
         for(let i = 0; i < rootElems.length; i++) {
-            if(rootElems[i].id === 'Choreography') name = rootElems[i].name
+            if(rootElems[i].$type === 'bpmn:Choreography') name = rootElems[i].name
         }
         return name
     }

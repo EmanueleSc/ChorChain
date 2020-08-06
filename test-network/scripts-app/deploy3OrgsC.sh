@@ -169,7 +169,7 @@ cat <<- EOF > ${COLLECTION_CONFIG}
   {
        "name": "collectionOrg1MSPOrg2MSP",
        "policy": "OR('Org1MSP.member', 'Org2MSP.member')",
-       "requiredPeerCount": 2,
+       "requiredPeerCount": 1,
        "maxPeerCount": 3,
        "blockToLive":1000000,
        "memberOnlyRead": true,
@@ -178,7 +178,7 @@ cat <<- EOF > ${COLLECTION_CONFIG}
   {
        "name": "collectionOrg1MSPOrg3MSP",
        "policy": "OR('Org1MSP.member', 'Org3MSP.member')",
-       "requiredPeerCount": 2,
+       "requiredPeerCount": 1,
        "maxPeerCount": 3,
        "blockToLive":1000000,
        "memberOnlyRead": true,
@@ -187,7 +187,7 @@ cat <<- EOF > ${COLLECTION_CONFIG}
   {
        "name": "collectionOrg2MSPOrg3MSP",
        "policy": "OR('Org2MSP.member', 'Org3MSP.member')",
-       "requiredPeerCount": 2,
+       "requiredPeerCount": 1,
        "maxPeerCount": 3,
        "blockToLive":1000000,
        "memberOnlyRead": true,
