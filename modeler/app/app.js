@@ -6,7 +6,7 @@ import { fetchChorInstances } from './lib/rest';
 import { fetchChorInstanceFile } from './lib/rest';
 import JSONFormatter from 'json-formatter-js';
 
-import xml from './diagrams/BikeRental.bpmn';
+// import xml from './diagrams/BikeRental.bpmn';
 
 let connectionIDOrg1 = '';
 let connectionIDOrg2 = '';
@@ -30,13 +30,47 @@ const modeler = new ChorModeler();
 
 function updateUI() {
   // update menu left
-  let items = `<a id="${chorInstances[0]._id}" class="item active">${chorInstances[0].bpmnFileName}</a>`; // first item
+  let items = `<a id="${chorInstances[0]._id}" class="leftmenuitem item active">${chorInstances[0].bpmnFileName}</a>`; // first item
   for(let i = 1; i < chorInstances.length; i++) {
     items += `
-      <a id="${chorInstances[i]._id}" class="item active">${chorInstances[i].bpmnFileName}</a>
+      <a id="${chorInstances[i]._id}" class="leftmenuitem item">${chorInstances[i].bpmnFileName}</a>
     `;
   }
-  document.getElementById('rightmenu').innerHTML = items;
+  document.getElementById('leftmenu').innerHTML = items;
+
+  // add event listener to left menu items
+  for(let i = 0; i < chorInstances.length; i++) {
+    document.getElementById(chorInstances[i]._id).addEventListener('click', menuItemClick);
+  }
+}
+
+async function menuItemClick(e) {
+  // active selected element
+  let items = document.querySelectorAll('.leftmenuitem');
+  items.forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+
+  let chorInstanceTarget
+  // get chor instance target object
+  for(let i = 0; i < chorInstances.length; i++) {
+    if(chorInstances[i]._id === e.target.id) {
+      chorInstanceTarget =  chorInstances[i];
+      break;
+    }
+  }
+
+  const resp = await fetchChorInstanceFile({ idBpmnFile: chorInstanceTarget.idBpmnFile });
+  await modeler.renderModel(resp.response);
+  updateButtonsName(chorInstanceTarget._id);
+
+  dataPayload = {
+    channel: chorInstanceTarget.channel,
+    contractName: chorInstanceTarget.contractName,
+    contractNamespace: 'choreographyprivatedatacontract', 
+    transactionName: chorInstanceTarget.startEvent
+  };
+
+  // console.log(dataPayload);
 }
 
 function updateButtonsName(chorInstanceID) {
