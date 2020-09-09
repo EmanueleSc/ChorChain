@@ -10,7 +10,8 @@ const chorinstanceSchema = mongoose.Schema({
   channel: String,                                  // e.g. 'channel123'
   configTxProfile: { type: String, enum: ['TwoOrgsChannel', 'ThreeOrgsChannel'] },
   contractVersion: Number,
-  created_at: { type: Date, required: true, default: Date.now }
+  created_at: { type: Date, required: true, default: Date.now },
+  deployed: { type: Boolean, default: false }       // contract deployed into blockchain net (true), not deployed otherwise (false)
 })
 
 module.exports = mongoose.model('chorinstance', chorinstanceSchema)

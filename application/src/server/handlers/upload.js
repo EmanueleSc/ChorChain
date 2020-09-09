@@ -2,10 +2,17 @@ import express from "express"
 const router = express.Router()
 const fs = require('fs');
 const path = require('path')
+const ChorInstance = require("../../db/chorinstance")
 
 
 router.post('/upload', async (req, res) => {
     try {
+        const { bpmnFileName, startEvent, roles, configTxProfile, idChor } = req.body
+        const idBpmnFile = idChor + '.bpmn'
+        const contractName = `org.hyreochain.choreographyprivatedata_${idChor}`
+        const channel = `channel${idChor}`
+        const contractVersion = 1
+
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).send('No files were uploaded.')
         }
@@ -43,17 +50,32 @@ router.post('/upload', async (req, res) => {
         }
         
         const file = req.files.bpmn
-        const fileName = req.files.bpmn.name
-        const uploadPath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
+        // const fileName = req.files.bpmn.name
+        // const uploadPath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
+        const uploadPath = path.resolve(__dirname, `../bpmnFiles/${idBpmnFile}`)
         
 
         file.mv(uploadPath, (err) => {
-            if (err) {
-                return res.status(500).send(err)
-            }
-            
-            res.json({ response: 'File uploaded!' })
+            if (err) return res.status(500).send(err)
+            // res.json({ response: 'File uploaded!' })
         })
+
+        // create choreography instance in mongoDB
+        const chor = await ChorInstance.create({
+            idBpmnFile,
+            bpmnFileName,
+            startEvent,
+            roles,
+            configTxProfile,
+            idChor,
+            contractName,
+            channel,
+            contractVersion,
+            deployed: false
+        })
+
+        res.json({ response: chor })
+
     } catch (err) {
         res.json({ error: err.message || err.toString() })
     }

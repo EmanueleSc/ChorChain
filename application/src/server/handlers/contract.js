@@ -36,10 +36,13 @@ router.post('/translate', async (req, res) => {
 
 router.post('/deploy', async (req, res) => {
     try {
-        const { idBpmnFile, bpmnFileName, startEvent, roles, configTxProfile, idChor } = req.body
-        const contractName = `org.hyreochain.choreographyprivatedata_${idChor}`
-        const channel = `channel${idChor}`
-        const contractVersion = 1
+        const { idChor, contractVersion } = req.body
+
+        let chorinstance = await ChorInstance.findOne({ idChor: idChor }).exec()
+        const configTxProfile = chorinstance.configTxProfile
+        const contractName = chorinstance.contractName
+        const channel = chorinstance.channel
+        const contractVersion = contractVersion || 1
 
         highlightLog(`Generating Channel Transaction for: ${channel}`)
         await ChannelU.generateChannelTransaction(channel, configTxProfile)
@@ -68,7 +71,8 @@ router.post('/deploy', async (req, res) => {
         highlightLog(`Deploying Contract: ${contractName}`)
         await ChannelU.deploy3OrgsContract(channel, contractVersion)
 
-        highlightLog(`Creating Choreography Instance on MongoDB - chor ID: ${idChor}`)
+        // MOVED TO API/FILE/UPLOAD API
+        /*highlightLog(`Creating Choreography Instance on MongoDB - chor ID: ${idChor}`)
         const chor = await ChorInstance.create({
             idBpmnFile,
             bpmnFileName,
@@ -79,9 +83,15 @@ router.post('/deploy', async (req, res) => {
             contractName,
             channel,
             contractVersion
-        })
+        })*/
 
-        res.json({ response: chor })
+        // update choreography instance deployed field
+        chorinstance.deployed = true
+        await chorinstance.save()
+
+        // res.json({ response: chor })
+        res.json({ response: 'Contract successfully deployed!' })
+
     } catch (err) {
         console.log(err)
         res.json({ error: err.message || err.toString() })
