@@ -42,7 +42,7 @@ router.post('/deploy', async (req, res) => {
         const configTxProfile = chorinstance.configTxProfile
         const contractName = chorinstance.contractName
         const channel = chorinstance.channel
-        const contractVersion = contractVersion || 1
+        const cVersion = contractVersion || 1
 
         highlightLog(`Generating Channel Transaction for: ${channel}`)
         await ChannelU.generateChannelTransaction(channel, configTxProfile)
@@ -69,7 +69,7 @@ router.post('/deploy', async (req, res) => {
         await ChannelU.update3OrgsAnchorPeers(channel).catch(e => undefined) // skip this error
 
         highlightLog(`Deploying Contract: ${contractName}`)
-        await ChannelU.deploy3OrgsContract(channel, contractVersion)
+        await ChannelU.deploy3OrgsContract(channel, cVersion)
 
         // MOVED TO API/FILE/UPLOAD API
         /*highlightLog(`Creating Choreography Instance on MongoDB - chor ID: ${idChor}`)
