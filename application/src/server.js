@@ -2,6 +2,7 @@ import express from "express"
 import mongoose from "mongoose"
 import compression from "compression"
 import bodyParser from 'body-parser'
+import xmlparser from 'express-xml-bodyparser'
 import path from "path"
 import index from "./routes/index"
 
@@ -47,6 +48,8 @@ app.set("view engine", "ejs")
 // Middleware
 app.use(compression())
 app.use(bodyParser())
+app.use(bodyParser.text())
+app.use(xmlparser())
 console.log(__dirname)
 app.use(express.static(__dirname + "/public"))
 app.use(express.static(__dirname + "/server/bpmnFiles"))

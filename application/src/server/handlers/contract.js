@@ -2,7 +2,7 @@ import express from "express"
 const router = express.Router()
 const ChorInstance = require("../../db/chorinstance")
 const ChannelU = require("../utils/channelu")
-const ChorTranslator = require("../utils/translator")
+import { ChorTranslator } from '../utils/translator'
 
 const highlightLog = (message) => {
     console.log(`##############################################################################`)
@@ -13,7 +13,8 @@ const highlightLog = (message) => {
 
 router.post('/translate', async (req, res) => {
     try {
-        const { chorxml } = req.body
+        // const { chorxml } = req.body
+        const chorRawXml = req.body
         
         // ChorTranslator is the Choreography translator module for Hyperledger Fabric smart contracts.
         // it returns an object with the following fields:
@@ -25,7 +26,7 @@ router.post('/translate', async (req, res) => {
         //      object.contract (the translated contract code)
         //      object.contractName
 
-        const obj = await new ChorTranslator(chorxml)
+        const obj = await new ChorTranslator(chorRawXml)
 
         res.json({ response: obj })
     } catch (err) {
