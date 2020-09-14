@@ -17,7 +17,7 @@ router.post('/upload', async (req, res) => {
         }
 
         const bpmnFile = req.files.bpmn
-        const chorXml = bpmnFile.data
+        const chorXml = bpmnFile.data.toString('utf8')
         
         // ChorTranslator is the Choreography translator module for Hyperledger Fabric smart contracts.
         // it returns an object with the following fields:
