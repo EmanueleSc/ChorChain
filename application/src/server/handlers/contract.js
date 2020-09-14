@@ -2,7 +2,7 @@ import express from "express"
 const router = express.Router()
 const ChorInstance = require("../../db/chorinstance")
 const ChannelU = require("../utils/channelu")
-import { ChorTranslator } from '../utils/translator'
+// import { ChorTranslator } from '../utils/translator'
 
 const highlightLog = (message) => {
     console.log(`##############################################################################`)
@@ -11,7 +11,8 @@ const highlightLog = (message) => {
 
 }
 
-router.post('/translate', async (req, res) => {
+// MOVED INTO API/FILE/UPLOAD API
+/*router.post('/translate', async (req, res) => {
     try {
         // const { chorxml } = req.body
         const chorRawXml = req.body
@@ -33,7 +34,7 @@ router.post('/translate', async (req, res) => {
         console.log(err)
         res.json({ error: err.message || err.toString() })
     }
-})
+})*/
 
 router.post('/deploy', async (req, res) => {
     try {
