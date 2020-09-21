@@ -22,11 +22,13 @@
 /chaincode/coverage
 /chaincode/identity
 /chaincode/lib/*
+!/chaincode/lib/.gitkeep
 /chaincode/utils/cc_counter.json
 /application/node_modules
 /application/src/public
 /application/identity
 /application/src/server/bpmnFiles/*
+!/application/src/server/bpmnFiles/.gitkeep
 /application/log.txt
 /modeler/dist
 /modeler/.cache
