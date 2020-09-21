@@ -82,6 +82,10 @@ router.post('/upload', async (req, res) => {
             if (err) return res.status(500).send(err)
         })
 
+        // Initialize subscriptions to null (no user subscribed to any role)
+        const subscriptions = {}
+        Object.keys(roles).forEach(key => subscriptions[key] = null)
+
         // create choreography instance in mongoDB
         const chor = await ChorInstance.create({
             idBpmnFile,
@@ -93,7 +97,9 @@ router.post('/upload', async (req, res) => {
             contractName,
             channel,
             contractVersion,
-            deployed: false
+            deployed: false,
+            idUsersSubscribed: [],
+            subscriptions
         })
 
         res.json({ response: chor })
