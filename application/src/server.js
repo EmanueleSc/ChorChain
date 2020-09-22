@@ -12,7 +12,7 @@ import apiNetwork from "./server/handlers/network"
 import apiIdentity from "./server/handlers/identity"
 import apiTransaction from "./server/handlers/transaction"
 import apiUpload from "./server/handlers/upload"
-import apiFetch from "./server/handlers/fetch"
+import apiChorInstance from "./server/handlers/chorinstance"
 import apiContract from "./server/handlers/contract"
 
 // .env file
@@ -71,7 +71,7 @@ app.use("/api/identity", apiIdentity)
 app.use("/api/transaction", apiTransaction)
 app.use("/api/contract", apiContract)
 app.use("/api/file", apiUpload)
-app.use("/api/chorinstance", apiFetch)
+app.use("/api/chorinstance", apiChorInstance)
 
 const port = process.env.PORT || 3000
 
