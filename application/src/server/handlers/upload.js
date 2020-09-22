@@ -16,6 +16,7 @@ router.post('/upload', async (req, res) => {
             return res.status(400).send('No bpmn were uploaded.')
         }
 
+        const idModel = req.body.modelId
         const bpmnFile = req.files.bpmn
         const chorXml = bpmnFile.data.toString('utf8')
         
@@ -94,6 +95,7 @@ router.post('/upload', async (req, res) => {
             roles,
             configTxProfile,
             idChor,
+            idModel,
             contractName,
             channel,
             contractVersion,
