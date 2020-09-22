@@ -6,6 +6,17 @@ const fs = require('fs')
 const mongoose = require('mongoose')
 
 
+router.get('/instances', async (req, res) => {
+    try {
+        const { idModel } = req.query
+        const chors = await ChorInstance.find({ idModel })
+
+        res.json({ response: chors })
+    } catch (error) {
+        res.json({ error: err.message || err.toString() })
+    }
+})
+
 router.post('/fetch', async (req, res) => {
     try {
         const chors = await ChorInstance.find()
