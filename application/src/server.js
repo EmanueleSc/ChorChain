@@ -11,7 +11,8 @@ import apiHelloWorld from "./server/handlers/helloworld"
 import apiNetwork from "./server/handlers/network"
 import apiIdentity from "./server/handlers/identity"
 import apiTransaction from "./server/handlers/transaction"
-import apiUpload from "./server/handlers/upload"
+// import apiUpload from "./server/handlers/upload" // DEPRECATED
+import apiModel from "./server/handlers/model"
 import apiChorInstance from "./server/handlers/chorinstance"
 import apiContract from "./server/handlers/contract"
 
@@ -70,7 +71,8 @@ app.use("/api/network", apiNetwork)
 app.use("/api/identity", apiIdentity)
 app.use("/api/transaction", apiTransaction)
 app.use("/api/contract", apiContract)
-app.use("/api/file", apiUpload)
+// app.use("/api/file", apiUpload) // DEPRECATED
+app.use("/api/model", apiModel)
 app.use("/api/chorinstance", apiChorInstance)
 
 const port = process.env.PORT || 3000

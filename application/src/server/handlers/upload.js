@@ -5,7 +5,11 @@ const path = require('path')
 const ChorInstance = require("../../db/chorinstance")
 import { ChorTranslator } from '../utils/translator'
 
-
+/**
+ * API DEPRECATED
+ * (replaced with api/model/upload)
+ * 
+ */
 router.post('/upload', async (req, res) => {
     try {
         if (!req.files || Object.keys(req.files).length === 0) {
