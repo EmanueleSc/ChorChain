@@ -1,25 +1,103 @@
 import express from "express"
 const router = express.Router()
+const ChorModel = require("../../db/chormodel")
 const ChorInstance = require("../../db/chorinstance")
 const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
+import { ChorTranslator } from '../utils/translator'
 
-
-router.get('/instances', async (req, res) => {
+router.post('/create', async (req, res) => {
     try {
-        const { idModel } = req.query
-        const chors = await ChorInstance.find({ idModel })
+        const { idModel } = req.body
+        const model = await ChorModel.findOne({ idModel: mongoose.Types.ObjectId(idModel) })
+        const fileName = model.fileName
 
-        res.json({ response: chors })
-    } catch (error) {
+        // Get the xml of the bpmn file
+        const bpmnFilePath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
+        const chorXml = fs.readFileSync(bpmnFilePath, {encoding:'utf8', flag:'r'})
+
+        // ChorTranslator is the Choreography translator module for Hyperledger Fabric smart contracts.
+        // it returns an object with the following fields:
+        //      object.chorID
+        //      object.roles
+        //      object.configTxProfile
+        //      object.startEvent
+        //      object.modelName
+        //      object.contract (the translated contract code)
+        //      object.contractName
+        const obj = await new ChorTranslator(chorXml)
+        const idChorLedger = obj.chorID
+        const startEvent = obj.startEvent
+        const roles = obj.roles
+        const contractName = obj.contractName
+        const channel = `channel${idChorLedger}`
+        const configTxProfile = obj.configTxProfile
+        const contractVersion = 1
+        const contract = obj.contract
+        // Initialize subscriptions to null (no user subscribed to any role)
+        const subscriptions = {}
+        Object.keys(roles).forEach(key => subscriptions[key] = null)
+
+
+        // check if cc_counter.json exists (contract counter file)
+        const cc_counterFile = path.resolve(__dirname, `../../../../chaincode/utils/cc_counter.json`)
+        let data
+        if (fs.existsSync(cc_counterFile)) { // file exists
+            data = JSON.parse(fs.readFileSync(cc_counterFile, {encoding:'utf8', flag:'r'}))
+            data.counter = data.counter + 1
+            fs.writeFileSync(cc_counterFile, JSON.stringify(data))
+
+        } else {  //file not exists
+            data = { counter: 1 }
+            fs.writeFileSync(cc_counterFile, JSON.stringify(data))
+        }
+
+        // write smart contract file inside chaincode
+        // const code = req.files.contract.data.toString('utf8')
+        const code = contract.toString('utf8')
+        const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract${data.counter}.js`)
+        fs.writeFileSync(chaincodeFile, code)
+
+        // write index.js file inside chaincode
+        let header = `\n'use strict';\nconst contracts = [];`
+        let body = ''
+        let end = 'module.exports.contracts = contracts;'
+        const cc_index = path.resolve(__dirname, `../../../../chaincode/index.js`)
+
+        for(let i = 0; i < data.counter; i++) {
+            body += `\nconst ChoreographyPrivateDataContract${i+1} = require('./lib/choreographyprivatedatacontract${i+1}.js');\ncontracts.push(ChoreographyPrivateDataContract${i+1});`
+        }
+        body = header + '\n' + body + '\n' + end
+        fs.writeFileSync(cc_index, body)
+
+
+        // create choreography instance in mongoDB
+        const chor = await ChorInstance.create({
+            idModel,
+            idChorLedger,
+            startEvent,
+            roles,
+            contractName,
+            channel,
+            configTxProfile,
+            contractVersion,
+            deployed: false,
+            idUsersSubscribed: [],
+            subscriptions
+        })
+
+        res.json({ response: chor })
+        
+    } catch (err) {
         res.json({ error: err.message || err.toString() })
     }
 })
 
-router.post('/fetch', async (req, res) => {
+router.get('/instances', async (req, res) => {
     try {
-        const chors = await ChorInstance.find()
+        const { idModel } = req.query
+        const chors = await ChorInstance.find({ idModel: mongoose.Types.ObjectId(idModel) })
 
         res.json({ response: chors })
     } catch (err) {
@@ -27,7 +105,17 @@ router.post('/fetch', async (req, res) => {
     }
 })
 
-router.post('/fetch/file', async (req, res) => {
+/*router.post('/fetch', async (req, res) => {
+    try {
+        const chors = await ChorInstance.find()
+
+        res.json({ response: chors })
+    } catch (err) {
+        res.json({ error: err.message || err.toString() })
+    }
+})*/
+
+/*router.post('/fetch/file', async (req, res) => {
     try {
         const { idBpmnFile } = req.body
         const file = path.resolve(__dirname, `../bpmnFiles/${idBpmnFile}`)
@@ -36,13 +124,13 @@ router.post('/fetch/file', async (req, res) => {
     } catch (err) {
         res.json({ error: err.message || err.toString() })
     }
-})
+})*/
 
 router.get('/subscribe', async (req, res) => {
     try {
-        const { idUser, idChor, subRole } = req.query
+        const { idUser, idChorInstance, subRole } = req.query
         
-        let chorinstance = await ChorInstance.findOne({ idChor: idChor }).exec()
+        let chorinstance = await ChorInstance.findOne({ _id: mongoose.Types.ObjectId(idChorInstance) }).exec()
         if(!chorinstance) {
             return res.status(404).send('Chor instance document not found.')
         }
