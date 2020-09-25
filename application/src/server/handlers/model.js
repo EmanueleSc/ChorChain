@@ -15,8 +15,6 @@ router.post('/upload', async (req, res) => {
 
         const bpmnFile = req.files.bpmn
         const idModel = req.body.idModel
-        const modelName = req.body.modelName
-        const idUser = req.body.idUser
 
         // Upload bpmn file
         const fileName = idModel + '.bpmn'
@@ -28,8 +26,6 @@ router.post('/upload', async (req, res) => {
         // create choreography model in mongoDB
         const model = await ChorModel.create({
             fileName,
-            modelName,
-            idUser,
             idModel
         })
 
