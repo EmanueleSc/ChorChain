@@ -7,9 +7,9 @@ const fs = require('fs')
 const mongoose = require('mongoose')
 import { ChorTranslator } from '../utils/translator'
 
-router.post('/create', async (req, res) => {
+router.get('/create', async (req, res) => {
     try {
-        const { idModel } = req.body
+        const { idModel } = req.query
         const model = await ChorModel.findOne({ idModel: mongoose.Types.ObjectId(idModel) })
         const fileName = model.fileName
 
