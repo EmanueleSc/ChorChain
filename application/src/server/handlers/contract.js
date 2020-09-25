@@ -38,9 +38,9 @@ const highlightLog = (message) => {
 
 router.post('/deploy', async (req, res) => {
     try {
-        const { idChor, contractVersion } = req.body
+        const { idChorLedger, contractVersion } = req.body
 
-        let chorinstance = await ChorInstance.findOne({ idChor: idChor }).exec()
+        let chorinstance = await ChorInstance.findOne({ idChorLedger }).exec()
         const configTxProfile = chorinstance.configTxProfile
         const contractName = chorinstance.contractName
         const channel = chorinstance.channel
