@@ -84,7 +84,7 @@ class ChorTranslator {
         return participants.map(p => p.name.replace(" ", "_"))
     }
 
-    computeRolesObj = (roles) => {
+    computeRolesObj(roles) {
         let obj = {}
         for(let i = 0; i < roles.length; i++) {
             obj[roles[i]] = "Org" + (i+1) + "MSP"
