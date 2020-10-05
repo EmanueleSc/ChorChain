@@ -55,7 +55,11 @@ console.log(__dirname)
 app.use(express.static(__dirname + "/public"))
 app.use(express.static(__dirname + "/server/bpmnFiles"))
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", process.env.MODELER_URL) // update to match the domain you will make the request from
+    const allowed = [process.env.CHORCHAIN_MODELER_URL, process.env.FABRIC_MODELER_URL]
+    const origin = req.headers.origin
+    if(allowed.indexOf(origin) >= 0) {
+        res.header("Access-Control-Allow-Origin", origin)
+    }
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
     next()
 })

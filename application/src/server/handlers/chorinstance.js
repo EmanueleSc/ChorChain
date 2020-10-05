@@ -105,6 +105,21 @@ router.get('/instances', async (req, res) => {
     }
 })
 
+router.post('/instances/deployed', async (req, res) => {
+    try {
+        const { idUser, idModel } = req.body
+        const chors = await ChorInstance.find({ 
+            idModel: mongoose.Types.ObjectId(idModel),
+            idUsersSubscribed: mongoose.Types.ObjectId(idUser),
+            deployed: true
+        })
+
+        res.json({ response: chors })
+    } catch (err) {
+        res.json({ error: err.message || err.toString() })
+    }
+})
+
 /*router.post('/fetch', async (req, res) => {
     try {
         const chors = await ChorInstance.find()
@@ -115,7 +130,7 @@ router.get('/instances', async (req, res) => {
     }
 })*/
 
-/*router.post('/fetch/file', async (req, res) => {
+router.post('/fetch/file', async (req, res) => {
     try {
         const { idBpmnFile } = req.body
         const file = path.resolve(__dirname, `../bpmnFiles/${idBpmnFile}`)
@@ -124,7 +139,7 @@ router.get('/instances', async (req, res) => {
     } catch (err) {
         res.json({ error: err.message || err.toString() })
     }
-})*/
+})
 
 router.get('/subscribe', async (req, res) => {
     try {

@@ -28,7 +28,8 @@ export const submitPrivateTransaction = ({
     body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName, transientData }) 
 });
 
-export const deployContract = ({ 
+// DEPRECATED
+/*export const deployContract = ({ 
     idBpmnFile, 
     bpmnFileName, 
     startEvent, 
@@ -37,12 +38,18 @@ export const deployContract = ({
     idChor 
 }) => sendRequest(`/api/contract/deploy`, { 
     body: JSON.stringify({ idBpmnFile, bpmnFileName, startEvent, roles, configTxProfile, idChor }) 
-});
+});*/
 
-export const uploadBpmnFile = ( data ) => sendRequest(`/api/file/upload`, { body: data }, true);
+// DEPRECATED
+// export const uploadBpmnFile = ( data ) => sendRequest(`/api/file/upload`, { body: data }, true);
 
-export const fetchChorInstances = ({ hello }) => sendRequest(`/api/chorinstance/fetch`, { 
+// DEPRECATED
+/*export const fetchChorInstances = ({ hello }) => sendRequest(`/api/chorinstance/fetch`, {
     body:  JSON.stringify({ hello })
+});*/
+
+export const fetchChorInstancesDeployed = ({ idUser, idModel }) => sendRequest(`/api/chorinstance/instances/deployed`, {
+    body:  JSON.stringify({ idUser, idModel })
 });
 
 export const fetchChorInstanceFile = ({ idBpmnFile }) => sendRequest(`/api/chorinstance/fetch/file`, { 

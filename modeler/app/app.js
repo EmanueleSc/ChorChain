@@ -2,7 +2,7 @@ import { ChorModeler } from './lib/modeler'; // my lib
 import { createUserIdentity } from './lib/rest';
 import { submitPrivateTransaction } from './lib/rest';
 import { submitTransaction } from './lib/rest';
-import { fetchChorInstances } from './lib/rest';
+import { fetchChorInstancesDeployed } from './lib/rest';
 import { fetchChorInstanceFile } from './lib/rest';
 import JSONFormatter from 'json-formatter-js';
 
@@ -86,8 +86,16 @@ function updateButtonsName(chorInstanceID) {
 }
 
 function fetchChors() {
+  let idUser, idModel
+
+  // get idUser and idModel from the URL
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  idUser = urlParams.get('idUser')
+  idModel = urlParams.get('idModel')
+
   return new Promise((resolve, reject) => {
-      return fetchChorInstances({ hello: 'hello' }).then(res => {
+      return fetchChorInstancesDeployed({ idUser, idModel }).then(res => {
         return resolve(res.response);
       })
       .catch(err => {
@@ -275,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
 fetchChors().then(async (res) => {
   console.log(res);
   chorInstances = res;
-  const resp = await fetchChorInstanceFile({ idBpmnFile: chorInstances[0].idBpmnFile }); // get first file
+  const idBpmnFile = chorInstances[0].idModel + ".bpmn"
+  const resp = await fetchChorInstanceFile({ idBpmnFile }); // get first file
   await modeler.renderModel(resp.response);
   updateUI();
   updateButtonsName(chorInstances[0]._id);
