@@ -30,10 +30,10 @@ const modeler = new ChorModeler();
 
 function updateUI() {
   // update menu left
-  let items = `<a id="${chorInstances[0]._id}" class="leftmenuitem item active">${chorInstances[0].bpmnFileName}</a>`; // first item
+  let items = `<a id="${chorInstances[0]._id}" class="leftmenuitem item active">${chorInstances[0].model[0].idModel}</a>`; // first item
   for(let i = 1; i < chorInstances.length; i++) {
     items += `
-      <a id="${chorInstances[i]._id}" class="leftmenuitem item">${chorInstances[i].bpmnFileName}</a>
+      <a id="${chorInstances[i]._id}" class="leftmenuitem item">${chorInstances[i].model[0].idModel}</a>
     `;
   }
   document.getElementById('leftmenu').innerHTML = items;

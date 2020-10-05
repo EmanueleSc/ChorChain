@@ -108,11 +108,25 @@ router.get('/instances', async (req, res) => {
 router.post('/instances/deployed', async (req, res) => {
     try {
         const { idUser, idModel } = req.body
-        const chors = await ChorInstance.find({ 
-            idModel: mongoose.Types.ObjectId(idModel),
-            idUsersSubscribed: mongoose.Types.ObjectId(idUser),
-            deployed: true
-        })
+        const chors = await ChorInstance.aggregate([
+            {
+                $match: {
+                  $and: [
+                    { idModel: mongoose.Types.ObjectId(idModel) },
+                    { idUsersSubscribed: mongoose.Types.ObjectId(idUser) },
+                    { deployed: true }
+                  ]
+                }
+            },
+            {
+                $lookup: {
+                    from: 'fabchormodels',
+                    localField: 'idModel',
+                    foreignField: 'idModel',
+                    as: 'model'
+                }
+            }
+        ])
 
         res.json({ response: chors })
     } catch (err) {
