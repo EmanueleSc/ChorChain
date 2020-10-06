@@ -1,9 +1,9 @@
 import sendRequest from './sendRequest';
 
-export const createUserIdentity = ({ 
-    orgNum 
+export const createUserIdentity = ({
+    OrgMspID
 }) => sendRequest(`/api/identity/create/user`, {
-    body: JSON.stringify({ orgNum }) 
+    body: JSON.stringify({ OrgMspID })
 });
 
 export const submitTransaction = ({ 
