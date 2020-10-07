@@ -6,10 +6,6 @@ import { fetchChorInstancesDeployed } from './lib/rest'
 import { fetchChorInstanceFile } from './lib/rest'
 import JSONFormatter from 'json-formatter-js'
 
-// let connectionIDOrg1 = '';
-// let connectionIDOrg2 = '';
-// let connectionIDOrg3 = '';
-
 let userID = ''
 let connectionID = ''
 let dataPayload = { 
@@ -60,7 +56,6 @@ async function menuItemClick(e) {
   const idBpmnFile = chorInstanceTarget.idModel + ".bpmn"
   const resp = await fetchChorInstanceFile({ idBpmnFile })
   await modeler.renderModel(resp.response)
-  // updateButtonsName(chorInstanceTarget._id)
   whichRoleAmI(chorInstanceTarget._id)
 
   dataPayload = {
@@ -75,17 +70,6 @@ async function menuItemClick(e) {
   await queryChorState()
 }
 
-/*function updateButtonsName(chorInstanceID) {
-  let roles
-  for(let i = 0; i < chorInstances.length; i++) {
-    if(chorInstances[i]._id === chorInstanceID) roles = chorInstances[i].roles
-  }
-  let i = 1
-  for (const [key, value] of Object.entries(roles)) {
-    document.getElementById(`btnOrg${i}`).innerText = key
-    i++
-  }
-}*/
 function whichRoleAmI(chorInstanceID) {
   let subscriptions
   for(let i = 0; i < chorInstances.length; i++) {
@@ -240,48 +224,6 @@ function bindResp(output) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /*const btnCustomer = document.getElementById("btnOrg1");
-  btnCustomer.addEventListener('click', async (e) => {
-    if(connectionIDOrg1 === '') {
-      const resp = await createUserIdentity({ orgNum: 1 });
-      connectionIDOrg1 = resp.response;
-      bindResp(connectionIDOrg1);
-    } else {
-      bindResp(connectionIDOrg1);
-    }
-    
-    connectionID = connectionIDOrg1;
-    await queryChorState();
-  });*/
-
-  /*const btnBikeCenter = document.getElementById("btnOrg2");
-  btnBikeCenter.addEventListener('click', async (e) => {
-    if(connectionIDOrg2 === '') {
-      const resp = await createUserIdentity({ orgNum: 2 });
-      connectionIDOrg2 = resp.response;
-      bindResp(connectionIDOrg2);
-    } else {
-      bindResp(connectionIDOrg2);
-    }
-
-    connectionID = connectionIDOrg2;
-    await queryChorState();
-  });*/
-
-  /*const btnInsurer = document.getElementById("btnOrg3");
-  btnInsurer.addEventListener('click', async (e) => {
-    if(connectionIDOrg3 === '') {
-      const resp = await createUserIdentity({ orgNum: 3 });
-      connectionIDOrg3 = resp.response;
-      bindResp(connectionIDOrg3);
-    } else {
-      bindResp(connectionIDOrg3);
-    }
-
-    connectionID = connectionIDOrg3;
-    await queryChorState();
-  });*/
-
   // botton start
   document.getElementById("btnStart").addEventListener('click', async (e) => {
     if(connectionID !== '') {
@@ -342,15 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Something went wrong when submit private transaction', err)
       }
 
-      /*const resp = await submitPrivateTransaction(dataPayload)
-      if(resp.error) bindResp(resp.error)
-      else {
-        bindResp(resp.response)
-        dataPayload.transientData = undefined
-        dataPayload.transactionName = undefined
-        dataPayload.connectionID = undefined
-      }*/
-
     } else {
       alert('Something went wrong, please reload the page.')
     }
@@ -365,7 +298,6 @@ fetchChors().then(async (res) => {
   const resp = await fetchChorInstanceFile({ idBpmnFile }) // get first file
   await modeler.renderModel(resp.response)
   updateUI()
-  // updateButtonsName(chorInstances[0]._id)
   whichRoleAmI(chorInstances[0]._id)
 
   dataPayload = {
