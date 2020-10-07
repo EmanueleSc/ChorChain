@@ -48,8 +48,8 @@ export const submitPrivateTransaction = ({
     body:  JSON.stringify({ hello })
 });*/
 
-export const fetchChorInstancesDeployed = ({ idUser, idModel }) => sendRequest(`/api/chorinstance/instances/deployed`, {
-    body:  JSON.stringify({ idUser, idModel })
+export const fetchChorInstancesDeployed = ({ idUser }) => sendRequest(`/api/chorinstance/instances/deployed`, {
+    body:  JSON.stringify({ idUser })
 });
 
 export const fetchChorInstanceFile = ({ idBpmnFile }) => sendRequest(`/api/chorinstance/fetch/file`, { 

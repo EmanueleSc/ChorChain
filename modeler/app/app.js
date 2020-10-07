@@ -101,19 +101,14 @@ function whichRoleAmI(chorInstanceID) {
  * It also saves the userID in a global variable for later use.
  */
 function fetchChors() {
-  let idModel
-
-  // get idUser and idModel from the URL
+  // get idUser from the URL
   const queryString = window.location.search
   const urlParams = new URLSearchParams(queryString)
   userID = urlParams.get('idUser')
-  idModel = urlParams.get('idModel')
 
   return new Promise((resolve, reject) => {
-      return fetchChorInstancesDeployed({ idUser: userID, idModel })
-      .then(res => {
-        return resolve(res.response)
-      })
+      return fetchChorInstancesDeployed({ idUser: userID })
+      .then(res => resolve(res.response))
       .catch(err => reject(err))
   })
 }

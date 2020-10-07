@@ -107,12 +107,11 @@ router.get('/instances', async (req, res) => {
 
 router.post('/instances/deployed', async (req, res) => {
     try {
-        const { idUser, idModel } = req.body
+        const { idUser } = req.body
         const chors = await ChorInstance.aggregate([
             {
                 $match: {
                   $and: [
-                    { idModel: mongoose.Types.ObjectId(idModel) },
                     { idUsersSubscribed: mongoose.Types.ObjectId(idUser) },
                     { deployed: true }
                   ]
