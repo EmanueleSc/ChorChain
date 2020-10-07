@@ -142,18 +142,46 @@ function connectUser(subscriptions, roles) {
   })
 }
 
+function submitTX(private) {
+  return new Promise(async (resolve, reject) => {
+    const RETRY = 25
+    let lastError, resp
+
+    for(let i = 1; i <= RETRY; i++) {
+
+        if(private) {
+          resp = await submitPrivateTransaction(dataPayload)
+        } else {
+          resp = await submitTransaction(dataPayload)
+        }
+        
+        if(resp.error) {
+          lastError = resp.error
+          console.log(lastError)
+          console.log("!!! RETRY submit transaction (private: " + private + ")")
+        } else {
+          return resolve(resp.response || resp)
+        }
+    }
+
+    return reject(lastError)
+  })
+}
+
 function queryChorState() {
   if(connectionID !== '') {
     dataPayload.connectionID = connectionID
     dataPayload.transactionName = 'queryChorState'
 
-    return new Promise((resolve, reject) => {
-      return submitTransaction(dataPayload)
-      .then(res => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await submitTX(false)
         bindResp(res)
         return resolve(res)
-      })
-      .catch(err => reject(err))
+        
+      } catch (err) {
+        return reject(err)
+      }
     })
 
   } else {
@@ -307,14 +335,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
       console.log('DATA PAYLOAD: '); console.log(dataPayload)
 
-      const resp = await submitPrivateTransaction(dataPayload)
+      try {
+        const resp = await submitTX(true)
+        bindResp(resp)
+        dataPayload.transientData = undefined
+        dataPayload.transactionName = undefined
+        dataPayload.connectionID = undefined
+
+      } catch (err) {
+        bindResp(err)
+        console.error('Something went wrong when submit private transaction', err)
+      }
+
+      /*const resp = await submitPrivateTransaction(dataPayload)
       if(resp.error) bindResp(resp.error)
       else {
         bindResp(resp.response)
         dataPayload.transientData = undefined
         dataPayload.transactionName = undefined
         dataPayload.connectionID = undefined
-      }
+      }*/
 
     } else {
       alert('Something went wrong, please reload the page.')

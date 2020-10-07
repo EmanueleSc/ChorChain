@@ -13,10 +13,12 @@ router.post('/submit', async (req, res) => {
         const contract = await network.getContract(contractNamespace, contractName)
         let resp = null
 
-        if(!transactionParams || transactionParams === '')
+        if(!transactionParams || transactionParams === '') {
             resp = await contract.submitTransaction(transactionName)
-        else
+        }
+        else {
             resp = await contract.submitTransaction(transactionName, transactionParams)
+        }
         
         gateway.disconnect()
         res.json({ response: resp })
@@ -30,6 +32,7 @@ router.post('/submit/private', async (req, res) => {
         const { connectionID, channel, contractNamespace, contractName, transactionName, transientData } = req.body
         const gateway = new Gateway()
         const conn = global.ConnectionProfiles[connectionID]
+
         await gateway.connect(conn.connectionProfile, conn.connectionOptions)
         const network = await gateway.getNetwork(channel)
         const contract = await network.getContract(contractNamespace, contractName)
