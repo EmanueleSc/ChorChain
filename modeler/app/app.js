@@ -182,43 +182,70 @@ function removeChilds(nodeID) {
   }
 }
 
-function bindResp(output) {
-  if(typeof output === 'object') {
-    if('response' in output) output = output.response;
+function formatOutput(obj, res) {
+  if(!res) res = {}
+  if(typeof obj === 'object') {
+      const e = Object.entries(obj)
 
-    if(output.type && output.type === 'Buffer') {
-      output = Buffer.from(output.data);
-      output = output.toString('utf8');
+      for(x in e) {
+          let el = e[x]
+          if(typeof el[1] === 'object') formatOutput(el[1], res)
+          else res[el[0]] = el[1]
+      }
+  }
+  return res
+}
 
-      const json = JSON.parse(output);
-      if('choreography' in json) elements = json.choreography.elements;
-      else elements = json.elements;
-      
-      console.log('RESP JSON: '); console.log(json);
-      console.log('ELEMENTS: '); console.log(elements);
-
-      const elems = modeler.findEnabledElementsID(elements);
-      if(elems.length !== 0) {
-        removeChilds('inputContainer');
-
-        for(let i = 0; i < elems.length; i++) {
-          const elemID = elems[i];
-          modeler.colorElem(elemID);
-          const messageAnnotation = modeler.getAnnotation(elemID);
-          if(messageAnnotation) {
-            document.getElementById('inputContainer').innerHTML += templateParams(elemID);
-            document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID);
-          }
-            
-        }
-
+function renderRightOutput(output) {
+    let formatter
+    if(typeof output === 'string') output = JSON.parse(output)
+    if(typeof output === 'object') {
+      if(output.hasOwnProperty('choreographyPrivate')) {
+        output = formatOutput(output.choreographyPrivate)
+        formatter = new JSONFormatter(output)
+      } else {
+        formatter = new JSONFormatter(JSON.parse(output))
       }
     }
-    removeChilds('output');
-    const formatter = new JSONFormatter(JSON.parse(output));
-    document.getElementById('output').appendChild(formatter.render());
+    if(formatter) document.getElementById('output').appendChild(formatter.render());
+}
+
+function bindResp(output) {
+  if(typeof output === 'object') {
+    if('response' in output) output = output.response
+
+    if(output.type && output.type === 'Buffer') {
+      output = Buffer.from(output.data)
+      output = output.toString('utf8')
+
+      const json = JSON.parse(output)
+      if('choreography' in json) elements = json.choreography.elements
+      else elements = json.elements
+      
+      console.log('RESP JSON: ') 
+      console.log(json)
+      console.log('ELEMENTS: ') 
+      console.log(elements)
+
+      const elems = modeler.findEnabledElementsID(elements)
+      if(elems.length !== 0) {
+        removeChilds('inputContainer')
+
+        for(let i = 0; i < elems.length; i++) {
+          const elemID = elems[i]
+          modeler.colorElem(elemID)
+          const messageAnnotation = modeler.getAnnotation(elemID)
+          if(messageAnnotation) {
+            document.getElementById('inputContainer').innerHTML += templateParams(elemID)
+            document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
+          }
+        }
+      }
+    }
+    removeChilds('output')
+    renderRightOutput(output)
   } else {
-    document.getElementById('output').innerHTML = output;
+    document.getElementById('output').innerHTML = output
   }
 }
 
