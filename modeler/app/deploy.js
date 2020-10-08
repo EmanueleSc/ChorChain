@@ -1,3 +1,14 @@
+
+/**
+ * ******************************
+ * !!! PAGE DEPRECATED !!!
+ * 
+ * ******************************
+ */
+
+
+
+/*
 import { ChorModeler } from './lib/modeler';
 import { ChorTranslator } from './lib/translator';
 import { deployContract } from './lib/rest';
@@ -93,3 +104,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // render the model
 modeler.renderModel(xml).catch(error => console.log(error))
+*/

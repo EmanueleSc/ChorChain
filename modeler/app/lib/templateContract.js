@@ -1,4 +1,16 @@
-const _computeStringElements = (elements) => {
+
+/**
+ * ****************************************************************
+ * !!! DEPRECATED !!!
+ * TRANSLATOR MOVED TO BACKEND (hyreochain/application/server/utils)
+ * 
+ * 
+ * ****************************************************************
+ */
+
+
+
+/*const _computeStringElements = (elements) => {
     let str = ''
     for(let i = 0; i < elements.length; i++) {
         str += "'" + elements[i] + "'" + ','
@@ -253,7 +265,7 @@ const _messageTamplate = (obj, roles) => {
 
         return `
             async ${messageID}(ctx) {
-                /* one-way task */
+                // one-way task
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
                 if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid) {
@@ -321,7 +333,7 @@ const _messageTamplate = (obj, roles) => {
 
         return `
             async ${initialMessageID}(ctx) {
-                /* two-way task - initial participant */
+                // two-way task - initial participant
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
                 if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid) {
@@ -339,7 +351,7 @@ const _messageTamplate = (obj, roles) => {
             }
 
             async ${lastMessageID}(ctx) {
-                /* two-way task - last participant */
+                // two-way task - last participant
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
                 if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid) {
@@ -459,4 +471,4 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
 
 module.exports = {
     smartcontract
-}
+}*/

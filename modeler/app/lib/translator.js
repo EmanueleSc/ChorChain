@@ -1,4 +1,16 @@
-import BpmnModdle from 'bpmn-moddle';
+
+/**
+ * ****************************************************************
+ * !!! DEPRECATED !!!
+ * TRANSLATOR MOVED TO BACKEND (hyreochain/application/server/utils)
+ * 
+ * 
+ * ****************************************************************
+ */
+
+
+
+/*import BpmnModdle from 'bpmn-moddle';
 import { smartcontract } from './templateContract'
 const { v4: uuidv4 } = require('uuid');
 
@@ -97,3 +109,4 @@ class ChorTranslator {
 module.exports = {
     ChorTranslator
 }
+*/
