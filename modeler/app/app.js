@@ -204,7 +204,7 @@ function renderRightOutput(output) {
         output = formatOutput(output.choreographyPrivate)
         formatter = new JSONFormatter(output)
       } else {
-        formatter = new JSONFormatter(JSON.parse(output))
+        formatter = new JSONFormatter(formatOutput(output))
       }
     }
     if(formatter) document.getElementById('output').appendChild(formatter.render());
