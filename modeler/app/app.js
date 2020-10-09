@@ -196,7 +196,7 @@ function formatOutput(obj, res) {
   return res
 }
 
-function renderRightOutput(output) {
+function renderRightPanel(output) {
     let formatter
     if(typeof output === 'string') output = JSON.parse(output)
     if(typeof output === 'object') {
@@ -208,6 +208,23 @@ function renderRightOutput(output) {
       }
     }
     if(formatter) document.getElementById('output').appendChild(formatter.render());
+}
+
+function renderLeftPanel(elements) {
+  const elems = modeler.findEnabledElementsID(elements)
+  if(elems.length !== 0) {
+    removeChilds('inputContainer')
+    
+    for(let i = 0; i < elems.length; i++) {
+      const elemID = elems[i]
+      modeler.colorElem(elemID)
+      const messageAnnotation = modeler.getAnnotation(elemID)
+      if(messageAnnotation) {
+        document.getElementById('inputContainer').innerHTML += templateParams(elemID)
+        document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
+      }
+    }
+  }
 }
 
 function bindResp(output) {
@@ -222,28 +239,16 @@ function bindResp(output) {
       if('choreography' in json) elements = json.choreography.elements
       else elements = json.elements
       
-      console.log('RESP JSON: ') 
+      console.log('RESP JSON:')
       console.log(json)
-      console.log('ELEMENTS: ') 
+      console.log('ELEMENTS:')
       console.log(elements)
 
-      const elems = modeler.findEnabledElementsID(elements)
-      if(elems.length !== 0) {
-        removeChilds('inputContainer')
-
-        for(let i = 0; i < elems.length; i++) {
-          const elemID = elems[i]
-          modeler.colorElem(elemID)
-          const messageAnnotation = modeler.getAnnotation(elemID)
-          if(messageAnnotation) {
-            document.getElementById('inputContainer').innerHTML += templateParams(elemID)
-            document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
-          }
-        }
-      }
+      renderLeftPanel(elements)
     }
+
     removeChilds('output')
-    renderRightOutput(output)
+    renderRightPanel(output)
   } else {
     document.getElementById('output').innerHTML = output
   }
