@@ -97,6 +97,15 @@ class ChorModeler {
         return elem.businessObject.name
     }
 
+    getInitialParticipant(messageElemID) {
+        const elementRegistry = this.modeler.get('elementRegistry')
+        const elem = elementRegistry.get(messageElemID)
+        if(elem.type === "bpmn:Message") {
+            return elem.parent.activityShape.businessObject.initiatingParticipantRef.name
+        }
+        return null
+    }
+
 }
 
 module.exports = {

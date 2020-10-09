@@ -73,11 +73,12 @@ async function menuItemClick(e) {
 function whichRoleAmI(chorInstanceID) {
   let subscriptions
   for(let i = 0; i < chorInstances.length; i++) {
-    if(chorInstances[i]._id === chorInstanceID) subscriptions = chorInstances[i].subscriptions
+    if(chorInstances[i]._id === chorInstanceID || chorInstances[i].idChorLedger === chorInstanceID) subscriptions = chorInstances[i].subscriptions
   }
 
   const subRole = Object.keys(subscriptions).find(key => subscriptions[key] === userID)
   document.getElementById('whoAmI').innerText = "You are subscribed as " + subRole
+  return subRole
 }
 
 /**
@@ -210,7 +211,7 @@ function renderRightPanel(output) {
     if(formatter) document.getElementById('output').appendChild(formatter.render());
 }
 
-function renderLeftPanel(elements) {
+function renderLeftPanel(elements, idChorLedger) {
   const elems = modeler.findEnabledElementsID(elements)
   if(elems.length !== 0) {
     removeChilds('inputContainer')
@@ -219,9 +220,17 @@ function renderLeftPanel(elements) {
       const elemID = elems[i]
       modeler.colorElem(elemID)
       const messageAnnotation = modeler.getAnnotation(elemID)
-      if(messageAnnotation) {
-        document.getElementById('inputContainer').innerHTML += templateParams(elemID)
-        document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
+      const initialParticipant = modeler.getInitialParticipant(elemID)
+      const subRole = whichRoleAmI(idChorLedger)
+
+      if(initialParticipant.replace(" ", "_") === subRole) {
+        if(messageAnnotation) {
+          document.getElementById('inputContainer').innerHTML += templateParams(elemID)
+          document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
+        }
+      } else {
+        const message = "Waiting for the message of "
+        document.getElementById('inputContainer').innerHTML = `<p>${message}${initialParticipant}</p>`
       }
     }
   }
@@ -236,15 +245,23 @@ function bindResp(output) {
       output = output.toString('utf8')
 
       const json = JSON.parse(output)
-      if('choreography' in json) elements = json.choreography.elements
-      else elements = json.elements
+      let idChorLedger
+
+      if('choreography' in json) {
+        idChorLedger = json.choreography.chorID
+        elements = json.choreography.elements
+      }
+      else {
+        idChorLedger = json.chorID
+        elements = json.elements
+      }
       
       console.log('RESP JSON:')
       console.log(json)
       console.log('ELEMENTS:')
       console.log(elements)
 
-      renderLeftPanel(elements)
+      renderLeftPanel(elements, idChorLedger)
     }
 
     removeChilds('output')
