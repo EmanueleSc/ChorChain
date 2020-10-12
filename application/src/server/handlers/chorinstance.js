@@ -66,7 +66,11 @@ router.get('/create', async (req, res) => {
         const cc_index = path.resolve(__dirname, `../../../../chaincode/index.js`)
 
         for(let i = 0; i < data.counter; i++) {
-            body += `\nconst ChoreographyPrivateDataContract${i+1} = require('./lib/choreographyprivatedatacontract${i+1}.js');\ncontracts.push(ChoreographyPrivateDataContract${i+1});`
+            body += `
+            \nconst ChoreographyPrivateDataContract${i+1} = require('./lib/choreographyprivatedatacontract${i+1}.js');
+            \nmodule.exports.ChoreographyPrivateDataContract${i+1} = ChoreographyPrivateDataContract${i+1};
+            \ncontracts.push(ChoreographyPrivateDataContract${i+1});
+            `
         }
         body = header + '\n' + body + '\n' + end
         fs.writeFileSync(cc_index, body)

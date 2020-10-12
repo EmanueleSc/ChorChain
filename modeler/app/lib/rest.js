@@ -7,25 +7,25 @@ export const createUserIdentity = ({
 });
 
 export const submitTransaction = ({ 
-    connectionID, 
-    channel, 
-    contractNamespace, 
-    contractName, 
-    transactionName, 
-    transactionParams 
-}) => sendRequest(`/api/transaction/submit`, { 
-    body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName, transactionParams }) 
+    connectionID,
+    channel,
+    /*contractNamespace,*/
+    contractName,
+    transactionName,
+    transactionParams
+}) => sendRequest(`/api/transaction/submit`, {
+    body: JSON.stringify({ connectionID, channel, /*contractNamespace,*/ contractName, transactionName, transactionParams })
 });
 
-export const submitPrivateTransaction = ({ 
-    connectionID, 
-    channel, 
-    contractNamespace, 
-    contractName, 
+export const submitPrivateTransaction = ({
+    connectionID,
+    channel,
+    /*contractNamespace,*/
+    contractName,
     transactionName,
     transientData
-}) => sendRequest(`/api/transaction/submit/private`, { 
-    body: JSON.stringify({ connectionID, channel, contractNamespace, contractName, transactionName, transientData }) 
+}) => sendRequest(`/api/transaction/submit/private`, {
+    body: JSON.stringify({ connectionID, channel, /*contractNamespace,*/ contractName, transactionName, transientData })
 });
 
 // DEPRECATED

@@ -4,13 +4,14 @@ const { Gateway } = require('fabric-network')
 
 router.post('/submit', async (req, res) => {
     try {
-        const { connectionID, channel, contractNamespace, contractName, transactionName, transactionParams } = req.body
+        const { connectionID, channel, /*contractNamespace,*/ contractName, transactionName, transactionParams } = req.body
         const gateway = new Gateway()
         const conn = global.ConnectionProfiles[connectionID]
         await gateway.connect(conn.connectionProfile, conn.connectionOptions)
 
         const network = await gateway.getNetwork(channel)
-        const contract = await network.getContract(contractNamespace, contractName)
+        // const contract = await network.getContract(contractNamespace, contractName)
+        const contract = await network.getContract(contractName)
         let resp = null
 
         if(!transactionParams || transactionParams === '') {
@@ -29,13 +30,14 @@ router.post('/submit', async (req, res) => {
 
 router.post('/submit/private', async (req, res) => {
     try {
-        const { connectionID, channel, contractNamespace, contractName, transactionName, transientData } = req.body
+        const { connectionID, channel, /*contractNamespace,*/ contractName, transactionName, transientData } = req.body
         const gateway = new Gateway()
         const conn = global.ConnectionProfiles[connectionID]
 
         await gateway.connect(conn.connectionProfile, conn.connectionOptions)
         const network = await gateway.getNetwork(channel)
-        const contract = await network.getContract(contractNamespace, contractName)
+        // const contract = await network.getContract(contractNamespace, contractName)
+        const contract = await network.getContract(contractName)
         let resp = null
         
         // Private data sent as transient data: { [key: string]: Buffer }

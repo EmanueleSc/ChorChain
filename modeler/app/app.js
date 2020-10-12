@@ -61,7 +61,7 @@ async function menuItemClick(e) {
   dataPayload = {
     channel: chorInstanceTarget.channel,
     contractName: chorInstanceTarget.contractName,
-    contractNamespace: 'choreographyprivatedatacontract', 
+    // contractNamespace: 'choreographyprivatedatacontract', 
     transactionName: chorInstanceTarget.startEvent
   }
 
@@ -352,7 +352,7 @@ fetchChors().then(async (res) => {
   dataPayload = {
     channel: chorInstances[0].channel,
     contractName: chorInstances[0].contractName,
-    contractNamespace: 'choreographyprivatedatacontract', 
+    // contractNamespace: 'choreographyprivatedatacontract', 
     transactionName: chorInstances[0].startEvent
   }
 

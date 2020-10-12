@@ -147,11 +147,12 @@ class ChannelU {
 
     /**
      * @param {String} channelName | name of the channel (eg. mychannel)
+     * @param {String} contractName | smart contract name
      * @param {Number} version | the version of the contract (eg. 1)
      */
-    static async deploy3OrgsContract(channelName, version) {
+    static async deploy3OrgsContract(channelName, contractName, version) {
         const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/deploy3OrgsC.sh')
-        const resp = await command.shExec(shFilePath, [channelName, version])
+        const resp = await command.shExec(shFilePath, [channelName, contractName, version])
         console.log('\n------- DEPLOY 3 ORGS CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
     }
 

@@ -50,7 +50,7 @@ router.post('/deploy', async (req, res) => {
             await ChannelU.update3OrgsAnchorPeers(channel).catch(e => undefined) // skip this error
 
             highlightLog(`Deploying Contract: ${contractName}`)
-            await ChannelU.deploy3OrgsContract(channel, cVersion).then(() => { STOP = true })
+            await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true })
 
             if(STOP) break
             

@@ -9,14 +9,16 @@ class ChorTranslator {
         this.roles = {}
         this.configTxProfile = 'ThreeOrgsChannel' // default
         this.startEvent = ''
-        this.modelName = ''
+        // this.modelName = ''
         this.contract = ''
-        this.contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
+        // this.contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
+        this.contractName = `contract${this.chorID}`
+
 
         return new Promise((resolve, reject) => {
             try {
                 return moddle.fromXML(xml).then(obj => {
-                    this.modelName = this.getModelName(obj)
+                    // this.modelName = this.getModelName(obj)
                     
                     let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
                     this.startEvent = chorElements[0]
@@ -52,14 +54,14 @@ class ChorTranslator {
         })
     }
 
-    getModelName(obj) {
+    /*getModelName(obj) {
         const rootElems = obj.rootElement.rootElements
         let name = ''
         for(let i = 0; i < rootElems.length; i++) {
             if(rootElems[i].$type === 'bpmn:Choreography') name = rootElems[i].name
         }
         return name
-    }
+    }*/
 
     getElementsByType(modelObj, type) {
         const obj = modelObj.elementsById

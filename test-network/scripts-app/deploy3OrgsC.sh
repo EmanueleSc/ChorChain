@@ -1,16 +1,17 @@
 #!/bin/bash
 
 CHANNEL_NAME="$1"
-VERSION="$2"
-DELAY="$3"
-MAX_RETRY="$4"
+CC_NAME="$2"
+VERSION="$3"
+DELAY="$4"
+MAX_RETRY="$5"
 : ${CHANNEL_NAME:="mychannel"}
+: ${CC_NAME:="choreographyprivatedatacontract"}
 : ${VERSION:="1"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-CC_NAME="choreographyprivatedatacontract"
 CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 CC_SRC_PATH=$SCRIPT_PATH/../../chaincode/
 COLLECTION_CONFIG=${SCRIPT_PATH}/../collections_config.json
@@ -27,7 +28,7 @@ packageChaincode() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode package ${SCRIPT_PATH}/../${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${VERSION} >&log.txt
+  peer lifecycle chaincode package ${SCRIPT_PATH}/../chaincode-artifacts/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${VERSION} >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -41,7 +42,7 @@ installChaincode() {
   ORG=$1
   setGlobals $ORG
   set -x
-  peer lifecycle chaincode install ${SCRIPT_PATH}/../${CC_NAME}.tar.gz >&log.txt
+  peer lifecycle chaincode install ${SCRIPT_PATH}/../chaincode-artifacts/${CC_NAME}.tar.gz >&log.txt
   res=$?
   set +x
   cat log.txt
