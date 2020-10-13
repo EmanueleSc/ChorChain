@@ -12,8 +12,8 @@ MAX_RETRY="$5"
 : ${MAX_RETRY:="5"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
-CC_SRC_PATH=$SCRIPT_PATH/../../chaincode/
+# CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
+# CC_SRC_PATH=$SCRIPT_PATH/../../chaincode/
 COLLECTION_CONFIG=${SCRIPT_PATH}/../collections_config.json
 
 export PATH=${SCRIPT_PATH}/../../bin:${SCRIPT_PATH}:$PATH
@@ -24,18 +24,18 @@ export ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 # import utils
 . $SCRIPT_PATH/envV.sh
 
-packageChaincode() {
-  ORG=$1
-  setGlobals $ORG
-  set -x
-  peer lifecycle chaincode package ${SCRIPT_PATH}/../chaincode-artifacts/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${VERSION} >&log.txt
-  res=$?
-  set +x
-  cat log.txt
-  verifyResult $res "Chaincode packaging on peer0.org${ORG} has failed"
-  echo "===================== Chaincode is packaged on peer0.org${ORG} ===================== "
-  echo
-}
+# packageChaincode() {
+#   ORG=$1
+#   setGlobals $ORG
+#   set -x
+#   peer lifecycle chaincode package ${SCRIPT_PATH}/../chaincode-artifacts/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${VERSION} >&log.txt
+#   res=$?
+#   set +x
+#   cat log.txt
+#   verifyResult $res "Chaincode packaging on peer0.org${ORG} has failed"
+#   echo "===================== Chaincode is packaged on peer0.org${ORG} ===================== "
+#   echo
+# }
 
 # installChaincode PEER ORG
 installChaincode() {
@@ -151,7 +151,7 @@ chaincodeInvokeInit() {
 }
 
 ## At first we package the chaincode
-packageChaincode 1
+# packageChaincode 1
 
 ## Install chaincode
 echo "Installing chaincode on peer0.org1..."

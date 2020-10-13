@@ -6,6 +6,7 @@ const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
 import { ChorTranslator } from '../utils/translator'
+const ChannelU = require("../utils/channelu")
 
 router.get('/create', async (req, res) => {
     try {
@@ -41,7 +42,7 @@ router.get('/create', async (req, res) => {
 
 
         // check if cc_counter.json exists (contract counter file)
-        const cc_counterFile = path.resolve(__dirname, `../../../../chaincode/utils/cc_counter.json`)
+        /*const cc_counterFile = path.resolve(__dirname, `../../../../chaincode/utils/cc_counter.json`)
         let data
         if (fs.existsSync(cc_counterFile)) { // file exists
             data = JSON.parse(fs.readFileSync(cc_counterFile, {encoding:'utf8', flag:'r'}))
@@ -51,16 +52,19 @@ router.get('/create', async (req, res) => {
         } else {  //file not exists
             data = { counter: 1 }
             fs.writeFileSync(cc_counterFile, JSON.stringify(data))
-        }
+        }*/
 
         // write smart contract file inside chaincode
-        // const code = req.files.contract.data.toString('utf8')
         const code = contract.toString('utf8')
-        const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract${data.counter}.js`)
+        // const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract${data.counter}.js`)
+        const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
         fs.writeFileSync(chaincodeFile, code)
 
+        // package the chaincode
+        await ChannelU.packageChaincode(contractName, contractVersion)
+
         // write index.js file inside chaincode
-        let header = `\n'use strict';\nconst contracts = [];`
+        /*let header = `\n'use strict';\nconst contracts = [];`
         let body = ''
         let end = 'module.exports.contracts = contracts;'
         const cc_index = path.resolve(__dirname, `../../../../chaincode/index.js`)
@@ -73,7 +77,7 @@ router.get('/create', async (req, res) => {
             `
         }
         body = header + '\n' + body + '\n' + end
-        fs.writeFileSync(cc_index, body)
+        fs.writeFileSync(cc_index, body)*/
 
 
         // create choreography instance in mongoDB

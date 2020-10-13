@@ -156,6 +156,16 @@ class ChannelU {
         console.log('\n------- DEPLOY 3 ORGS CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
     }
 
+    /**
+     * @param {String} contractName | smart contract name
+     * @param {Number} version | the version of the contract (eg. 1)
+     */
+    static async packageChaincode(contractName, version) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/packageC.sh')
+        const resp = await command.shExec(shFilePath, [contractName, version])
+        console.log('\n------- PACKAGE CHAINCODE SCRIPT -------'); console.log(resp); console.log('\n')
+    }
+
 }
 
 module.exports = ChannelU
