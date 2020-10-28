@@ -1,17 +1,6 @@
 #!/bin/bash
 #
-# Copyright IBM Corp All Rights Reserved
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
-# This script brings up a Hyperledger Fabric network for testing smart contracts
-# and applications. The test network consists of two organizations with one
-# peer each, and a single node Raft ordering service. Users can also use this
-# script to create a channel deploy a chaincode on the channel
-#
 # prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries
-# this may be commented out to resolve installed version of tools if desired
 export PATH=${PWD}/../bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}/configtx
 export VERBOSE=false
@@ -22,37 +11,22 @@ function printHelp() {
   echo "  network.sh <Mode> [Flags]"
   echo "    <Mode>"
   echo "      - 'up' - bring up fabric orderer and peer nodes. No channel is created"
-  echo "      - 'up createChannel' - bring up fabric network with one channel"
-  echo "      - 'createChannel' - create and join a channel after the network is created"
-  echo "      - 'deployCC' - deploy the choreography chaincode on the channel"
-# echo "      - 'down' - clear the network with docker-compose down"
-# echo "      - 'restart' - restart the network"
   echo
   echo "    Flags:"
 # echo "    -ca <use CAs> -  create Certificate Authorities to generate the crypto material"
-  echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
   echo "    -r <max retry> - CLI times out after certain number of attempts (defaults to 5)"
   echo "    -d <delay> - delay duration in seconds (defaults to 3)"
-  echo "    -l <language> - the programming language of the chaincode to deploy: go (default), java, javascript, typescript"
-  echo "    -v <version>  - chaincode version. Must be a round number, 1, 2, 3, etc"
   echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
   echo "    -verbose - verbose mode"
   echo "  network.sh -h (print this message)"
   echo
   echo " Possible Mode and flags"
   echo "  network.sh up -c -r -d -s -i -verbose" # -ca removed
-  echo "  network.sh up createChannel -c -r -d -s -i -verbose" # -ca removed
-  echo "  network.sh createChannel -c -r -d -verbose"
-  echo "  network.sh deployCC -l -v -r -d -verbose"
   echo
   echo " Taking all defaults:"
   echo "	network.sh up"
   echo
-  echo " Examples:"
-  echo "  network.sh up createChannel -c mychannel -s couchdb -i 2.0.0" # -ca removed
-  echo "  network.sh createChannel -c channelName"
-  echo "  network.sh deployCC -l javascript"
 }
 
 # Versions of fabric known not to work with the test network
@@ -335,70 +309,6 @@ function networkUp() {
   fi
 }
 
-## call the script to join create the channel and join the peers of org1 and org2
-function createChannel() {
-
-## Bring up the network if it is not arleady up.
-
-  if [ ! -d "organizations/peerOrganizations" ]; then
-    echo "Bringing up network"
-    networkUp
-  fi
-
-  # now run the script that creates a channel. This script uses configtxgen once
-  # more to create the channel creation transaction and the anchor peer updates.
-  # configtx.yaml is mounted in the cli container, which allows us to use it to
-  # create the channel artifacts
- scripts/createChannel.sh $CHANNEL_NAME $CLI_DELAY $MAX_RETRY $VERBOSE
-  if [ $? -ne 0 ]; then
-    echo "Error !!! Create channel failed"
-    exit 1
-  fi
-
-}
-
-## Call the script to isntall and instantiate a chaincode on the channel
-function deployCC() {
-
-  scripts/deployCC.sh $CHANNEL_NAME $CC_SRC_LANGUAGE $VERSION $CLI_DELAY $MAX_RETRY $VERBOSE
-
-  if [ $? -ne 0 ]; then
-    echo "ERROR !!! Deploying chaincode failed"
-    exit 1
-  fi
-
-  exit 0
-}
-
-
-# Tear down running network
-#function networkDown() {
-  # stop org3 containers also in addition to org1 and org2, in case we were running sample to add org3
-#  docker-compose -f $COMPOSE_FILE_BASE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_CA down --volumes --remove-orphans
-#  docker-compose -f $COMPOSE_FILE_COUCH_ORG3 -f $COMPOSE_FILE_ORG3 down --volumes --remove-orphans
-  # Don't remove the generated artifacts -- note, the ledgers are always removed
-#  if [ "$MODE" != "restart" ]; then
-    # Bring down the network, deleting the volumes
-    #Delete any ledger backups
-#    docker run -v $PWD:/tmp/first-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/first-network/ledgers-backup
-    #Cleanup the chaincode containers
-#    clearContainers
-    #Cleanup images
-#    removeUnwantedImages
-    # remove orderer block and other channel configuration transactions and certs
-#    rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations
-    ## remove fabric ca artifacts
-#    rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
-#    rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
-#    rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-#    rm -rf addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
-
-
-    # remove channel and script artifacts
-#    rm -rf channel-artifacts log.txt fabcar.tar.gz fabcar
-
-#  fi
-#}
 
 # Obtain the OS and Architecture string that will be used to select the correct
 # native binaries for your platform, e.g., darwin-amd64 or linux-amd64
@@ -410,23 +320,12 @@ CRYPTO="cryptogen"
 MAX_RETRY=5
 # default for delay between commands
 CLI_DELAY=3
-# channel name defaults to "mychannel"
-CHANNEL_NAME="mychannel"
 # use this as the default docker-compose yaml definition
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
 # docker-compose.yaml file if you are using couchdb
 COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
 # certificate authorities compose file
 COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
-# use this as the docker compose couch file for org3
-COMPOSE_FILE_COUCH_ORG3=addOrg3/docker/docker-compose-couch-org3.yaml
-# use this as the default docker-compose yaml definition for org3
-COMPOSE_FILE_ORG3=addOrg3/docker/docker-compose-org3.yaml
-#
-# use javascript as the default language for chaincode
-CC_SRC_LANGUAGE=javascript
-# Chaincode version
-VERSION=1
 # default image tag
 IMAGETAG="latest"
 # default database
@@ -443,27 +342,13 @@ else
   shift
 fi
 
-# parse a createChannel subcommand if used
-if [[ $# -ge 1 ]] ; then
-  key="$1"
-  if [[ "$key" == "createChannel" ]]; then
-      export MODE="createChannel"
-      shift
-  fi
-fi
-
 # parse flags
-
 while [[ $# -ge 1 ]] ; do
   key="$1"
   case $key in
   -h )
     printHelp
     exit 0
-    ;;
-  -c )
-    CHANNEL_NAME="$2"
-    shift
     ;;
 #  -ca )
 #    CRYPTO="Certificate Authorities"
@@ -478,14 +363,6 @@ while [[ $# -ge 1 ]] ; do
     ;;
   -s )
     DATABASE="$2"
-    shift
-    ;;
-  -l )
-    CC_SRC_LANGUAGE="$2"
-    shift
-    ;;
-  -v )
-    VERSION="$2"
     shift
     ;;
   -i )
@@ -518,20 +395,6 @@ fi
 if [ "$MODE" == "up" ]; then
   echo "Starting nodes with CLI timeout of '${MAX_RETRY}' tries and CLI delay of '${CLI_DELAY}' seconds and using database '${DATABASE}' ${CRYPTO_MODE}"
   echo
-elif [ "$MODE" == "createChannel" ]; then
-  echo "Creating channel '${CHANNEL_NAME}'."
-  echo
-  echo "If network is not up, starting nodes with CLI timeout of '${MAX_RETRY}' tries and CLI delay of '${CLI_DELAY}' seconds and using database '${DATABASE} ${CRYPTO_MODE}"
-  echo
-#elif [ "$MODE" == "down" ]; then
-#  echo "Stopping network"
-#  echo
-#elif [ "$MODE" == "restart" ]; then
-#  echo "Restarting network"
-#  echo
-elif [ "$MODE" == "deployCC" ]; then
-  echo "deploying chaincode on channel '${CHANNEL_NAME}'"
-  echo
 else
   printHelp
   exit 1
@@ -539,15 +402,6 @@ fi
 
 if [ "${MODE}" == "up" ]; then
   networkUp
-elif [ "${MODE}" == "createChannel" ]; then
-  createChannel
-elif [ "${MODE}" == "deployCC" ]; then
-  deployCC
-#elif [ "${MODE}" == "down" ]; then
-#  networkDown
-#elif [ "${MODE}" == "restart" ]; then
-#  networkDown
-#  networkUp
 else
   printHelp
   exit 1
