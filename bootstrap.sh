@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Fabric version
-VERSION=2.0.0
+VERSION=2.2.1
 # Fabric CA version
-CA_VERSION=1.4.6
+CA_VERSION=1.4.9
 # Version of thirdparty images (couchdb, kafka and zookeeper) released
 THIRDPARTY_IMAGE_VERSION=0.4.18
 
@@ -18,10 +18,9 @@ function printHelp() {
   echo "        4. Delete all unused docker networks"
   echo "        5. Tear down the running network \"test_network\""
   echo "        6. Install the Hyperledger Fabric platform-specific binaries, config files and pull docker images"
-  echo "           - Fabric Version:              2.0.0"
-  echo "           - CA Version:                  1.4.6"
-  echo "           - Thirdparty images Version:   0.4.18"
-  echo "    If you have already installed the tools in step 6, please consider the flag -s"
+  echo "           - Fabric Version:              ${VERSION}"
+  echo "           - CA Version:                  ${CA_VERSION}"
+  echo "           - Thirdparty images Version:   ${THIRDPARTY_IMAGE_VERSION}"
   echo
   echo "Usage:"
   echo "  bootstrap.sh [Flags]"
@@ -78,13 +77,11 @@ function removeNetwork() {
 
 # Tear down running network
 function networkDown() {
-  # stop org3 containers also in addition to org1 and org2, in case we were running sample to add org3
+  # stop containers
   docker-compose -f $COMPOSE_FILE_BASE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_CA down --volumes --remove-orphans
-  docker-compose -f $COMPOSE_FILE_COUCH_ORG3 -f $COMPOSE_FILE_ORG3 down --volumes --remove-orphans
-  # Don't remove the generated artifacts -- note, the ledgers are always removed
   
   # Bring down the network, deleting the volumes
-  #Delete any ledger backups
+  # Delete any ledger backups
   docker run -v $PWD/test-network:/tmp/test-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/test-network/ledgers-backup
   
   #Cleanup the chaincode containers
@@ -97,8 +94,8 @@ function networkDown() {
   removeNetwork
   
   # remove orderer block and other channel configuration transactions and certs
-  rm -rf test-network/system-genesis-block/*.block 
-  rm -rf test-network/organizations/peerOrganizations 
+  rm -rf test-network/system-genesis-block/*.block
+  rm -rf test-network/organizations/peerOrganizations
   rm -rf test-network/organizations/ordererOrganizations
   ## remove fabric ca artifacts
   #rm -rf test-network/organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
@@ -107,7 +104,6 @@ function networkDown() {
   #rm -rf test-network/addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
 
   # remove channel and script artifacts
-  # rm -rf test-network/choreographycontract.tar.gz
   rm -rf test-network/channel-artifacts test-network/log.txt chaincode/identity
 }
 
@@ -126,10 +122,7 @@ COMPOSE_FILE_BASE=test-network/docker/docker-compose-test-net.yaml
 COMPOSE_FILE_COUCH=test-network/docker/docker-compose-couch.yaml
 # certificate authorities compose file
 COMPOSE_FILE_CA=test-network/docker/docker-compose-ca.yaml
-# use this as the docker compose couch file for org3
-COMPOSE_FILE_COUCH_ORG3=test-network/addOrg3/docker/docker-compose-couch-org3.yaml
-# use this as the default docker-compose yaml definition for org3
-COMPOSE_FILE_ORG3=test-network/addOrg3/docker/docker-compose-org3.yaml
+
 
 BINARIES=true
 
