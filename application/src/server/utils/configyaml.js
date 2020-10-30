@@ -99,6 +99,6 @@ class ConfigYaml {
 }
 
 // test 
-// ConfigYaml.generateDockerCaYaml('id', 3)
+// ConfigYaml.generateDockerCaYaml('idModel', 3)
 
 module.exports = ConfigYaml
