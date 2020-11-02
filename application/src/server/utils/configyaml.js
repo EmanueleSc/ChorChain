@@ -10,7 +10,7 @@ class ConfigYaml {
      * @param {String} idModel
      * @param {Number} numOrgs 
      */
-    static async generateDockerCaYaml(idModel, numOrgs) {
+    static generateDockerCaYaml(idModel, numOrgs) {
         const json = { version: '2', networks: {}, services: {} }
 
         const networkName = `net_${idModel}`
@@ -96,9 +96,11 @@ class ConfigYaml {
         }
     }
 
-}
+    static getYamlObj(filePath) {
+        const doc = yaml.safeLoad(fs.readFileSync(filePath, 'utf8'))
+        return doc
+    }
 
-// test 
-// ConfigYaml.generateDockerCaYaml('idModel', 3)
+}
 
 module.exports = ConfigYaml

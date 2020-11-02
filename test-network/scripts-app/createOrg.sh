@@ -5,55 +5,32 @@ BIN_DIR=$SCRIPT_PATH/../../bin
 ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 IMAGETAG="latest"
 
-# certificate authorities compose file
-COMPOSE_FILE_CA="$1" : ${COMPOSE_FILE_CA:="docker-compose-ca.yaml"}
-
-# number model participants
-NUM_ORGS="$2" : ${NUM_ORGS:=3}
-
+# number of the organisation
+COUNTER="$1"
 # id of choreography model
-MODEL_ID="$3" : ${MODEL_ID:="example"}
-
+MODEL_ID="$2"
 # CA name defined in docker-compose-ca-{idModel}.yaml
-CA_NAME="$5" : ${CA_NAME:="ca-org1"}
-
+CA_NAME="$3"
 # CA port defined in docker-compose-ca-{idModel}.yaml
-CA_PORT="$6" : ${CA_PORT:=7054}
-
+CA_PORT="$4"
 # CA address, localhost default
-CA_ADDRESS="$7" : ${CA_ADDRESS:="localhost"}
+CA_ADDRESS="$5"
+: ${COUNTER:=1}
+: ${MODEL_ID:="example"}
+: ${CA_NAME:="ca-org1"}
+: ${CA_PORT:=7054}
+: ${CA_ADDRESS:="localhost"}
 
 
 # TODO 
-function createOrgs() {
-
-#  if [ -d "organizations/peerOrganizations" ]; then
-#    rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
-#  fi
-
+function createOrg() {
     echo
     echo "##########################################################"
-    echo "##### Generate certificates using Fabric CA's ############"
+    echo "############ Create Org${COUNTER} Identities #############"
     echo "##########################################################"
 
-    IMAGE_TAG=$IMAGETAG docker-compose -f "${SCRIPT_PATH}/../docker/${COMPOSE_FILE_CA}" up -d 2>&1
+    registerEnrollOrg
 
-    # !!! TEST !!! generate msp for one org1
-    createOrg 1
-
-    x=1;
-    while [ $x -le $NUM_ORGS ];
-    do
-        echo
-        echo "##########################################################"
-        echo "############ Create Org${x} Identities ###################"
-        echo "##########################################################"
-
-#        createOrg $x
-        x=$(( $x + 1 ))
-
-        sleep 10
-    done
 
 #    echo "##########################################################"
 #    echo "############ Create Orderer Org Identities ###############"
@@ -68,8 +45,7 @@ function createOrgs() {
 }
 
 
-function createOrg {
-    local COUNTER=$1
+function registerEnrollOrg {
     local ORG_DIR="org${COUNTER}.${MODEL_ID}.com"
     local ORG_CA_DIR="org${COUNTER}-${MODEL_ID}"
 
@@ -179,5 +155,5 @@ function createOrg {
 
 }
 
-createOrgs
+createOrg
 exit 0
