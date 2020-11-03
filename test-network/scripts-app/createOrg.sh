@@ -22,7 +22,7 @@ CA_ADDRESS="$5"
 : ${CA_ADDRESS:="localhost"}
 
 
-# TODO 
+
 function createOrg() {
     echo
     echo "##########################################################"
@@ -30,10 +30,6 @@ function createOrg() {
     echo "##########################################################"
 
     registerEnrollOrg
-
-#  echo
-#  echo "Generate CCP files for Org1, Org2 and Org3"
-#  ./organizations/ccp-generate.sh
 }
 
 
