@@ -26,10 +26,6 @@ function createOrderer() {
     echo "########################################################"
 
     registerEnrollOrderer
-
-#  echo
-#  echo "Generate CCP files for Org1, Org2 and Org3"
-#  ./organizations/ccp-generate.sh
 }
 
 
@@ -73,12 +69,6 @@ function registerEnrollOrderer {
 	${BIN_DIR}/fabric-ca-client register --caname ${CA_NAME} --id.name ${ORDERER_ID} --id.secret ${ORDERER_PW} --id.type orderer --tls.certfiles ${ORGANIZATIONS_PATH}/fabric-ca/${ORG_CA_DIR}/tls-cert.pem
     set +x
 
-    #echo
-    #echo "Register user"
-    #echo
-    #set -x
-    #${BIN_DIR}/fabric-ca-client register --caname ${CA_NAME} --id.name user1 --id.secret user1pw --id.type client --tls.certfiles ${ORGANIZATIONS_PATH}/fabric-ca/${ORG_CA_DIR}/tls-cert.pem
-    #set +x
 
     local ADMIN_ID="ordererAdmin.${MODEL_ID}"
     local ADMIM_PW="ordererAdminpw"

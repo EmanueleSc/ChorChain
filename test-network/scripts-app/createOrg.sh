@@ -31,14 +31,6 @@ function createOrg() {
 
     registerEnrollOrg
 
-
-#    echo "##########################################################"
-#    echo "############ Create Orderer Org Identities ###############"
-#    echo "##########################################################"
-
-#    createOrderer
-
-
 #  echo
 #  echo "Generate CCP files for Org1, Org2 and Org3"
 #  ./organizations/ccp-generate.sh
