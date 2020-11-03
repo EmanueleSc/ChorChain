@@ -39,6 +39,22 @@ class NetworkU {
         return res
     }
 
+    static getOrdererOrgCAsInfo(idModel) {
+        const composeCAFile = path.join(__dirname, `../../../../test-network/docker/docker-compose-ca-${idModel}.yaml`)
+        const yaml = ConfigYaml.getYamlObj(composeCAFile)
+        const CAs = yaml.services
+        let res = []
+        for (let key in CAs) {
+            if (key.includes('orderer')) {
+                res.push({
+                    nameCA: key,
+                    portCA: CAs[key].ports[0].split(':')[0]
+                })
+            }
+        }
+        return res
+    }
+
     /**
      * 
      * @param {String} idModel 
@@ -58,12 +74,31 @@ class NetworkU {
         }
     }
 
+    /**
+     * 
+     * @param {String} idModel 
+     * @param {String} addressCA 
+     */
+    static async createOrdererCrypto(idModel, addressCA) {
+        addressCA = addressCA || 'localhost'
+
+        const OrgCAs = NetworkU.getOrdererOrgCAsInfo(idModel)
+
+        for(let i = 0; i < OrgCAs.length; i++) {
+            const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createOrderer.sh')
+            const resp = await command.shExec(shFilePath, [idModel, OrgCAs[i].nameCA, OrgCAs[i].portCA, addressCA])
+
+            console.log(`\n------- CREATE ORDERER ORG IDENTITIES -------`)
+            console.log(resp); console.log('\n')
+        }
+    }
+
 }
 
 // test
-/*const main = async () => {
-    await NetworkU.createOrganisationsCrypto('pippo', 'localhost')
+const main = async () => {
+    await NetworkU.createOrdererCrypto('pippo', 'localhost')
 }
-main()*/
+main()
 
 module.exports = NetworkU

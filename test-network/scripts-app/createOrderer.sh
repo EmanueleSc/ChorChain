@@ -5,39 +5,27 @@ BIN_DIR=$SCRIPT_PATH/../../bin
 ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 IMAGETAG="latest"
 
-# number of the organisation
-COUNTER="$1"
 # id of choreography model
-MODEL_ID="$2"
+MODEL_ID="$1"
 # CA name defined in docker-compose-ca-{idModel}.yaml
-CA_NAME="$3"
+CA_NAME="$2"
 # CA port defined in docker-compose-ca-{idModel}.yaml
-CA_PORT="$4"
+CA_PORT="$3"
 # CA address, localhost default
-CA_ADDRESS="$5"
-: ${COUNTER:=1}
+CA_ADDRESS="$4"
 : ${MODEL_ID:="example"}
-: ${CA_NAME:="ca-org1"}
-: ${CA_PORT:=7054}
+: ${CA_NAME:="ca_orderer"}
+: ${CA_PORT:=9054}
 : ${CA_ADDRESS:="localhost"}
 
 
-# TODO 
 function createOrderer() {
     echo
-    echo "##########################################################"
-    echo "############ Create Org${COUNTER} Identities #############"
-    echo "##########################################################"
+    echo "########################################################"
+    echo "############ Create Orderer Org Identities #############"
+    echo "########################################################"
 
     registerEnrollOrderer
-
-
-#    echo "##########################################################"
-#    echo "############ Create Orderer Org Identities ###############"
-#    echo "##########################################################"
-
-#    createOrderer
-
 
 #  echo
 #  echo "Generate CCP files for Org1, Org2 and Org3"
@@ -136,6 +124,7 @@ function registerEnrollOrderer {
 
     mkdir -p ${ORGANIZATIONS_PATH}/ordererOrganizations/${ORG_DIR}/users
     mkdir -p ${ORGANIZATIONS_PATH}/ordererOrganizations/${ORG_DIR}/users/Admin@${ORG_DIR}
+    mkdir -p ${ORGANIZATIONS_PATH}/ordererOrganizations/${ORG_DIR}/users/Admin@${ORG_DIR}/msp
 
     echo
     echo "## Generate the orderer Admin@${ORG_DIR} msp"
