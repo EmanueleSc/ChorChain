@@ -24,13 +24,13 @@ function ccpGenerate() {
     echo "##########################################################"
 
     ORG=org${COUNTER}.${MODEL_ID}.com
-    PEERPEM=organizations/peerOrganizations/${ORG}/tlsca/tlsca.${ORG}-cert.pem
-    CAPEM=organizations/peerOrganizations/${ORG}/ca/ca.${ORG}-cert.pem
+    PEERPEM=${ORGANIZATIONS_PATH}/peerOrganizations/${ORG}/tlsca/tlsca.${ORG}-cert.pem
+    CAPEM=${ORGANIZATIONS_PATH}/peerOrganizations/${ORG}/ca/ca.${ORG}-cert.pem
     ORG_MSP=Org${COUNTER}MSP${MODEL_ID}
     CA_NAME=ca_org${COUNTER}_${MODEL_ID}
 
-    echo "$(json_ccp $ORG $P0PORT $CAPORT $PEERPEM $CAPEM $ORG_MSP $CA_NAME)" > ${ORGANIZATIONS_PATH}/peerOrganizations/${PEER_ORG_DIR}/connection-org${COUNTER}.json
-    echo "$(yaml_ccp $ORG $P0PORT $CAPORT $PEERPEM $CAPEM $ORG_MSP $CA_NAME)" > ${ORGANIZATIONS_PATH}/peerOrganizations/${PEER_ORG_DIR}/connection-org${COUNTER}.yaml
+    echo "$(json_ccp $ORG $P0PORT $CAPORT $PEERPEM $CAPEM $ORG_MSP $CA_NAME $MODEL_ID)" > ${ORGANIZATIONS_PATH}/peerOrganizations/${ORG}/connection-org${COUNTER}.json
+    echo "$(yaml_ccp $ORG $P0PORT $CAPORT $PEERPEM $CAPEM $ORG_MSP $CA_NAME $MODEL_ID)" > ${ORGANIZATIONS_PATH}/peerOrganizations/${ORG}/connection-org${COUNTER}.yaml
 }
 
 function one_line_pem {
@@ -47,6 +47,7 @@ function json_ccp {
         -e "s#\${CAPEM}#$CP#" \
         -e "s/\${ORG_MSP}/$6/" \
         -e "s/\${CA_NAME}/$7/" \
+        -e "s/\${MODEL_ID}/$8/" \
         ${ORGANIZATIONS_PATH}/ccp-template.json
 }
 
@@ -60,6 +61,7 @@ function yaml_ccp {
         -e "s#\${CAPEM}#$CP#" \
         -e "s/\${ORG_MSP}/$6/" \
         -e "s/\${CA_NAME}/$7/" \
+        -e "s/\${MODEL_ID}/$8/" \
         ${ORGANIZATIONS_PATH}/ccp-template.yaml | sed -e $'s/\\\\n/\\\n        /g'
 }
 

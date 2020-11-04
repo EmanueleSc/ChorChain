@@ -55,6 +55,22 @@ class NetworkU {
         return res
     }
 
+    static getPeer0sInfo(idModel) {
+        const composeCAFile = path.join(__dirname, `../../../../test-network/docker/docker-compose-test-net-${idModel}.yaml`)
+        const yaml = ConfigYaml.getYamlObj(composeCAFile)
+        const orgs = yaml.services
+        let res = []
+        for (let key in orgs) {
+            if (key.includes('peer0.org')) {
+                res.push({
+                    peer0Name: key,
+                    peer0Port: orgs[key].ports[0].split(':')[0]
+                })
+            }
+        }
+        return res
+    }
+
     /**
      * 
      * @param {String} idModel 
@@ -64,9 +80,9 @@ class NetworkU {
         addressCA = addressCA || 'localhost'
 
         const OrgCAs = NetworkU.getOrgCAsInfo(idModel)
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createOrg.sh')
 
         for(let i = 0; i < OrgCAs.length; i++) {
-            const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createOrg.sh')
             const resp = await command.shExec(shFilePath, [OrgCAs[i].numOrg, idModel, OrgCAs[i].nameCA, OrgCAs[i].portCA, addressCA])
 
             console.log(`\n------- CREATE ORGANISATION ${OrgCAs[i].numOrg} IDENTITIES -------`)
@@ -83,9 +99,9 @@ class NetworkU {
         addressCA = addressCA || 'localhost'
 
         const OrgCAs = NetworkU.getOrdererOrgCAsInfo(idModel)
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createOrderer.sh')
 
         for(let i = 0; i < OrgCAs.length; i++) {
-            const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createOrderer.sh')
             const resp = await command.shExec(shFilePath, [idModel, OrgCAs[i].nameCA, OrgCAs[i].portCA, addressCA])
 
             console.log(`\n------- CREATE ORDERER ORG IDENTITIES -------`)
@@ -93,12 +109,30 @@ class NetworkU {
         }
     }
 
+    /**
+     * 
+     * @param {String} idModel 
+     */
+    static async createCCPs(idModel) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/ccpGenerate.sh')
+        const peers = NetworkU.getPeer0sInfo(idModel)
+        const CAs = NetworkU.getOrgCAsInfo(idModel)
+
+        for(let i = 0; i < peers.length; i++) {
+            const orgCount = i + 1
+            const resp = await command.shExec(shFilePath, [orgCount, idModel, peers[i].peer0Port, CAs[i].portCA])
+
+            console.log(`\n------- CREATE CCP FOR PEER0 ORG${orgCount} -------`)
+            console.log(resp); console.log('\n')
+        }
+    }
+
 }
 
 // test
-const main = async () => {
-    await NetworkU.createOrdererCrypto('pippo', 'localhost')
+/*const main = async () => {
+    await NetworkU.createCCPs('pippo')
 }
-main()
+main()*/
 
 module.exports = NetworkU

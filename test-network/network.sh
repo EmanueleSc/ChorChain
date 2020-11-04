@@ -7,6 +7,11 @@ export VERBOSE=false
 
 # Print the usage message
 function printHelp() {
+  echo
+  echo "========================"
+  echo "!!! DEPRECATED !!! "
+  echo "========================"
+  echo
   echo "Usage: "
   echo "  network.sh <Mode> [Flags]"
   echo "    <Mode>"

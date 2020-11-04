@@ -5,7 +5,7 @@
 /test-network/channel-artifacts/*.json
 /test-network/org3-artifacts/crypto-config/*
 /test-network/organizations/fabric-ca/*
-!/test-network/organizations/fabric-ca/registerEnroll.sh
+!/test-network/organizations/fabric-ca/.gitkeep
 /test-network/docker/docker-compose-ca-*.yaml
 /test-network/docker/docker-compose-test-net-*.yaml
 /test-network/organizations/ordererOrganizations/*

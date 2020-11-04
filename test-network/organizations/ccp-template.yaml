@@ -1,5 +1,5 @@
 ---
-name: network-${ORG}
+name: net_${MODEL_ID}
 version: 1.0.0
 client:
   organization: ${ORG}
