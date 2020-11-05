@@ -294,17 +294,14 @@ class ConfigYaml {
         })
 
         const configtxobj = new ConfigTx(idModel, ordererPort, peer0Ports)
+        const configtxyaml = yaml.safeDump(configtxobj)
+        return configtxyaml
 
-        console.log('JSON: ')
-        console.log(configtxobj)
-
-        console.log('YAML:')
-        console.log(yaml.safeDump(configtxobj))
-
-
+        // test
         /*const configtx = path.join(__dirname, `../../../../test-network/configtx/configtx.yaml`)
         const obj = ConfigYaml.getYamlObj(configtx)
-        console.log(obj)*/
+        console.log(obj.Profiles)*/
+        // console.log(obj.Profiles.ThreeOrgsOrdererGenesis.Consortiums.SampleConsortium.Organizations)
     }
 
 }

@@ -78,7 +78,34 @@ class ConfigTx {
             Capabilities: this.Capabilities.Channel
         }
 
-        this.Profiles = { /** TODO */ }
+        const OrdererProfile = Object.assign(this.Orderer, { Organizations: [this.Organizations[0]], Capabilities: this.Capabilities.Orderer })
+        const OrganizationsProfile = []
+        this.Organizations.forEach((o, i) => {
+            if(i !== 0) { // skip orderer organization
+                OrganizationsProfile.push(o)
+            }  
+        })
+
+        const ApplicationProfile = Object.assign(this.Application, { Organizations: OrganizationsProfile, Capabilities: this.Capabilities.Application })
+
+        this.Profiles = {
+            OrgsOrdererGenesis: {
+                Policies: this.Channel.Policies,
+                Capabilities: this.Channel.Capabilities,
+                Orderer: OrdererProfile,
+                Consortiums: {
+                    SampleConsortium: {
+                        Organizations: OrganizationsProfile
+                    }
+                }
+            },
+            OrgsChannel: {
+                Consortium: 'SampleConsortium',
+                Policies: this.Channel.Policies,
+                Capabilities: this.Channel.Capabilities,
+                Application: ApplicationProfile
+            }
+        }
 
     }
 
