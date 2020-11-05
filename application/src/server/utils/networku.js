@@ -71,6 +71,22 @@ class NetworkU {
         return res
     }
 
+    static getOrderersInfo(idModel) {
+        const composeCAFile = path.join(__dirname, `../../../../test-network/docker/docker-compose-test-net-${idModel}.yaml`)
+        const yaml = ConfigYaml.getYamlObj(composeCAFile)
+        const orgs = yaml.services
+        let res = []
+        for (let key in orgs) {
+            if (key.includes('orderer')) {
+                res.push({
+                    ordererName: key,
+                    ordererPort: orgs[key].ports[0].split(':')[0]
+                })
+            }
+        }
+        return res
+    }
+
     /**
      * 
      * @param {String} idModel 
@@ -127,12 +143,19 @@ class NetworkU {
         }
     }
 
+    static async netUp(idModel) {
+        // create consortium
+        const peers = NetworkU.getPeer0sInfo(idModel)
+        const orderers = NetworkU.getOrderersInfo(idModel)
+        ConfigYaml.generateConfigTxYaml(idModel, orderers, peers)
+    }
+
 }
 
 // test
-/*const main = async () => {
-    await NetworkU.createCCPs('pippo')
+const main = async () => {
+    await NetworkU.netUp('pippo')
 }
-main()*/
+main()
 
 module.exports = NetworkU

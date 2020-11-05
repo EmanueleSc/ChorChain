@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const yaml = require('js-yaml')
+const ConfigTx = require('./configtx')
 
 class ConfigYaml {
     constructor() {}
@@ -284,12 +285,28 @@ class ConfigYaml {
         return doc
     }
 
-}
+    static generateConfigTxYaml(idModel, orderers, peers) {
+        let ordererPort = orderers[0].ordererPort
 
-// test
-/*const main = () => {
-    ConfigYaml.generateDockerTestNetYaml('pippo', 3)
+        let peer0Ports = []
+        peers.forEach(p => {
+            peer0Ports.push(p.peer0Port)
+        })
+
+        const configtxobj = new ConfigTx(idModel, ordererPort, peer0Ports)
+
+        console.log('JSON: ')
+        console.log(configtxobj)
+
+        console.log('YAML:')
+        console.log(yaml.safeDump(configtxobj))
+
+
+        /*const configtx = path.join(__dirname, `../../../../test-network/configtx/configtx.yaml`)
+        const obj = ConfigYaml.getYamlObj(configtx)
+        console.log(obj)*/
+    }
+
 }
-main()*/
 
 module.exports = ConfigYaml
