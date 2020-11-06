@@ -148,13 +148,26 @@ class NetworkU {
         const peers = NetworkU.getPeer0sInfo(idModel)
         const orderers = NetworkU.getOrderersInfo(idModel)
         ConfigYaml.generateConfigTxYaml(idModel, orderers, peers)
+
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createConsortium.sh')
+        const resp = await command.shExec(shFilePath, [idModel])
+
+        console.log(`\n------- NETWORK UP NET_${idModel} -------`)
+        console.log(resp); console.log('\n')
     }
 
 }
 
 // test
 const main = async () => {
-    await NetworkU.netUp('pippo')
+    const idModel = 'pippo'
+    const numOrgs = 3
+    await NetworkU.CAsUp(idModel, numOrgs)
+    await ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
+    await NetworkU.createOrganisationsCrypto(idModel)
+    await NetworkU.createOrdererCrypto(idModel)
+    await NetworkU.createCCPs(idModel)
+    await NetworkU.netUp(idModel)
 }
 main()
 
