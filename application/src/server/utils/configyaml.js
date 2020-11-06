@@ -297,7 +297,7 @@ class ConfigYaml {
         const configtxyaml = yaml.safeDump(configtxobj)
 
         const configtxyamldir = path.resolve(__dirname, `../../../../test-network/configtx/${idModel}`)
-        fs.mkdirSync(configtxyamldir)
+        if (!fs.existsSync(configtxyamldir)) fs.mkdirSync(configtxyamldir)
 
         const yamlPath = path.resolve(configtxyamldir, 'configtx.yaml')
         fs.writeFileSync(yamlPath, configtxyaml, 'utf8')

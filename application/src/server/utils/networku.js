@@ -159,9 +159,9 @@ class NetworkU {
 }
 
 // test
-const main = async () => {
-    const idModel = 'pippo'
-    const numOrgs = 3
+/*const main = async () => {
+    const idModel = 'topolino'
+    const numOrgs = 4
     await NetworkU.CAsUp(idModel, numOrgs)
     await ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
     await NetworkU.createOrganisationsCrypto(idModel)
@@ -169,6 +169,6 @@ const main = async () => {
     await NetworkU.createCCPs(idModel)
     await NetworkU.netUp(idModel)
 }
-main()
+main()*/
 
 module.exports = NetworkU

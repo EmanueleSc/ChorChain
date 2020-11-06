@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Fabric version
-VERSION=2.2.1
+VERSION=2.0.0
 # Fabric CA version
-CA_VERSION=1.4.9
+CA_VERSION=1.4.6
 # Version of thirdparty images (couchdb, kafka and zookeeper) released
 THIRDPARTY_IMAGE_VERSION=0.4.18
 
