@@ -295,13 +295,12 @@ class ConfigYaml {
 
         const configtxobj = new ConfigTx(idModel, ordererPort, peer0Ports)
         const configtxyaml = yaml.safeDump(configtxobj)
-        return configtxyaml
 
-        // test
-        /*const configtx = path.join(__dirname, `../../../../test-network/configtx/configtx.yaml`)
-        const obj = ConfigYaml.getYamlObj(configtx)
-        console.log(obj.Profiles)*/
-        // console.log(obj.Profiles.ThreeOrgsOrdererGenesis.Consortiums.SampleConsortium.Organizations)
+        const configtxyamldir = path.resolve(__dirname, `../../../../test-network/configtx/${idModel}`)
+        fs.mkdirSync(configtxyamldir)
+
+        const yamlPath = path.resolve(configtxyamldir, 'configtx.yaml')
+        fs.writeFileSync(yamlPath, configtxyaml, 'utf8')
     }
 
 }

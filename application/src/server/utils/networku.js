@@ -147,8 +147,7 @@ class NetworkU {
         // create consortium
         const peers = NetworkU.getPeer0sInfo(idModel)
         const orderers = NetworkU.getOrderersInfo(idModel)
-        const configtxyaml = ConfigYaml.generateConfigTxYaml(idModel, orderers, peers)
-        console.log(configtxyaml)
+        ConfigYaml.generateConfigTxYaml(idModel, orderers, peers)
     }
 
 }
