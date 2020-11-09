@@ -101,6 +101,11 @@ function networkDown() {
   rm -rf test-network/organizations/fabric-ca
   # remove used ports in application
   rm -rf application/src/server/utils/usedPorts.json
+  # remove docker compose CA a network auto generated yaml files
+  rm -rf test-network/docker/docker-compose-ca-*.yaml
+  rm -rf test-network/docker/docker-compose-test-net-*.yaml
+  # delete all configtx auto generated yaml files except configtx-sample.yaml
+  find test-network/configtx/ -mindepth 1 -not -name configtx-sample.yaml -delete
 
   # remove channel and script artifacts
   rm -rf test-network/channel-artifacts test-network/log.txt chaincode/identity

@@ -166,7 +166,7 @@ class NetworkU {
         await NetworkU.CAsUp(idModel, numOrgs)
 
         // auto generate docker compose network yaml
-        await ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
+        ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
 
         // create MSPs for organizations and orderer
         await NetworkU.createOrganisationsCrypto(idModel)
@@ -183,8 +183,8 @@ class NetworkU {
 
 // test
 /*const main = async () => {
-    const idModel = 'pippo'
-    const numOrgs = 2
+    const idModel = 'topolino'
+    const numOrgs = 3
     await NetworkU.networkUp(idModel, numOrgs)
 }
 main()*/

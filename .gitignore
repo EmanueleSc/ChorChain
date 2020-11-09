@@ -12,7 +12,7 @@
 /test-network/organizations/peerOrganizations/*
 /test-network/system-genesis-block/*
 /test-network/configtx/*
-!/test-network/configtx/configtx.yaml
+!/test-network/configtx/configtx-sample.yaml
 # /test-network/choreographycontract.tar.gz
 # /test-network/choreographyprivatedatacontract.tar.gz
 /test-network/chaincode-artifacts/*
