@@ -143,7 +143,7 @@ class NetworkU {
         }
     }
 
-    static async netUp(idModel) {
+    static async createConsortium(idModel) {
         // create consortium
         const peers = NetworkU.getPeer0sInfo(idModel)
         const orderers = NetworkU.getOrderersInfo(idModel)
@@ -152,22 +152,40 @@ class NetworkU {
         const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/createConsortium.sh')
         const resp = await command.shExec(shFilePath, [idModel])
 
-        console.log(`\n------- NETWORK UP NET_${idModel} -------`)
+        console.log(`\n------- CREATE CONSORTIUM NET_${idModel} -------`)
         console.log(resp); console.log('\n')
+    }
+
+    /**
+     * 
+     * @param {String} idModel 
+     * @param {Number} numOrgs 
+     */
+    static async networkUp(idModel, numOrgs) {
+        // create Certification Authorities 
+        await NetworkU.CAsUp(idModel, numOrgs)
+
+        // auto generate docker compose network yaml
+        await ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
+
+        // create MSPs for organizations and orderer
+        await NetworkU.createOrganisationsCrypto(idModel)
+        await NetworkU.createOrdererCrypto(idModel)
+
+        // create connection profiles
+        await NetworkU.createCCPs(idModel)
+
+        // create consortium and docker container up with docker compose
+        await NetworkU.createConsortium(idModel)
     }
 
 }
 
 // test
 /*const main = async () => {
-    const idModel = 'topolino'
-    const numOrgs = 4
-    await NetworkU.CAsUp(idModel, numOrgs)
-    await ConfigYaml.generateDockerTestNetYaml(idModel, numOrgs)
-    await NetworkU.createOrganisationsCrypto(idModel)
-    await NetworkU.createOrdererCrypto(idModel)
-    await NetworkU.createCCPs(idModel)
-    await NetworkU.netUp(idModel)
+    const idModel = 'pippo'
+    const numOrgs = 2
+    await NetworkU.networkUp(idModel, numOrgs)
 }
 main()*/
 

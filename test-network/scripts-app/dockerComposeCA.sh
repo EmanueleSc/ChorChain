@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 IMAGETAG="latest"
 
 # certificate authorities compose file
@@ -9,10 +10,9 @@ COMPOSE_FILE_CA="$1"
 
 
 function runCAs() {
-
-#  if [ -d "organizations/peerOrganizations" ]; then
-#    rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
-#  fi
+    if [ ! -d "${ORGANIZATIONS_PATH}/fabric-ca" ]; then
+        mkdir -p ${ORGANIZATIONS_PATH}/fabric-ca
+    fi
 
     echo
     echo "##########################################################"
@@ -20,7 +20,6 @@ function runCAs() {
     echo "##########################################################"
 
     IMAGE_TAG=$IMAGETAG docker-compose -f "${SCRIPT_PATH}/../docker/${COMPOSE_FILE_CA}" up -d 2>&1
-
 }
 
 runCAs

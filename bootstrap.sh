@@ -97,11 +97,10 @@ function networkDown() {
   rm -rf test-network/system-genesis-block/*.block
   rm -rf test-network/organizations/peerOrganizations
   rm -rf test-network/organizations/ordererOrganizations
-  ## remove fabric ca artifacts
-  #rm -rf test-network/organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
-  #rm -rf test-network/organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
-  #rm -rf test-network/organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-  #rm -rf test-network/addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
+  # remove fabric ca artifacts
+  rm -rf test-network/organizations/fabric-ca
+  # remove used ports in application
+  rm -rf application/src/server/utils/usedPorts.json
 
   # remove channel and script artifacts
   rm -rf test-network/channel-artifacts test-network/log.txt chaincode/identity
