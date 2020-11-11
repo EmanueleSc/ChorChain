@@ -100,7 +100,7 @@ function networkDown() {
   # remove fabric ca artifacts
   rm -rf test-network/organizations/fabric-ca
   # remove used ports in application
-  rm -rf application/src/server/utils/usedPorts.json
+  rm -rf test-network/scripts-app/usedPorts.json
   # remove docker compose CA a network auto generated yaml files
   rm -rf test-network/docker/docker-compose-ca-*.yaml
   rm -rf test-network/docker/docker-compose-test-net-*.yaml

@@ -6,7 +6,9 @@ IMAGETAG="latest"
 
 # certificate authorities compose file
 COMPOSE_FILE_CA="$1"
+DELAY="$2"
 : ${COMPOSE_FILE_CA:="docker-compose-ca.yaml"}
+: ${DELAY:="3"}
 
 
 function runCAs() {
@@ -23,4 +25,5 @@ function runCAs() {
 }
 
 runCAs
+sleep $DELAY
 exit 0

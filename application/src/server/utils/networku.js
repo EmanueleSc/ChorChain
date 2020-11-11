@@ -181,12 +181,4 @@ class NetworkU {
 
 }
 
-// test
-/*const main = async () => {
-    const idModel = 'topolino'
-    const numOrgs = 3
-    await NetworkU.networkUp(idModel, numOrgs)
-}
-main()*/
-
 module.exports = NetworkU

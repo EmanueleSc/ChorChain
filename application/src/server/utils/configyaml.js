@@ -176,7 +176,7 @@ class ConfigYaml {
         const startPeerPort = 7051
         const startChaincodePort = startPeerPort + 1
 
-        const filePath = path.resolve(__dirname, `./usedPorts.json`)
+        const filePath = path.resolve(__dirname, `../../../../test-network/scripts-app/usedPorts.json`)
         if(fs.existsSync(filePath)) {
             let data = JSON.parse(fs.readFileSync(filePath, {encoding:'utf8', flag:'r'}))
 
@@ -218,7 +218,7 @@ class ConfigYaml {
         // for CAs we start from the 9051
         const startCAPort = 9051
         
-        const filePath = path.resolve(__dirname, `./usedPorts.json`)
+        const filePath = path.resolve(__dirname, `../../../../test-network/scripts-app/usedPorts.json`)
         if(fs.existsSync(filePath)) {
             let data = JSON.parse(fs.readFileSync(filePath, {encoding:'utf8', flag:'r'}))
 
@@ -251,7 +251,7 @@ class ConfigYaml {
         // for Orderers we start from the 11051
         const startOrdererPort = 11051
         
-        const filePath = path.resolve(__dirname, `./usedPorts.json`)
+        const filePath = path.resolve(__dirname, `../../../../test-network/scripts-app/usedPorts.json`)
         if(fs.existsSync(filePath)) {
             let data = JSON.parse(fs.readFileSync(filePath, {encoding:'utf8', flag:'r'}))
 

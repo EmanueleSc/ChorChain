@@ -2,6 +2,8 @@ import express from "express"
 const router = express.Router()
 const path = require('path')
 const ChorModel = require("../../db/chormodel")
+const NetworkU = require("../utils/networku")
+import { ChorTranslator } from '../utils/translator'
 
 router.post('/upload', async (req, res) => {
     try {
@@ -22,6 +24,12 @@ router.post('/upload', async (req, res) => {
         bpmnFile.mv(uploadPath, (err) => {
             if (err) return res.status(500).send(err)
         })
+
+        // Create Hyperledger Fabric network
+        const bpmnXml = bpmnFile.data.toString('utf8')
+        const translator = await new ChorTranslator(bpmnXml)
+        const numOrgs = Object.keys(translator.roles).length
+        await NetworkU.networkUp(idModel, numOrgs)
 
         // create choreography model in mongoDB
         const model = await ChorModel.create({
