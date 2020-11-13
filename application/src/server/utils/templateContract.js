@@ -6,10 +6,10 @@ const _computeStringElements = (elements) => {
     return str
 }
 
-const _computeRoles = (roles) => {
+const _computeRoles = (roles, idModel) => {
     let str = ''
     for(let i = 0; i < roles.length; i++) {
-        str += roles[i] + ': ' + "'Org" + (i+1) + "MSP', "
+        str += roles[i] + ': ' + "'Org" + (i+1) + "MSP" + idModel + "', "
     }
     return str
 }
@@ -368,7 +368,47 @@ const _computeMultipleElements = (arr, template, args) => {
     return str
 }
 
-const smartcontract = (chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs) => {
+
+const _computeQueryChorStateTX = (roles, idModel) => {
+    const relations = _computeRelations(roles)
+    let ifs = ''
+    for(let i = 1; i <= roles.length; i++) {
+        let body = ''
+        let rels =  relations.filter(e => e.includes(roles[i-1]))
+        
+        for(let k = 0; k < rels.length; k++) {
+            body += `
+            privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${rels[k]}, chorID)
+            resp.choreographyPrivate['${rels[k]}'] = privateState
+            `
+        }
+
+        ifs += `
+        if(mspid === 'Org${i}MSP${idModel}') {
+            ${body}
+        }
+        `
+    }
+
+    return `
+    async queryChorState(ctx) {
+        let privateState 
+        let resp = {}
+
+        // public state
+        const choreography = await ChoreographyState.getState(ctx, chorID)
+        resp.choreography = choreography
+        resp.choreographyPrivate = {}
+
+        const mspid = ctx.stub.getCreator().mspid
+        ${ifs}
+
+        return resp
+    }
+    `
+}
+
+const smartcontract = (idModel, chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs) => {
     return `
         'use strict'
         const { Contract } = require('fabric-contract-api')
@@ -379,7 +419,7 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
         const chorElements = [
             ${_computeStringElements(chorElements)}
         ]
-        const roles = { ${_computeRoles(roles)} }
+        const roles = { ${_computeRoles(roles, idModel)} }
         const collectionsPrivate = {
             ${_computeCollections(roles)}
         }
@@ -405,50 +445,7 @@ const smartcontract = (chorID, contractName, chorElements, roles, startEvent, st
 
             ${_computeMultipleElements(choreographyTaskObjs, _messageTamplate, roles)}
 
-            async queryChorState(ctx) {
-                let privateState, privateCollection 
-                let resp = {}
-        
-                // public state
-                const choreography = await ChoreographyState.getState(ctx, chorID)
-                resp.choreography = choreography
-                resp.choreographyPrivate = {}
-        
-                const mspid = ctx.stub.getCreator().mspid
-                const k1 = Object.keys(roles).find(key => roles[key] === 'Org1MSP')
-                const k2 = Object.keys(roles).find(key => roles[key] === 'Org2MSP')
-                const k3 = Object.keys(roles).find(key => roles[key] === 'Org3MSP')
-        
-                if(mspid === 'Org1MSP') {
-                    privateCollection = k1 + k2
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-        
-                    privateCollection = k1 + k3
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-                }
-                else if(mspid === 'Org2MSP') {
-                    privateCollection = k1 + k2
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-        
-                    privateCollection = k2 + k3
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-                }
-                else if(mspid === 'Org3MSP') {
-                    privateCollection = k1 + k3
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-        
-                    privateCollection = k2 + k3
-                    privateState = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate[privateCollection], chorID)
-                    resp.choreographyPrivate[privateCollection] = privateState
-                }
-        
-                return resp
-            }
+            ${_computeQueryChorStateTX(roles, idModel)}
 
         }
 

@@ -3,23 +3,20 @@ import { smartcontract } from './templateContract'
 const { v4: uuidv4 } = require('uuid')
 
 class ChorTranslator {
-    constructor(xml) {
+    constructor(xml, idModel) {
         const moddle = new BpmnModdle()
         this.chorID = uuidv4()
         this.roles = {}
-        this.configTxProfile = 'ThreeOrgsChannel' // default
+        this.configTxProfile = 'OrgsChannel'
         this.startEvent = ''
-        // this.modelName = ''
         this.contract = ''
-        // this.contractName = `org.hyreochain.choreographyprivatedata_${this.chorID}`
         this.contractName = `contract${this.chorID}`
 
 
         return new Promise((resolve, reject) => {
             try {
                 return moddle.fromXML(xml).then(obj => {
-                    // this.modelName = this.getModelName(obj)
-                    
+            
                     let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
                     this.startEvent = chorElements[0]
                     const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
@@ -37,12 +34,19 @@ class ChorTranslator {
                     chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
         
                     const participants = this.getParticipatsNames(obj)
-                    this.roles = this.computeRolesObj(participants)
-                    if(participants.length === 2) this.configTxProfile = 'TwoOrgsChannel'
-        
+                    this.roles = this.computeRolesObj(participants, idModel)
+
                     this.contract = smartcontract(
-                        this.chorID, this.contractName, chorElements, participants, this.startEvent,
-                        startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs
+                        idModel, 
+                        this.chorID, 
+                        this.contractName, 
+                        chorElements, 
+                        participants, 
+                        this.startEvent,
+                        startEventObj, 
+                        exclusiveGatewayObjs, 
+                        eventBasedGatewayObjs, 
+                        choreographyTaskObjs
                     )
                     
                     return resolve(this)
@@ -86,10 +90,10 @@ class ChorTranslator {
         return participants.map(p => p.name.replace(" ", "_"))
     }
 
-    computeRolesObj(roles) {
+    computeRolesObj(roles, idModel) {
         let obj = {}
         for(let i = 0; i < roles.length; i++) {
-            obj[roles[i]] = "Org" + (i+1) + "MSP"
+            obj[roles[i]] = "Org" + (i+1) + "MSP" + idModel
         }
         return obj
     }

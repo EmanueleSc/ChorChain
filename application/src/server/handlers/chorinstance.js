@@ -27,7 +27,7 @@ router.get('/create', async (req, res) => {
         //      object.modelName
         //      object.contract (the translated contract code)
         //      object.contractName
-        const obj = await new ChorTranslator(chorXml)
+        const obj = await new ChorTranslator(chorXml, idModel)
         const idChorLedger = obj.chorID
         const startEvent = obj.startEvent
         const roles = obj.roles
@@ -40,45 +40,13 @@ router.get('/create', async (req, res) => {
         const subscriptions = {}
         Object.keys(roles).forEach(key => subscriptions[key] = null)
 
-
-        // check if cc_counter.json exists (contract counter file)
-        /*const cc_counterFile = path.resolve(__dirname, `../../../../chaincode/utils/cc_counter.json`)
-        let data
-        if (fs.existsSync(cc_counterFile)) { // file exists
-            data = JSON.parse(fs.readFileSync(cc_counterFile, {encoding:'utf8', flag:'r'}))
-            data.counter = data.counter + 1
-            fs.writeFileSync(cc_counterFile, JSON.stringify(data))
-
-        } else {  //file not exists
-            data = { counter: 1 }
-            fs.writeFileSync(cc_counterFile, JSON.stringify(data))
-        }*/
-
         // write smart contract file inside chaincode
         const code = contract.toString('utf8')
-        // const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract${data.counter}.js`)
         const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
         fs.writeFileSync(chaincodeFile, code)
 
         // package the chaincode
         await ChannelU.packageChaincode(contractName, contractVersion)
-
-        // write index.js file inside chaincode
-        /*let header = `\n'use strict';\nconst contracts = [];`
-        let body = ''
-        let end = 'module.exports.contracts = contracts;'
-        const cc_index = path.resolve(__dirname, `../../../../chaincode/index.js`)
-
-        for(let i = 0; i < data.counter; i++) {
-            body += `
-            \nconst ChoreographyPrivateDataContract${i+1} = require('./lib/choreographyprivatedatacontract${i+1}.js');
-            \nmodule.exports.ChoreographyPrivateDataContract${i+1} = ChoreographyPrivateDataContract${i+1};
-            \ncontracts.push(ChoreographyPrivateDataContract${i+1});
-            `
-        }
-        body = header + '\n' + body + '\n' + end
-        fs.writeFileSync(cc_index, body)*/
-
 
         // create choreography instance in mongoDB
         const chor = await ChorInstance.create({
