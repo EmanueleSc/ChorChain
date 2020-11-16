@@ -158,11 +158,12 @@ class ChannelU {
 
     /**
      * @param {String} contractName | smart contract name
+     * @param {String} idModel | id of choreography model
      * @param {Number} version | the version of the contract (eg. 1)
      */
-    static async packageChaincode(contractName, version) {
+    static async packageChaincode(contractName, idModel, version) {
         const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/packageC.sh')
-        const resp = await command.shExec(shFilePath, [contractName, version])
+        const resp = await command.shExec(shFilePath, [contractName, idModel, version])
         console.log('\n------- PACKAGE CHAINCODE SCRIPT -------'); console.log(resp); console.log('\n')
     }
 

@@ -1,8 +1,10 @@
 #!/bin/bash
 
 CC_NAME="$1"
-VERSION="$2"
+MODEL_ID="$2"
+VERSION="$3"
 : ${CC_NAME:="choreographyprivatedatacontract"}
+: ${MODEL_ID:="example"}
 : ${VERSION:="1"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -19,7 +21,7 @@ export ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 
 packageChaincode() {
   ORG=$1
-  setGlobals $ORG
+  setGlobals $ORG $MODEL_ID
   set -x
   peer lifecycle chaincode package ${SCRIPT_PATH}/../chaincode-artifacts/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${VERSION} >&log.txt
   res=$?

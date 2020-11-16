@@ -46,7 +46,7 @@ router.get('/create', async (req, res) => {
         fs.writeFileSync(chaincodeFile, code)
 
         // package the chaincode
-        await ChannelU.packageChaincode(contractName, contractVersion)
+        await ChannelU.packageChaincode(contractName, idModel, contractVersion)
 
         // create choreography instance in mongoDB
         const chor = await ChorInstance.create({
