@@ -7,6 +7,7 @@ const fs = require('fs')
 const mongoose = require('mongoose')
 import { ChorTranslator } from '../utils/translator'
 const ChannelU = require("../utils/channelu")
+const WalletU = require("../utils/walletu")
 
 router.get('/create', async (req, res) => {
     try {
@@ -158,17 +159,32 @@ router.get('/subscribe', async (req, res) => {
             return res.status(405).send('Role already subscribed, operation not allowed.')
         }
 
+        // organization msp id
+        const idModel = chorinstance.idModel
+        const mspId = roles[subRole]
+        const orgNum = mspId.split('MSP')[0].toLowerCase()
+        const org = `${orgNum}.${idModel}.com`
+        const ccpFileName = `connection-${orgNum}.yaml`
+        const caHostName = `ca.${org}`
+        const userIdentityWallet = `${mspId}.${idUser}`
+
+        // Register and enroll User to the organization
+        await WalletU.registerAndEnrollUserCA(org, ccpFileName, caHostName, userIdentityWallet, mspId)
+
+
         // Update document: user subscription to the specific role
-        idUsersSubscribed.push(mongoose.Types.ObjectId(idUser))
+        /*idUsersSubscribed.push(mongoose.Types.ObjectId(idUser))
         subscriptions[subRole] = idUser
 
         const response = await ChorInstance.update(
             { _id: chorinstance._id },
             { $set: { idUsersSubscribed, subscriptions } }
-        )
+        )*/
 
 
-        res.json({ response })
+        // res.json({ response })
+
+        res.json({response:'OK'}) // TEST
     } catch (err) {
         res.json({ error: err.message || err.toString() })
     }
