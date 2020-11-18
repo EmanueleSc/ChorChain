@@ -86,10 +86,10 @@ class WalletU {
      * @param {String} org | organization domain (eg. org1.{idModel}.com)
      * @param {String} ccpFileName | connection profile name (eg. connection-org1.yaml) 
      * @param {String} caHostName | name of CA inside ccp (e.g. ca.org1.{idModel}.com)
-     * @param {String} identity | wallet user identity label (e.g. User{idUser}@org1.{idModel}.com)
+     * @param {String} idUser | user id
      * @param {String} mspId | (eg. Org1MSP{idModel})
      */
-    static async registerAndEnrollUserCA(org, ccpFileName, caHostName, identity, mspId) {
+    static async registerAndEnrollUserCA(org, ccpFileName, caHostName, idUser, mspId) {
         try {
             const ccpPath = CryptoPeerUser.getConnectionProfilePath(org, ccpFileName)
             const ccp = yaml.safeLoad(fs.readFileSync(ccpPath, 'utf8'))
@@ -98,6 +98,7 @@ class WalletU {
             const caTLSCACerts = caInfo.tlsCACerts.pem
             const caClient = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName)
 
+            const identity = `User${idUser}@${org}`
             const walletPath = WalletU.getWalletPath(identity)
             const wallet = await Wallets.newFileSystemWallet(walletPath)
 
@@ -121,12 +122,14 @@ class WalletU {
             const secret = await caClient.register({
                 /*affiliation: affiliation,*/
                 enrollmentID: identity,
-                role: 'client'
+                role: 'client',
+                attrs: [{ name: 'role', value: idUser, ecert: true }] // attribute encoding for ABAC (smartcontract)
             }, adminUser)
 
             const enrollment = await caClient.enroll({
                 enrollmentID: identity,
-                enrollmentSecret: secret
+                enrollmentSecret: secret,
+                attr_reqs: [{ name: 'role', optional: false }]
             })
 
             const x509Identity = {

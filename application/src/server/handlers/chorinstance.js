@@ -166,10 +166,9 @@ router.get('/subscribe', async (req, res) => {
         const org = `${orgNum}.${idModel}.com`
         const ccpFileName = `connection-${orgNum}.yaml`
         const caHostName = `ca.${org}`
-        const userIdentityWallet = `User${idUser}@${org}`
 
         // Register and enroll User to the organization
-        await WalletU.registerAndEnrollUserCA(org, ccpFileName, caHostName, userIdentityWallet, mspId)
+        await WalletU.registerAndEnrollUserCA(org, ccpFileName, caHostName, idUser, mspId)
 
         // Update document: user subscription to the specific role
         idUsersSubscribed.push(mongoose.Types.ObjectId(idUser))
