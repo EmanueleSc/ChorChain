@@ -166,25 +166,21 @@ router.get('/subscribe', async (req, res) => {
         const org = `${orgNum}.${idModel}.com`
         const ccpFileName = `connection-${orgNum}.yaml`
         const caHostName = `ca.${org}`
-        const userIdentityWallet = `${mspId}.${idUser}`
+        const userIdentityWallet = `User${idUser}@${org}`
 
         // Register and enroll User to the organization
         await WalletU.registerAndEnrollUserCA(org, ccpFileName, caHostName, userIdentityWallet, mspId)
 
-
         // Update document: user subscription to the specific role
-        /*idUsersSubscribed.push(mongoose.Types.ObjectId(idUser))
+        idUsersSubscribed.push(mongoose.Types.ObjectId(idUser))
         subscriptions[subRole] = idUser
 
         const response = await ChorInstance.update(
             { _id: chorinstance._id },
             { $set: { idUsersSubscribed, subscriptions } }
-        )*/
+        )
 
-
-        // res.json({ response })
-
-        res.json({response:'OK'}) // TEST
+        res.json({ response })
     } catch (err) {
         res.json({ error: err.message || err.toString() })
     }

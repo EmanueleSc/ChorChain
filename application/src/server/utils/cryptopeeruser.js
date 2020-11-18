@@ -11,8 +11,25 @@ class CryptoPeerUser {
      */
     constructor(org, user, mspUserSignCert, mspUserPrivKey) {
         const credPath = path.join(fixtures, `/organizations/peerOrganizations/${org}/users/${user}`)
+        
+        mspUserSignCert = mspUserSignCert || 'cert.pem' // default
         this.certificate = fs.readFileSync(path.join(credPath, `/msp/signcerts/${mspUserSignCert}`)).toString()
-        this.privateKey = fs.readFileSync(path.join(credPath, `/msp/keystore/${mspUserPrivKey}`)).toString()
+        
+        // Search the private key for the user
+        // this.privateKey = fs.readFileSync(path.join(credPath, `/msp/keystore/${mspUserPrivKey}`)).toString()
+        this.privateKey = ''
+        mspUserPrivKey = mspUserPrivKey || 'priv_sk' // default
+        const keyPath = path.join(credPath, `/msp/keystore/${mspUserPrivKey}`)
+        
+        if(fs.existsSync(keyPath)) {
+            this.privateKey = fs.readFileSync(keyPath).toString()
+        } else {
+            let keyFile = ''
+            fs.readdirSync(path.join(credPath, `/msp/keystore`)).forEach(file => {
+                keyFile = file
+            })
+            this.privateKey = fs.readFileSync(path.join(credPath, `/msp/keystore/${keyFile}`)).toString()
+        }
     }
 
     /**

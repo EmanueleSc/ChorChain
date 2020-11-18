@@ -79,8 +79,9 @@ function registerEnrollOrg {
     #${BIN_DIR}/fabric-ca-client register --caname ${CA_NAME} --id.name user1 --id.secret user1pw --id.type client --tls.certfiles ${ORGANIZATIONS_PATH}/fabric-ca/${ORG_CA_DIR}/tls-cert.pem
     #set +x
 
-    local ADMIN_ID="org${COUNTER}admin.${MODEL_ID}"
-    local ADMIM_PW="orgadminpw"
+    #local ADMIN_ID="org${COUNTER}admin.${MODEL_ID}"
+    local ADMIN_ID="Admin@${ORG_DIR}"
+    local ADMIM_PW="adminpw"
     echo
     echo "Register the org admin ${ADMIN_ID}"
     echo
