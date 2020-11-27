@@ -6,8 +6,8 @@ const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
 import { ChorTranslator } from '../utils/translator'
-const ChannelU = require("../utils/channelu")
 const WalletU = require("../utils/walletu")
+const { v4: uuidv4 } = require('uuid')
 
 router.get('/create', async (req, res) => {
     try {
@@ -28,26 +28,18 @@ router.get('/create', async (req, res) => {
         //      object.modelName
         //      object.contract (the translated contract code)
         //      object.contractName
-        const obj = await new ChorTranslator(chorXml, idModel)
-        const idChorLedger = obj.chorID
+        //      object.channel
+        const idChorLedger = uuidv4()
+        const obj = await new ChorTranslator(chorXml, idModel, false, idChorLedger)
         const startEvent = obj.startEvent
         const roles = obj.roles
         const contractName = obj.contractName
-        const channel = `channel${idChorLedger}`
+        const channel = obj.channel
         const configTxProfile = obj.configTxProfile
         const contractVersion = 1
-        const contract = obj.contract
         // Initialize subscriptions to null (no user subscribed to any role)
         const subscriptions = {}
         Object.keys(roles).forEach(key => subscriptions[key] = null)
-
-        // write smart contract file inside chaincode
-        const code = contract.toString('utf8')
-        const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
-        fs.writeFileSync(chaincodeFile, code)
-
-        // package the chaincode
-        await ChannelU.packageChaincode(contractName, idModel, contractVersion)
 
         // create choreography instance in mongoDB
         const chor = await ChorInstance.create({
@@ -109,16 +101,6 @@ router.post('/instances/deployed', async (req, res) => {
         res.json({ error: err.message || err.toString() })
     }
 })
-
-/*router.post('/fetch', async (req, res) => {
-    try {
-        const chors = await ChorInstance.find()
-
-        res.json({ response: chors })
-    } catch (err) {
-        res.json({ error: err.message || err.toString() })
-    }
-})*/
 
 router.post('/fetch/file', async (req, res) => {
     try {

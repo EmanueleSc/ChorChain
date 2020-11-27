@@ -27,7 +27,7 @@ router.post('/upload', async (req, res) => {
 
         // Create Hyperledger Fabric network
         const bpmnXml = bpmnFile.data.toString('utf8')
-        const translator = await new ChorTranslator(bpmnXml)
+        const translator = await new ChorTranslator(bpmnXml, idModel, false)
         const numOrgs = Object.keys(translator.roles).length
         await NetworkU.networkUp(idModel, numOrgs)
 

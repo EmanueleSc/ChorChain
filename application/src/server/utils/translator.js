@@ -1,16 +1,24 @@
 import BpmnModdle from 'bpmn-moddle'
 import { smartcontract } from './templateContract'
-const { v4: uuidv4 } = require('uuid')
 
 class ChorTranslator {
-    constructor(xml, idModel) {
+    /**
+     * 
+     * @param {String} xml | xml of bpmn model 
+     * @param {String} idModel | id model
+     * @param {Boolean} generateContract | if true generate the smartcontract (saved in this.contract)
+     * @param {String} idChorLedger | id of choreography model used as key of ledger world state
+     * @param {Object} subscriptions | the object of subscribed users to the choreography roles
+     */
+    constructor(xml, idModel, generateContract, idChorLedger, subscriptions) {
         const moddle = new BpmnModdle()
-        this.chorID = uuidv4()
+        this.chorID = idChorLedger
         this.roles = {}
         this.configTxProfile = 'OrgsChannel'
         this.startEvent = ''
         this.contract = ''
         this.contractName = `contract${this.chorID}`
+        this.channel = `channel${this.chorID}`
 
 
         return new Promise((resolve, reject) => {
@@ -19,35 +27,39 @@ class ChorTranslator {
             
                     let chorElements = this.getElementsIdByType(obj, "bpmn:StartEvent")
                     this.startEvent = chorElements[0]
-                    const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
-        
-                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
-                    const exclusiveGatewayObjs = this.getElementsByType(obj, "bpmn:ExclusiveGateway")
-        
-                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EventBasedGateway"))
-                    const eventBasedGatewayObjs = this.getElementsByType(obj, "bpmn:EventBasedGateway")
-        
-                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message"))
-                    const choreographyTaskObjs = this.getElementsByType(obj, "bpmn:ChoreographyTask")
-        
-                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
-                    chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
         
                     const participants = this.getParticipatsNames(obj)
                     this.roles = this.computeRolesObj(participants, idModel)
 
-                    this.contract = smartcontract(
-                        idModel, 
-                        this.chorID, 
-                        this.contractName, 
-                        chorElements, 
-                        participants, 
-                        this.startEvent,
-                        startEventObj, 
-                        exclusiveGatewayObjs, 
-                        eventBasedGatewayObjs, 
-                        choreographyTaskObjs
-                    )
+                    if(generateContract) {
+                        const startEventObj = this.getElementsByType(obj, "bpmn:StartEvent")[0]
+        
+                        chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ExclusiveGateway"))
+                        const exclusiveGatewayObjs = this.getElementsByType(obj, "bpmn:ExclusiveGateway")
+        
+                        chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EventBasedGateway"))
+                        const eventBasedGatewayObjs = this.getElementsByType(obj, "bpmn:EventBasedGateway")
+        
+                        chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:Message"))
+                        const choreographyTaskObjs = this.getElementsByType(obj, "bpmn:ChoreographyTask")
+        
+                        chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:ParallelGateway"))
+                        chorElements = chorElements.concat(this.getElementsIdByType(obj, "bpmn:EndEvent"))
+
+                        this.contract = smartcontract(
+                            idModel, 
+                            this.chorID, 
+                            this.contractName, 
+                            chorElements, 
+                            participants, 
+                            this.startEvent,
+                            startEventObj, 
+                            exclusiveGatewayObjs, 
+                            eventBasedGatewayObjs, 
+                            choreographyTaskObjs,
+                            subscriptions
+                        )
+                    }
                     
                     return resolve(this)
                 })

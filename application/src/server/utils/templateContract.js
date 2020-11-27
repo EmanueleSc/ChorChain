@@ -14,6 +14,14 @@ const _computeRoles = (roles, idModel) => {
     return str
 }
 
+const _computeSubscriptions = (subscriptions) => {
+    let str = ''
+    for (const [key, value] of Object.entries(subscriptions)) {
+        str += key + ': ' + `'${value}', `
+    }
+    return str
+}
+
 function * cartesian (head, ...tail) {
     const remainder = tail.length ? cartesian(...tail) : [[]]
     for (const r of remainder) for (const h of head) yield [h, ...r]
@@ -256,7 +264,7 @@ const _messageTamplate = (obj, roles) => {
                 /* one-way task */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid) {
+                if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${submitter})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${messageID}')
                     
@@ -324,7 +332,7 @@ const _messageTamplate = (obj, roles) => {
                 /* two-way task - initial participant */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid) {
+                if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${initialParticipant})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${initialMessageID}')
                     ${body1}
@@ -342,7 +350,7 @@ const _messageTamplate = (obj, roles) => {
                 /* two-way task - last participant */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid) {
+                if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${lastParticipant})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${lastMessageID}')
                     
@@ -408,7 +416,7 @@ const _computeQueryChorStateTX = (roles, idModel) => {
     `
 }
 
-const smartcontract = (idModel, chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs) => {
+const smartcontract = (idModel, chorID, contractName, chorElements, roles, startEvent, startEventObj, exclusiveGatewayObjs, eventBasedGatewayObjs, choreographyTaskObjs, subscriptions) => {
     return `
         'use strict'
         const { Contract } = require('fabric-contract-api')
@@ -423,6 +431,7 @@ const smartcontract = (idModel, chorID, contractName, chorElements, roles, start
         const collectionsPrivate = {
             ${_computeCollections(roles)}
         }
+        const subscriptions = { ${_computeSubscriptions(subscriptions)} }
 
         class ChoreographyPrivateDataContract extends Contract {
             constructor() {

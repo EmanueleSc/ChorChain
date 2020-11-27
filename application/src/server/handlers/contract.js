@@ -1,7 +1,12 @@
 import express from "express"
 const router = express.Router()
+const ChorModel = require("../../db/chormodel")
 const ChorInstance = require("../../db/chorinstance")
 const ChannelU = require("../utils/channelu")
+const path = require('path')
+const fs = require('fs')
+const mongoose = require('mongoose')
+import { ChorTranslator } from '../utils/translator'
 
 const highlightLog = (message) => {
     console.log(`##############################################################################`)
@@ -18,8 +23,35 @@ router.post('/deploy', async (req, res) => {
     const configTxProfile = chorinstance.configTxProfile
     const contractName = chorinstance.contractName
     const channel = chorinstance.channel
-    const cVersion = contractVersion || 1
+    const cVersion = contractVersion || 1 // !!! NOTE: update of the contract not handled !!!
+    const idModel = chorinstance.idModel
+    const subscriptions = chorinstance.subscriptions
 
+    // check if subscriptions are completed
+    for (const [key, value] of Object.entries(subscriptions)) {
+        if(!value) {
+            return res.status(405).send(`The role ${key} is missing the subscription.`)
+        }
+    }
+
+    // translation of the model and packaging of the contract
+    const model = await ChorModel.findOne({ idModel: mongoose.Types.ObjectId(idModel) })
+    const fileName = model.fileName
+    // Get the xml of the bpmn file
+    const bpmnFilePath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
+    const chorXml = fs.readFileSync(bpmnFilePath, {encoding:'utf8', flag:'r'})
+    // contract generation and subscription encoding into the contract
+    const obj = await new ChorTranslator(chorXml, idModel, true, idChorLedger, subscriptions)
+    const contract = obj.contract
+    // write smart contract file inside chaincode
+    const code = contract.toString('utf8')
+    const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
+    fs.writeFileSync(chaincodeFile, code)
+    // package the chaincode
+    await ChannelU.packageChaincode(contractName, idModel, contractVersion)
+
+    // ================================================================================================================
+    // TODO DEPLOY REFACTORING ...
     const RETRY = 25
     let STOP = false
 
