@@ -11,10 +11,11 @@ class ChannelU {
     /**
      * @param {String} channelName | name of the created channel (eg. mychannel)
      * @param {String} configTxProfile | the profile specified in configtx.yaml (eg. TwoOrgsChannel)
+     * @param {String} idModel | id of choreography model
      */
-    static async generateChannelTransaction(channelName, configTxProfile) {
+    static async generateChannelTransaction(channelName, configTxProfile, idModel) {
         const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/channelTx.sh')
-        const resp = await command.shExec(shFilePath, [channelName, configTxProfile])
+        const resp = await command.shExec(shFilePath, [channelName, configTxProfile, idModel])
         console.log('\n------- CREATE CHANNEL TX -------'); console.log(resp); console.log('\n')
     }
 
@@ -23,9 +24,9 @@ class ChannelU {
      * @param {String} configTxProfile | the profile specified in configtx.yaml (eg. TwoOrgsChannel)
      * @param {String} orgMspID | organization msp ID (eg. Org1MSP)     
      */
-    static async generateAnchorPeerTransaction(channelName, configTxProfile, orgMspID) {
+    static async generateAnchorPeerTransaction(channelName, configTxProfile, orgMspID, idModel) {
         const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/anchorPeerTx.sh')
-        const resp = await command.shExec(shFilePath, [channelName, configTxProfile, orgMspID])
+        const resp = await command.shExec(shFilePath, [channelName, configTxProfile, orgMspID, idModel])
         console.log('\n------- CREATE ANCHOR PEER TX -------'); console.log(resp); console.log('\n')
     }
 
@@ -37,15 +38,15 @@ class ChannelU {
      * @returns {Client} return the Client object
      */
     static async createClient(org, orgMspID, ccpFileName) {
-        const connOrg1Path = CryptoPeerUser.getConnectionProfilePath(org, ccpFileName)
+        const connOrgPath = CryptoPeerUser.getConnectionProfilePath(org, ccpFileName)
 
         // Create identity
         const identityLabel = `Admin@${org}`;
         const walletPath = WalletU.getWalletPath(identityLabel)
-        const cryptoUser = new CryptoPeerUser(org, `Admin@${org}`, `Admin@${org}-cert.pem`, 'priv_sk')
+        const cryptoUser = new CryptoPeerUser(org, `Admin@${org}`, 'cert.pem', 'priv_sk') // removed: Admin@${org}-cert.pem (cert file name)
         await WalletU.createIdentity(identityLabel, orgMspID, cryptoUser.certificate, cryptoUser.privateKey)
 
-        let client = FabClient.loadFromConfig(connOrg1Path)
+        let client = FabClient.loadFromConfig(connOrgPath)
         let kvs = await FabClient.newDefaultKeyValueStore({ path: walletPath })
         await client.setStateStore(kvs)
 

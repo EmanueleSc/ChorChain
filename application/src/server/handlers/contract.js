@@ -7,6 +7,8 @@ const path = require('path')
 const fs = require('fs')
 const mongoose = require('mongoose')
 import { ChorTranslator } from '../utils/translator'
+const yaml = require('js-yaml')
+const CryptoPeerUser = require('../utils/cryptopeeruser')
 
 const highlightLog = (message) => {
     console.log(`##############################################################################`)
@@ -54,18 +56,37 @@ router.post('/deploy', async (req, res) => {
     // TODO DEPLOY REFACTORING ...
     const RETRY = 25
     let STOP = false
+    const numOrgs = Object.keys(obj.roles).length
 
     for (let i = 1; i <= RETRY; i++) {
         try {
             highlightLog(`Generating Channel Transaction for: ${channel}`)
-            await ChannelU.generateChannelTransaction(channel, configTxProfile)
+            await ChannelU.generateChannelTransaction(channel, configTxProfile, idModel)
 
-            for(let i = 1; i <= 3; i++) {
-                highlightLog(`Generating Anchor Peer Transaction for Org${i}`)
-                await ChannelU.generateAnchorPeerTransaction(channel, configTxProfile, `Org${i}MSP`)
+            for(let k = 1; k <= numOrgs; k++) {
+                const orgMspID =  `Org${k}MSP${idModel}`
+                const org = `org${k}.${idModel}.com`
+                const ccpFile = `connection-org${k}.yaml`
+                const peer0 = `peer0.org${k}.${idModel}.com`
+
+                highlightLog(`Generating Anchor Peer Transaction for org${k}.${idModel}.com`)
+                await ChannelU.generateAnchorPeerTransaction(channel, configTxProfile, orgMspID, idModel)
+
+                const ccpPath = CryptoPeerUser.getConnectionProfilePath(org, ccpFile)
+                const ccp = yaml.safeLoad(fs.readFileSync(ccpPath, 'utf8'))
+                const peer0Url = ccp.peers[peer0].url
+
+                highlightLog(`Join Peer0 Org${k}`)
+                const client = await ChannelU.createClient(org, orgMspID, ccpFile)
+
+                // =============================================================================================
+                // TODO: refactoring createChannel and joinChannel methods
+                if(k === 1) await ChannelU.createChannel(client, channel) // create the channel only one time
+                await ChannelU.joinChannel(client, channel, org, peer0Url)
+                // =============================================================================================
             }
         
-            highlightLog(`Join Peer Org1`)
+            /*highlightLog(`Join Peer Org1`)
             const client = await ChannelU.createClient('org1.example.com', 'Org1MSP', 'connection-org1.yaml')
             await ChannelU.createChannel(client, channel)
             await ChannelU.joinChannel(client, channel, 'org1.example.com', 'grpcs://localhost:7051')
@@ -76,11 +97,13 @@ router.post('/deploy', async (req, res) => {
 
             highlightLog(`Join Peer Org3`)
             const client3 = await ChannelU.createClient('org3.example.com', 'Org3MSP', 'connection-org3.yaml')
-            await ChannelU.joinChannel(client3, channel, 'org3.example.com', 'grpcs://localhost:11051')
+            await ChannelU.joinChannel(client3, channel, 'org3.example.com', 'grpcs://localhost:11051')*/
 
+            // TODO: refactoring bash scripts
             highlightLog(`Update Anchor Peers definition for: ${channel}`)
             await ChannelU.update3OrgsAnchorPeers(channel).catch(e => undefined) // skip this error
 
+            // TODO: refactoring bash scripts
             highlightLog(`Deploying Contract: ${contractName}`)
             await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true })
 

@@ -3,12 +3,14 @@
 CHANNEL_NAME="$1"
 PROFILE_TX="$2" # The profile specified in configtx.yaml
 ORGMSP="$3"
-DELAY="$4"
-MAX_RETRY="$5"
-VERBOSE="$6"
+MODEL_ID="$4"
+DELAY="$5"
+MAX_RETRY="$6"
+VERBOSE="$7"
 : ${CHANNEL_NAME:="mychannel"}
 : ${PROFILE_TX:="TwoOrgsChannel"}
 : ${ORGMSP:="Org1MSP"}
+: ${MODEL_ID:="example"}
 : ${DELAY:="3"}
 : ${MAX_RETRY:="5"}
 : ${VERBOSE:="false"}
@@ -22,7 +24,7 @@ if [ ! -d "$ARTIFACTS_DIR" ]; then
 fi
 
 createAncorPeerTx() {
-    export FABRIC_CFG_PATH=$SCRIPT_PATH/../configtx
+    export FABRIC_CFG_PATH=$SCRIPT_PATH/../configtx/$MODEL_ID
 	${BIN_DIR}/configtxgen -profile ${PROFILE_TX} -outputAnchorPeersUpdate ${ARTIFACTS_DIR}/${ORGMSP}anchors.tx -channelID $CHANNEL_NAME -asOrg ${ORGMSP}
 	if [ $? -ne 0 ]; then
 		echo "Failed to generate anchor peer update for ${ORGMSP}..."

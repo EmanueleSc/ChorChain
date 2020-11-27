@@ -6,11 +6,11 @@ IMAGETAG="latest"
 COMPOSE_PROJECT_NAME=net
 SYS_CHANNEL=system-channel
 
-export FABRIC_CFG_PATH=${SCRIPT_PATH}/../configtx/${MODEL_ID}
-
 # id of choreography model
 MODEL_ID="$1"
 : ${MODEL_ID:="example"}
+
+export FABRIC_CFG_PATH=${SCRIPT_PATH}/../configtx/${MODEL_ID}
 
 function createConsortium() {
     echo "#########  Generating Orderer Genesis block for net_${MODEL_ID} ##############"
