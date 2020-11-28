@@ -96,19 +96,6 @@ router.post('/deploy', async (req, res) => {
                 // join the peer0 to the channel
                 await ChannelU.joinChannel(client, channel, org, peer0Url, peerTlsCACert, idModel, ordererUrl)
             }
-        
-            /*highlightLog(`Join Peer Org1`)
-            const client = await ChannelU.createClient('org1.example.com', 'Org1MSP', 'connection-org1.yaml')
-            await ChannelU.createChannel(client, channel)
-            await ChannelU.joinChannel(client, channel, 'org1.example.com', 'grpcs://localhost:7051')
-
-            highlightLog(`Join Peer Org2`)
-            const client2 = await ChannelU.createClient('org2.example.com', 'Org2MSP', 'connection-org2.yaml')
-            await ChannelU.joinChannel(client2, channel, 'org2.example.com', 'grpcs://localhost:9051')
-
-            highlightLog(`Join Peer Org3`)
-            const client3 = await ChannelU.createClient('org3.example.com', 'Org3MSP', 'connection-org3.yaml')
-            await ChannelU.joinChannel(client3, channel, 'org3.example.com', 'grpcs://localhost:11051')*/
 
             // TODO: refactoring bash scripts
             highlightLog(`Update Anchor Peers definition for: ${channel}`)
