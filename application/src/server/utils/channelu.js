@@ -65,8 +65,10 @@ class ChannelU {
     /**
      * @param {Client} client | the Client object returned by createClient method
      * @param {String} channelName | name of the created channel (eg. mychannel)
+     * @param {String} idModel | id of choreography model
+     * @param {String} ordererUrl | grpcs orderer address (e.g. grpcs://localhost:7050)
      */
-    static async createChannel(client, channelName) {
+    static async createChannel(client, channelName, idModel, ordererUrl) {
         let envelope_bytes = fs.readFileSync(path.join(__dirname, `../../../../test-network/channel-artifacts/${channelName}.tx`))
         let config_update = client.extractChannelConfig(envelope_bytes)
         const signature = client.signChannelConfig(config_update)
@@ -75,7 +77,7 @@ class ChannelU {
             config: config_update, // the binary config
             signatures: [signature], // the collected signatures
             name: channelName,
-            orderer: ChannelU.getOrderer(client),
+            orderer: ChannelU.getOrderer(client, idModel, ordererUrl),
             txId: client.newTransactionID() // the generated transaction id
         })
         console.log('\n------- CREATE CHANNEL RESP -------'); console.log(resp); console.log('\n')
@@ -86,10 +88,13 @@ class ChannelU {
      * @param {String} channelName | name of the created channel (eg. mychannel)
      * @param {String} org | organization domain (eg. org1.example.com)
      * @param {String} peerAddress | grpcs peer local address (eg. grpcs://localhost:7051) 
+     * @param {String} peerTlsCACert | tls ca cert from connection profile
+     * @param {String} idModel | id of choreography model
+     * @param {String} ordererUrl | grpcs orderer address (e.g. grpcs://localhost:7050)
      */
-    static async joinChannel(client, channelName, org, peerAddress) {
+    static async joinChannel(client, channelName, org, peerAddress, peerTlsCACert, idModel, ordererUrl) {
         const channel = client.newChannel(channelName)
-        const orderer = ChannelU.getOrderer(client)
+        const orderer = ChannelU.getOrderer(client, idModel, ordererUrl)
         channel.addOrderer(orderer)
 
         // get mychannel.block genesis block
@@ -100,9 +105,10 @@ class ChannelU {
 
         // Join peer0 to mychannel
         const peerOrgID = `peer0.${org}`
-        const peerOrgTlsCert = CryptoPeerUser.getPeerOrgTlsCert(org, peerOrgID, `tlsca.${org}-cert.pem`)
+        // const peerOrgTlsCert = CryptoPeerUser.getPeerOrgTlsCert(org, peerOrgID, `tlsca.${org}-cert.pem`)
         const peerOrg = client.newPeer(peerAddress, {
-            pem: peerOrgTlsCert,
+            // pem: peerOrgTlsCert,
+            pem: peerTlsCACert,
             'ssl-target-name-override': peerOrgID
         })
         channel.addPeer(peerOrg)
@@ -124,13 +130,23 @@ class ChannelU {
         console.log('\n------- UPDATE 3 ORGS ANCHOR PEERS -------'); console.log(resp); console.log('\n')
     }
 
-    static getOrderer(client) {
-        const ordererID = 'orderer.example.com'
-        const ordererTlsCert = CryptoPeerUser.getOrdererTlsCert('example.com', ordererID, 'tlsca.example.com-cert.pem')
-        const orderer = client.newOrderer('grpcs://localhost:7050', {
+    /**
+     * 
+     * @param {Client} client | the Client object returned by createClient method
+     * @param {String} idModel | id of choreography model
+     * @param {String} ordererUrl | grpcs orderer address (e.g. grpcs://localhost:7050)
+     */
+    static getOrderer(client, idModel, ordererUrl) {
+        const ordererDir = `${idModel}.com`
+        const ordererID = `orderer.${idModel}.com`
+        const tlsCa = `tlsca.${idModel}.com-cert.pem`
+
+        const ordererTlsCert = CryptoPeerUser.getOrdererTlsCert(ordererDir, ordererID, tlsCa)
+        const orderer = client.newOrderer(ordererUrl, {
             pem: ordererTlsCert,
             'ssl-target-name-override': ordererID
         })
+
         return orderer
     }
 

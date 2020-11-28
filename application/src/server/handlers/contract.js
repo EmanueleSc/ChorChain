@@ -52,8 +52,6 @@ router.post('/deploy', async (req, res) => {
     // package the chaincode
     await ChannelU.packageChaincode(contractName, idModel, contractVersion)
 
-    // ================================================================================================================
-    // TODO DEPLOY REFACTORING ...
     const RETRY = 25
     let STOP = false
     const numOrgs = Object.keys(obj.roles).length
@@ -75,15 +73,28 @@ router.post('/deploy', async (req, res) => {
                 const ccpPath = CryptoPeerUser.getConnectionProfilePath(org, ccpFile)
                 const ccp = yaml.safeLoad(fs.readFileSync(ccpPath, 'utf8'))
                 const peer0Url = ccp.peers[peer0].url
+                const peerTlsCACert = ccp.peers[peer0].tlsCACerts.pem
 
                 highlightLog(`Join Peer0 Org${k}`)
                 const client = await ChannelU.createClient(org, orgMspID, ccpFile)
 
-                // =============================================================================================
-                // TODO: refactoring createChannel and joinChannel methods
-                if(k === 1) await ChannelU.createChannel(client, channel) // create the channel only one time
-                await ChannelU.joinChannel(client, channel, org, peer0Url)
-                // =============================================================================================
+                // get the orderer port from configtx.yaml file
+                const configtxPath = path.resolve(__dirname, `../../../../test-network/configtx/${idModel}/configtx.yaml`)
+                const configtx = yaml.safeLoad(fs.readFileSync(configtxPath, 'utf8'))
+                let orgPort = ''
+                for(const org of configtx.Organizations) {
+                    if(org.OrdererEndpoints) {
+                        orgPort = org.OrdererEndpoints[0].split(':')[1]
+                    }
+                }
+                const ordererUrl = `grpcs://localhost:${orgPort}`
+
+                // create the channel only one time
+                if(k === 1) {
+                    await ChannelU.createChannel(client, channel, idModel, ordererUrl)
+                }
+                // join the peer0 to the channel
+                await ChannelU.joinChannel(client, channel, org, peer0Url, peerTlsCACert, idModel, ordererUrl)
             }
         
             /*highlightLog(`Join Peer Org1`)
