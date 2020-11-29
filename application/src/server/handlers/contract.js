@@ -81,13 +81,13 @@ router.post('/deploy', async (req, res) => {
                 // get the orderer port from configtx.yaml file
                 const configtxPath = path.resolve(__dirname, `../../../../test-network/configtx/${idModel}/configtx.yaml`)
                 const configtx = yaml.safeLoad(fs.readFileSync(configtxPath, 'utf8'))
-                let orgPort = ''
+                let ordererPort = ''
                 for(const org of configtx.Organizations) {
                     if(org.OrdererEndpoints) {
-                        orgPort = org.OrdererEndpoints[0].split(':')[1]
+                        ordererPort = org.OrdererEndpoints[0].split(':')[1]
                     }
                 }
-                const ordererUrl = `grpcs://localhost:${orgPort}`
+                const ordererUrl = `grpcs://localhost:${ordererPort}`
 
                 // create the channel only one time
                 if(k === 1) {
@@ -95,11 +95,11 @@ router.post('/deploy', async (req, res) => {
                 }
                 // join the peer0 to the channel
                 await ChannelU.joinChannel(client, channel, org, peer0Url, peerTlsCACert, idModel, ordererUrl)
-            }
 
-            // TODO: refactoring bash scripts
-            highlightLog(`Update Anchor Peers definition for: ${channel}`)
-            await ChannelU.update3OrgsAnchorPeers(channel).catch(e => undefined) // skip this error
+                // Update anchor peer
+                highlightLog(`Update Anchor Peer definition for: ${channel}`)
+                await ChannelU.updateOrgAnchorPeer(channel, k, idModel, `localhost:${ordererPort}`).catch(e => undefined) // skip this error
+            }
 
             // TODO: refactoring bash scripts
             highlightLog(`Deploying Contract: ${contractName}`)

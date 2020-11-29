@@ -2,8 +2,6 @@
 export CORE_PEER_TLS_ENABLED=true
 
 # =============================================== TODO =============================================================
-#export ORDERER_CA=${ORGANIZATIONS_PATH}/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-
 # Set OrdererOrg.Admin globals
 #setOrdererGlobals() {
 #  export CORE_PEER_LOCALMSPID="OrdererMSP"
@@ -24,6 +22,10 @@ setGlobals() {
   local MODEL_ID=$2
   local ORG_MSP="Org${USING_ORG}MSP${MODEL_ID}"
   local ORG_DIR="org${USING_ORG}.${MODEL_ID}.com"
+
+  local ORDERER_DIR="${MODEL_ID}.com"
+  export ORDERER_DOM="orderer.${MODEL_ID}.com"
+  export ORDERER_CA=${ORGANIZATIONS_PATH}/ordererOrganizations/${ORDERER_DIR}/orderers/${ORDERER_DOM}/msp/tlscacerts/tlsca.${ORDERER_DIR}-cert.pem
 
   echo "Using organization ${ORG_DIR}"
 

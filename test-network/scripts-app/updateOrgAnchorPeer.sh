@@ -1,8 +1,14 @@
 #!/bin/bash
 
 CHANNEL_NAME="$1"
-DELAY="$2"
+ORG_COUNTER="$2"
+MODEL_ID="$3"
+ORDERER_ADDRESS="$4"
+DELAY="$5"
 : ${CHANNEL_NAME:="mychannel"}
+: ${ORG_COUNTER:="1"}
+: ${MODEL_ID:="example"}
+: ${ORDERER_ADDRESS:="localhost:7050"}
 : ${DELAY:="3"}
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
@@ -17,10 +23,9 @@ export ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 . $SCRIPT_PATH/envV.sh
 
 updateAnchorPeers() {
-  ORG=$1
-  setGlobals $ORG
+  setGlobals $ORG_COUNTER $MODEL_ID
   set -x
-  peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c $CHANNEL_NAME -f ${ARTIFACTS_DIR}/${CORE_PEER_LOCALMSPID}anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
+  peer channel update -o $ORDERER_ADDRESS --ordererTLSHostnameOverride $ORDERER_DOM -c $CHANNEL_NAME -f ${ARTIFACTS_DIR}/${CORE_PEER_LOCALMSPID}anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -38,12 +43,8 @@ verifyResult() {
   fi
 }
 
-echo "Updating anchor peers for org1..."
-updateAnchorPeers 1
-echo "Updating anchor peers for org2..."
-updateAnchorPeers 2
-echo "Updating anchor peers for org3..."
-updateAnchorPeers 3
+echo "Updating anchor peers for org${ORG_COUNTER}.${MODEL_ID}.com ..."
+updateAnchorPeers
 
 sleep $DELAY
 exit 0

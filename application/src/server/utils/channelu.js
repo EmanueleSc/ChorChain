@@ -122,12 +122,15 @@ class ChannelU {
     }
 
     /**
-     * @param {String} channelName | name of the created channel (eg. mychannel)    
+     * @param {String} channelName | name of the created channel (eg. mychannel)
+     * @param {Number} orgCounter | organization counter
+     * @param {String} idModel | id of choreography model
+     * @param {String} ordererAddress | orderer address (eg. localhost:7050)
      */
-    static async update3OrgsAnchorPeers(channelName) {
-        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/update3OrgsAnchorPeer.sh')
-        const resp = await command.shExec(shFilePath, [channelName])
-        console.log('\n------- UPDATE 3 ORGS ANCHOR PEERS -------'); console.log(resp); console.log('\n')
+    static async updateOrgAnchorPeer(channelName, orgCounter, idModel, ordererAddress) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/updateOrgAnchorPeer.sh')
+        const resp = await command.shExec(shFilePath, [channelName, orgCounter, idModel, ordererAddress])
+        console.log(`\n------- UPDATE org${orgCounter}.${idModel}.com ANCHOR PEER -------`); console.log(resp); console.log('\n')
     }
 
     /**
