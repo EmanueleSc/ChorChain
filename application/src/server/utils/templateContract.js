@@ -464,5 +464,6 @@ const smartcontract = (idModel, chorID, contractName, chorElements, roles, start
 }
 
 module.exports = {
-    smartcontract
+    smartcontract,
+    cartesian
 }

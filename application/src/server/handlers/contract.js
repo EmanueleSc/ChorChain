@@ -45,6 +45,7 @@ router.post('/deploy', async (req, res) => {
     // contract generation and subscription encoding into the contract
     const obj = await new ChorTranslator(chorXml, idModel, true, idChorLedger, subscriptions)
     const contract = obj.contract
+    const collections = obj.collections
     // write smart contract file inside chaincode
     const code = contract.toString('utf8')
     const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
@@ -109,40 +110,24 @@ router.post('/deploy', async (req, res) => {
             highlightLog(`Deploying Contract: ${contractName}`)
             // await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true }) // OLD VERSION (STATIC DEPLOY)
 
-            // TODO: autogen collections policy 
-            let policy = [
-                {
-                    "name": "collectionOrg1MSPOrg2MSP",
-                    "policy": "OR('Org1MSP.member', 'Org2MSP.member')",
+            // autogen collections policy
+            let collectionsPolicy = []
+            for(const coll of collections) {
+                collectionsPolicy.push({
+                    "name": coll.collectionName,
+                    "policy": coll.collectionPolicy,
                     "requiredPeerCount": 1,
                     "maxPeerCount": 3,
-                    "blockToLive":1000000,
+                    "blockToLive": 1000000,
                     "memberOnlyRead": true,
                     "memberOnlyWrite": true
-                },
-                {
-                    "name": "collectionOrg1MSPOrg3MSP",
-                    "policy": "OR('Org1MSP.member', 'Org3MSP.member')",
-                    "requiredPeerCount": 1,
-                    "maxPeerCount": 3,
-                    "blockToLive":1000000,
-                    "memberOnlyRead": true,
-                    "memberOnlyWrite": true
-                },
-                {
-                    "name": "collectionOrg2MSPOrg3MSP",
-                    "policy": "OR('Org2MSP.member', 'Org3MSP.member')",
-                    "requiredPeerCount": 1,
-                    "maxPeerCount": 3,
-                    "blockToLive":1000000,
-                    "memberOnlyRead": true,
-                    "memberOnlyWrite": true
-                }
-            ]
-            policy=JSON.stringify(policy, null, 4)
-            policy=JSON.stringify(policy, null, "\t")
+                })
+            }
 
-            await ChannelU.deployOrgsContract(channel, contractName, cVersion, policy, idModel, numOrgs, ordererAddress) // NEW VERSION (DYNAMIC DEPLOY)
+            collectionsPolicy=JSON.stringify(collectionsPolicy, null, 4)
+            collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")
+
+            await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress) // NEW VERSION (DYNAMIC DEPLOY)
 
             if(STOP) break
             
