@@ -177,6 +177,22 @@ class ChannelU {
     }
 
     /**
+     * 
+     * @param {String} channelName | name of the channel (eg. mychannel)
+     * @param {String} contractName | smart contract name
+     * @param {Number} version | the version of the contract (eg. 1)
+     * @param {JSON} collectionsPolicy | policy for private data collection (see collections_config.json file)
+     * @param {String} idModel | id of choreography model
+     * @param {Number} numOrgs | number of choreography participants
+     * @param {String} ordererAddress | orderer address (eg. localhost:7050)
+     */
+    static async deployOrgsContract(channelName, contractName, version, collectionsPolicy, idModel, numOrgs, ordererAddress) {
+        const shFilePath = path.join(__dirname, '../../../../test-network/scripts-app/deployOrgsC.sh')
+        const resp = await command.shExec(shFilePath, [channelName, contractName, version, collectionsPolicy, idModel, numOrgs, ordererAddress])
+        console.log('\n------- DEPLOY ORGS CONTRACT SCRIPT -------'); console.log(resp); console.log('\n')
+    }
+
+    /**
      * @param {String} contractName | smart contract name
      * @param {String} idModel | id of choreography model
      * @param {Number} version | the version of the contract (eg. 1)
