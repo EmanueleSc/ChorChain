@@ -131,7 +131,7 @@ class ChorTranslator {
         for(let i = 0; i < relations.length; i++) {
             collections.push({
                 collectionName: 'collection' + relations[i][0] + relations[i][1],
-                collectionPolicy: `OR("${relations[i][0]}.member","${relations[i][1]}.member")`
+                collectionPolicy: `OR('${relations[i][0]}.member','${relations[i][1]}.member')`
             })
         }
         return collections
