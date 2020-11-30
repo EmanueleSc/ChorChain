@@ -106,7 +106,7 @@ router.post('/deploy', async (req, res) => {
                 await ChannelU.updateOrgAnchorPeer(channel, k, idModel, ordererAddress).catch(e => undefined) // skip this error
             }
 
-            // TODO: refactoring bash scripts
+            // deploy contract
             highlightLog(`Deploying Contract: ${contractName}`)
             // await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true }) // OLD VERSION (STATIC DEPLOY)
 
