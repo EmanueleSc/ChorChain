@@ -19,13 +19,13 @@ const highlightLog = (message) => {
 
 router.post('/deploy', async (req, res) => {
 
-    const { idChorLedger, contractVersion } = req.body
+    const { idChorLedger } = req.body
 
     let chorinstance = await ChorInstance.findOne({ idChorLedger }).exec().catch(err => res.json({ error: err.message || err.toString() }))
     const configTxProfile = chorinstance.configTxProfile
     const contractName = chorinstance.contractName
     const channel = chorinstance.channel
-    const cVersion = contractVersion || 1 // !!! NOTE: update of the contract not handled !!!
+    const cVersion = 1 // !!! NOTE: update of the contract not handled !!!
     const idModel = chorinstance.idModel
     const subscriptions = chorinstance.subscriptions
 
@@ -51,7 +51,7 @@ router.post('/deploy', async (req, res) => {
     const chaincodeFile = path.resolve(__dirname, `../../../../chaincode/lib/choreographyprivatedatacontract.js`)
     fs.writeFileSync(chaincodeFile, code)
     // package the chaincode
-    await ChannelU.packageChaincode(contractName, idModel, contractVersion)
+    await ChannelU.packageChaincode(contractName, idModel, cVersion)
 
     const RETRY = 25
     let STOP = false
@@ -79,7 +79,7 @@ router.post('/deploy', async (req, res) => {
                 const peer0Url = ccp.peers[peer0].url
                 const peerTlsCACert = ccp.peers[peer0].tlsCACerts.pem
 
-                highlightLog(`Join Peer0 Org${k}`)
+
                 const client = await ChannelU.createClient(org, orgMspID, ccpFile)
 
                 // get the orderer port from configtx.yaml file
@@ -96,10 +96,12 @@ router.post('/deploy', async (req, res) => {
 
                 // create the channel only one time
                 if(k === 1) {
+                    highlightLog(`Create channel: ${channel}`)
                     await ChannelU.createChannel(client, channel, idModel, ordererUrl)
                 }
                 // join the peer0 to the channel
-                await ChannelU.joinChannel(client, channel, org, peer0Url, peerTlsCACert, idModel, ordererUrl)
+                highlightLog(`Join Peer0 Org${k}`)
+                await ChannelU.joinChannel(client, channel, org, peer0Url, peerTlsCACert, idModel, ordererUrl) //.catch(e => undefined) // skip this error
 
                 // Update anchor peer
                 highlightLog(`Update Anchor Peer definition for: ${channel}`)
@@ -111,7 +113,7 @@ router.post('/deploy', async (req, res) => {
             // await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true }) // OLD VERSION (STATIC DEPLOY)
 
             // autogen collections policy
-            let collectionsPolicy = []
+            /*let collectionsPolicy = []
             for(const coll of collections) {
                 collectionsPolicy.push({
                     "name": coll.collectionName,
@@ -124,10 +126,11 @@ router.post('/deploy', async (req, res) => {
                 })
             }
 
-            collectionsPolicy=JSON.stringify(collectionsPolicy, null, 4)
-            collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")
+            collectionsPolicy=JSON.stringify(collectionsPolicy, null, 0)
+            collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")*/
+            const collectionsPolicy = "NA"
 
-            await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress) // NEW VERSION (DYNAMIC DEPLOY)
+            await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress).then(() => { STOP = true }) // NEW VERSION (DYNAMIC DEPLOY)
 
             if(STOP) break
             

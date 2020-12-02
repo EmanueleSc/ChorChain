@@ -14,7 +14,8 @@ class ConfigYaml {
     static generateDockerTestNetYaml(idModel, numOrgs) {
         const json = { version: '2', volumes: {}, networks: {}, services: {} }
 
-        const networkName = `net_${idModel}`
+        //const networkName = `docker_net_${idModel}`
+        const networkName = "chorchain"
         json.networks[networkName] = null
 
         // orderer
@@ -75,7 +76,8 @@ class ConfigYaml {
                 image: 'hyperledger/fabric-peer:$IMAGE_TAG',
                 environment: [
                     'CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock',
-                    'CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_test',
+                    //'CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_'+idModel,
+                    `CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=docker_${networkName}`,
                     'FABRIC_LOGGING_SPEC=INFO',
                     'CORE_PEER_TLS_ENABLED=true',
                     'CORE_PEER_GOSSIP_USELEADERELECTION=true',
@@ -120,7 +122,8 @@ class ConfigYaml {
     static generateDockerCaYaml(idModel, numOrgs) {
         const json = { version: '2', networks: {}, services: {} }
 
-        const networkName = `net_${idModel}`
+        // const networkName = `docker_net_${idModel}`
+        const networkName = "chorchain"
         json.networks[networkName] = null
 
         // one Fabric CA per organisation

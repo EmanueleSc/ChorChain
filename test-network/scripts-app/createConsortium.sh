@@ -2,15 +2,15 @@
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 BIN_DIR=$SCRIPT_PATH/../../bin
-IMAGETAG="latest"
-COMPOSE_PROJECT_NAME=net
-SYS_CHANNEL=system-channel
 
 # id of choreography model
 MODEL_ID="$1"
 : ${MODEL_ID:="example"}
 
 export FABRIC_CFG_PATH=${SCRIPT_PATH}/../configtx/${MODEL_ID}
+IMAGETAG="latest"
+COMPOSE_PROJECT_NAME=docker
+SYS_CHANNEL=system-channel
 
 function createConsortium() {
     echo "#########  Generating Orderer Genesis block for net_${MODEL_ID} ##############"
