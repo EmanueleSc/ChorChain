@@ -32,9 +32,6 @@ export ORGANIZATIONS_PATH=$SCRIPT_PATH/../organizations
 # import utils
 . $SCRIPT_PATH/envV.sh
 
-END_POLICY="OR('Org1MSP5f69db0691f55c46c8b134c3.member','Org2MSP5f69db0691f55c46c8b134c3.member','Org3MSP5f69db0691f55c46c8b134c3.member')"
-CC_END_POLICY="--signature-policy ${END_POLICY}"
-
 
 # installChaincode PEER ORG
 installChaincode() {
@@ -70,9 +67,6 @@ queryInstalled() {
 approveForMyOrg() {
   ORG=$1
   setGlobals $ORG $MODEL_ID
-  computeMSPs $NUM_ORGS $MODEL_ID
-  #local END_POLICY="OR($MSPs)" # e.g. "OR('Org1MSP.member','Org2MSP.member','Org3MSP.member')"
-  
   set -x
   peer lifecycle chaincode approveformyorg -o ${ORDERER_ADDRESS} --ordererTLSHostnameOverride ${ORDERER_DOM} --collections-config ${COLLECTION_CONFIG} ${CC_END_POLICY} --tls ${CORE_PEER_TLS_ENABLED} --cafile ${ORDERER_CA} --channelID ${CHANNEL_NAME} --name ${CC_NAME} --version ${VERSION} --init-required --package-id ${PACKAGE_ID} --sequence ${VERSION} >&log.txt
   set +x
@@ -119,10 +113,6 @@ commitChaincodeDefinition() {
   parsePeerConnectionParameters $@
   res=$?
   verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
-
-  computeMSPs $NUM_ORGS $MODEL_ID
-  #local END_POLICY="OR($MSPs)" # e.g. "OR('Org1MSP.member','Org2MSP.member','Org3MSP.member')"
-
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
@@ -187,88 +177,118 @@ chaincodeInvokeInit() {
   echo
 }
 
+## compute MSPs for endorsement policy
+# endorsement policy example: "OR('Org1MSP.member','Org2MSP.member','Org3MSP.member')"
+computeMSPs $NUM_ORGS $MODEL_ID
+END_POLICY="OR($MSPs)"
+CC_END_POLICY="--signature-policy ${END_POLICY}"
 
-## Install chaincode
-installChaincode 1
-installChaincode 2
-installChaincode 3
+
+## install chaincode
+c=1
+while [ $c -le $NUM_ORGS ]
+do
+installChaincode $c
+((c++))
+done
+
 
 ## query whether the chaincode is installed
 queryInstalled 1
 
 
 ## write collection policy into the file 'collections_config.json'
-# ${COLLECTION_POLICY}
+# collections example:
+#[
+#  {
+#       "name": "collectionOrg1MSP5f69db0691f55c46c8b134c3Org2MSP5f69db0691f55c46c8b134c3",
+#       "policy": "OR('Org1MSP5f69db0691f55c46c8b134c3.member', 'Org2MSP5f69db0691f55c46c8b134c3.member')",
+#       "requiredPeerCount": 1,
+#       "maxPeerCount": 3,
+#       "blockToLive":1000000,
+#       "memberOnlyRead": true,
+#       "memberOnlyWrite": true
+#  },
+#  {
+#       "name": "collectionOrg1MSP5f69db0691f55c46c8b134c3Org3MSP5f69db0691f55c46c8b134c3",
+#       "policy": "OR('Org1MSP5f69db0691f55c46c8b134c3.member', 'Org3MSP5f69db0691f55c46c8b134c3.member')",
+#       "requiredPeerCount": 1,
+#       "maxPeerCount": 3,
+#       "blockToLive":1000000,
+#       "memberOnlyRead": true,
+#       "memberOnlyWrite": true
+#  },
+#  {
+#       "name": "collectionOrg2MSP5f69db0691f55c46c8b134c3Org3MSP5f69db0691f55c46c8b134c3",
+#       "policy": "OR('Org2MSP5f69db0691f55c46c8b134c3.member', 'Org3MSP5f69db0691f55c46c8b134c3.member')",
+#       "requiredPeerCount": 1,
+#       "maxPeerCount": 3,
+#       "blockToLive":1000000,
+#       "memberOnlyRead": true,
+#       "memberOnlyWrite": true
+#  }
+#]
+# 
 cat <<- EOF > ${COLLECTION_CONFIG}
 
-[
-  {
-       "name": "collectionOrg1MSP5f69db0691f55c46c8b134c3Org2MSP5f69db0691f55c46c8b134c3",
-       "policy": "OR('Org1MSP5f69db0691f55c46c8b134c3.member', 'Org2MSP5f69db0691f55c46c8b134c3.member')",
-       "requiredPeerCount": 1,
-       "maxPeerCount": 3,
-       "blockToLive":1000000,
-       "memberOnlyRead": true,
-       "memberOnlyWrite": true
-  },
-  {
-       "name": "collectionOrg1MSP5f69db0691f55c46c8b134c3Org3MSP5f69db0691f55c46c8b134c3",
-       "policy": "OR('Org1MSP5f69db0691f55c46c8b134c3.member', 'Org3MSP5f69db0691f55c46c8b134c3.member')",
-       "requiredPeerCount": 1,
-       "maxPeerCount": 3,
-       "blockToLive":1000000,
-       "memberOnlyRead": true,
-       "memberOnlyWrite": true
-  },
-  {
-       "name": "collectionOrg2MSP5f69db0691f55c46c8b134c3Org3MSP5f69db0691f55c46c8b134c3",
-       "policy": "OR('Org2MSP5f69db0691f55c46c8b134c3.member', 'Org3MSP5f69db0691f55c46c8b134c3.member')",
-       "requiredPeerCount": 1,
-       "maxPeerCount": 3,
-       "blockToLive":1000000,
-       "memberOnlyRead": true,
-       "memberOnlyWrite": true
-  }
-]
+${COLLECTION_POLICY}
 
 EOF
 ## format the json file
-#sed -i 's/\\n//g' $COLLECTION_CONFIG
+sed -i 's/\\n//g' $COLLECTION_CONFIG
 
 
-## approve the definition
-approveForMyOrg 1
+## approve the definition simple versione (without checkCommitReadiness)
+c=1
+while [ $c -le $NUM_ORGS ]
+do
+approveForMyOrg $c
+((c++))
+done
+## approve the definition (with checkCommitReadiness) 
+# approveForMyOrg 1
 ## check whether the chaincode definition is ready to be committed
-checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-
+# checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
+# checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
+# checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": false" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
 ## approve the definition
-approveForMyOrg 2
+# approveForMyOrg 2
 ## check whether the chaincode definition is ready to be committed
-checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
-
+# checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
+# checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
+# checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": false"
 ## approve the definition
-approveForMyOrg 3
+# approveForMyOrg 3
 ## check whether the chaincode definition is ready to be committed
-checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
-checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
-checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
+# checkCommitReadiness 1 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
+# checkCommitReadiness 2 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
+# checkCommitReadiness 3 "\"Org1MSP5f69db0691f55c46c8b134c3\": true" "\"Org2MSP5f69db0691f55c46c8b134c3\": true" "\"Org3MSP5f69db0691f55c46c8b134c3\": true"
 
+## computes indexes for the 'parsePeerConnectionParameters' function
+c=1
+indexes=""
+while [ $c -le $NUM_ORGS ]
+do
+indexes="$indexes $c"
+((c++))
+done
 
 ## commit the definition
-commitChaincodeDefinition 1 2 3
+commitChaincodeDefinition $indexes
+
 
 ## query on orgs to see that the definition committed successfully
-queryCommitted 1
-queryCommitted 2
-queryCommitted 3
+c=1
+while [ $c -le $NUM_ORGS ]
+do
+queryCommitted $c
+((c++))
+done
+
 
 ## invoke the chaincode
-chaincodeInvokeInit 1 2 3
+chaincodeInvokeInit $indexes
+
 
 sleep 10
-
 exit 0

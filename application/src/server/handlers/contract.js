@@ -110,10 +110,8 @@ router.post('/deploy', async (req, res) => {
 
             // deploy contract
             highlightLog(`Deploying Contract: ${contractName}`)
-            // await ChannelU.deploy3OrgsContract(channel, contractName, cVersion).then(() => { STOP = true }) // OLD VERSION (STATIC DEPLOY)
-
             // autogen collections policy
-            /*let collectionsPolicy = []
+            let collectionsPolicy = []
             for(const coll of collections) {
                 collectionsPolicy.push({
                     "name": coll.collectionName,
@@ -125,12 +123,10 @@ router.post('/deploy', async (req, res) => {
                     "memberOnlyWrite": true
                 })
             }
-
             collectionsPolicy=JSON.stringify(collectionsPolicy, null, 0)
-            collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")*/
-            const collectionsPolicy = "NA"
-
-            await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress).then(() => { STOP = true }) // NEW VERSION (DYNAMIC DEPLOY)
+            collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")
+            // dynamic deploy
+            await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress).then(() => { STOP = true })
 
             if(STOP) break
             
