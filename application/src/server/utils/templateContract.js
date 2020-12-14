@@ -264,7 +264,7 @@ const _messageTamplate = (obj, roles) => {
                 /* one-way task */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${submitter})) {
+                if(choreography.elements.${messageID} === Status.ENABLED && roles.${submitter} === ctx.stub.getCreator().mspid && ctx.clientIdentity.assertAttributeValue('role', subscriptions.${submitter})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${messageID}')
                     
@@ -332,7 +332,7 @@ const _messageTamplate = (obj, roles) => {
                 /* two-way task - initial participant */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${initialParticipant})) {
+                if(choreography.elements.${initialMessageID} === Status.ENABLED && roles.${initialParticipant} === ctx.stub.getCreator().mspid && ctx.clientIdentity.assertAttributeValue('role', subscriptions.${initialParticipant})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${initialMessageID}')
                     ${body1}
@@ -350,7 +350,7 @@ const _messageTamplate = (obj, roles) => {
                 /* two-way task - last participant */
                 const choreography = await ChoreographyState.getState(ctx, chorID)
 
-                if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid && ctx.ClientIdentity.assertAttributeValue('role', subscriptions.${lastParticipant})) {
+                if(choreography.elements.${lastMessageID} === Status.ENABLED && roles.${lastParticipant} === ctx.stub.getCreator().mspid && ctx.clientIdentity.assertAttributeValue('role', subscriptions.${lastParticipant})) {
                     const choreographyPrivate = await ChoreographyPrivateState.getPrivateState(ctx, collectionsPrivate.${collection}, chorID)
                     choreography.setDone('${lastMessageID}')
                     

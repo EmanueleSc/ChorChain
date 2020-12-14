@@ -1,5 +1,6 @@
 import { ChorModeler } from './lib/modeler' // my lib
-import { createUserIdentity } from './lib/rest'
+// import { createUserIdentity } from './lib/rest'
+import { createUserConnection } from './lib/rest'
 import { submitPrivateTransaction } from './lib/rest'
 import { submitTransaction } from './lib/rest'
 import { fetchChorInstancesDeployed } from './lib/rest'
@@ -112,13 +113,14 @@ function connectUser(subscriptions, roles) {
 
   // connect the user to fabric test network
   return new Promise((resolve, reject) => {
-    return createUserIdentity({ OrgMspID })
-    .then(res => {
-      connectionID = res.response
-      bindResp(connectionID)
-      return resolve(res)
-    })
-    .catch(err => reject(err))
+    // return createUserIdentity({ OrgMspID })
+    return createUserConnection({ OrgMspID, idUser: userID })
+      .then(res => {
+        connectionID = res.response
+        bindResp(connectionID)
+        return resolve(res)
+      })
+      .catch(err => reject(err))
   })
 }
 

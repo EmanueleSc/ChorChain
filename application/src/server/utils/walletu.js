@@ -37,6 +37,27 @@ class WalletU {
         }
     }
 
+    /**
+     * 
+     * @param {String} identity | identity label in the wallet
+     */
+    static async getWalletForIdentity(identity) {
+        try {
+            const walletPath = WalletU.getWalletPath(identity)
+            const wallet = await Wallets.newFileSystemWallet(walletPath)
+
+            const user = await wallet.get(identity)
+            if (!user) {
+                console.error(`An identity for the user '${identity}' not exists!`)
+                return
+            }
+            
+            return wallet            
+        } catch (err) {
+            throw new Error({ error: err.message || err.toString() })
+        }
+    }
+
     static async enrollAdmin(identity, caClient, orgMspId) {
         try {
             // Check to see if we've already enrolled the admin user.

@@ -1,9 +1,17 @@
 import sendRequest from './sendRequest';
 
-export const createUserIdentity = ({
+// DEPRECATED
+/*export const createUserIdentity = ({
     OrgMspID
 }) => sendRequest(`/api/identity/create/user`, {
     body: JSON.stringify({ OrgMspID })
+});*/
+
+export const createUserConnection = ({
+    OrgMspID,
+    idUser
+}) => sendRequest(`/api/identity/create/connection`, {
+    body: JSON.stringify({ OrgMspID, idUser })
 });
 
 export const submitTransaction = ({ 
