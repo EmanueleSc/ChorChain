@@ -106,6 +106,21 @@ class ChorModeler {
         return null
     }
 
+    getActiveParticipant(messageElemID) {
+        const elementRegistry = this.modeler.get('elementRegistry')
+        const elem = elementRegistry.get(messageElemID)
+        let task
+        if(elem.type === "bpmn:Message") {
+            task = elem.parent.activityShape.businessObject
+            for(let i in task.messageFlowRef){
+                if(task.messageFlowRef[i].messageRef.id === messageElemID){
+                    return task.messageFlowRef[i].sourceRef.name
+                }
+            }
+        }
+        return null
+    }
+
 }
 
 module.exports = {

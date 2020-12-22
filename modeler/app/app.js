@@ -222,17 +222,18 @@ function renderLeftPanel(elements, idChorLedger) {
       const elemID = elems[i]
       modeler.colorElem(elemID)
       const messageAnnotation = modeler.getAnnotation(elemID)
-      const initialParticipant = modeler.getInitialParticipant(elemID)
+      //const initialParticipant = modeler.getInitialParticipant(elemID)
+      const activeParticipant = modeler.getActiveParticipant(elemID)
       const subRole = whichRoleAmI(idChorLedger)
 
-      if(initialParticipant.replace(" ", "_") === subRole) {
+      if(activeParticipant.replace(" ", "_") === subRole) {
         if(messageAnnotation) {
           document.getElementById('inputContainer').innerHTML += templateParams(elemID)
           document.getElementById(`params${elemID}`).innerHTML = modeler.getAnnotation(elemID)
         }
       } else {
         const message = "Waiting for the message of "
-        document.getElementById('inputContainer').innerHTML = `<p>${message}${initialParticipant}</p>`
+        document.getElementById('inputContainer').innerHTML = `<p>${message}${activeParticipant}</p>`
       }
     }
   }
