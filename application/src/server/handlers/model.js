@@ -29,7 +29,12 @@ router.post('/upload', async (req, res) => {
         const bpmnXml = bpmnFile.data.toString('utf8')
         const translator = await new ChorTranslator(bpmnXml, idModel, false)
         const numOrgs = Object.keys(translator.roles).length
+
+        // !!!! PERFORMANCE MEASURE: network creation
+        console.time('network creation')
         await NetworkU.networkUp(idModel, numOrgs)
+        console.timeEnd('network creation')
+        // !!!! END PERFORMANCE MEASURE
 
         // create choreography model in mongoDB
         const model = await ChorModel.create({

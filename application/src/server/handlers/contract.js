@@ -42,8 +42,14 @@ router.post('/deploy', async (req, res) => {
     // Get the xml of the bpmn file
     const bpmnFilePath = path.resolve(__dirname, `../bpmnFiles/${fileName}`)
     const chorXml = fs.readFileSync(bpmnFilePath, {encoding:'utf8', flag:'r'})
+
     // contract generation and subscription encoding into the contract
+    // !!!! PERFORMANCE MEASURE: translation
+    console.time('translation')
     const obj = await new ChorTranslator(chorXml, idModel, true, idChorLedger, subscriptions)
+    console.timeEnd('translation')
+    // !!!! END PERFORMANCE MEASURE
+
     const contract = obj.contract
     const collections = obj.collections
     // write smart contract file inside chaincode
@@ -125,8 +131,13 @@ router.post('/deploy', async (req, res) => {
             }
             collectionsPolicy=JSON.stringify(collectionsPolicy, null, 0)
             collectionsPolicy=JSON.stringify(collectionsPolicy, null, "\t")
+
             // dynamic deploy
+            // !!!! PERFORMANCE MEASURE: deploy contract
+            console.time('deploy contract')
             await ChannelU.deployOrgsContract(channel, contractName, cVersion, collectionsPolicy, idModel, numOrgs, ordererAddress).then(() => { STOP = true })
+            console.timeEnd('deploy contract')
+            // !!!! END PERFORMANCE MEASURE
 
             if(STOP) break
             

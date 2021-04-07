@@ -15,10 +15,18 @@ router.post('/submit', async (req, res) => {
         let resp = null
 
         if(!transactionParams || transactionParams === '') {
+            // !!!! PERFORMANCE MEASURE: transaction
+            console.time('transaction')
             resp = await contract.submitTransaction(transactionName)
+            console.timeEnd('transaction')
+            // !!!! END PERFORMANCE MEASURE
         }
         else {
+            // !!!! PERFORMANCE MEASURE: transaction with params
+            console.time('transaction with params')
             resp = await contract.submitTransaction(transactionName, transactionParams)
+            console.timeEnd('transaction with params')
+            // !!!! END PERFORMANCE MEASURE
         }
         
         gateway.disconnect()
@@ -60,12 +68,21 @@ router.post('/submit/private', async (req, res) => {
                 const str = String(value)
                 transientData[key] = Buffer.from(str)
             }
-    
+            
+            // !!!! PERFORMANCE MEASURE: transaction private with data
+            console.time('transaction private with data')
             resp = await contract.createTransaction(transactionName)
                 .setTransient(transientData)
                 .submit()
+            console.timeEnd('transaction private with data')
+            // !!!! END PERFORMANCE MEASURE
+
         } else {
+            // !!!! PERFORMANCE MEASURE: transaction private
+            console.time('transaction private')
             resp = await contract.createTransaction(transactionName).submit()
+            console.timeEnd('transaction private')
+            // !!!! END PERFORMANCE MEASURE
         }
         
 
